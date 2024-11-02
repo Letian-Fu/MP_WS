@@ -1,0 +1,8 @@
+prefix=/home/roboert/MP_WS/install
+
+Name: gpmp2_planner_py
+Description: Description of gpmp2_planner_py
+Version: 0.0.0
+Cflags: 
+Libs: -L${prefix}/lib 
+Requires: 

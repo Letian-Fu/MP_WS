@@ -1,0 +1,13 @@
+start_conf: [-0.8, -1.7, 1.64, 1.29, 1.1, -1.106]
+goal_conf: [0.5, 0.94, 0, 1.6, 0, -0.919]
+sdf_file: sdf/obs_test_one_box.bin
+total_time: 6.0
+total_step: 10
+obs_check_inter: 5
+control_inter: 5
+cost_sigma: 0.02
+epsilon: 0.1
+fix_pose_sigma: 0.0001
+fix_vel_sigma: 0.0001
+Qc: 1.0
+opt_type: LM

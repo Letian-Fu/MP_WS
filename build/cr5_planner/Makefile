@@ -56,18 +56,6 @@ CMAKE_BINARY_DIR = /home/roboert/MP_WS/build
 #=============================================================================
 # Targets provided globally by CMake.
 
-# Special rule for the target install/strip
-install/strip: preinstall
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Installing the project stripped..."
-	/usr/bin/cmake -DCMAKE_INSTALL_DO_STRIP=1 -P cmake_install.cmake
-.PHONY : install/strip
-
-# Special rule for the target install/strip
-install/strip/fast: preinstall/fast
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Installing the project stripped..."
-	/usr/bin/cmake -DCMAKE_INSTALL_DO_STRIP=1 -P cmake_install.cmake
-.PHONY : install/strip/fast
-
 # Special rule for the target install/local
 install/local: preinstall
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Installing only the local directory..."
@@ -92,17 +80,6 @@ install/fast: preinstall/fast
 	/usr/bin/cmake -P cmake_install.cmake
 .PHONY : install/fast
 
-# Special rule for the target test
-test:
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Running tests..."
-	/usr/bin/ctest --force-new-ctest-process $(ARGS)
-.PHONY : test
-
-# Special rule for the target test
-test/fast: test
-
-.PHONY : test/fast
-
 # Special rule for the target list_install_components
 list_install_components:
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Available install components are: \"Unspecified\""
@@ -112,6 +89,17 @@ list_install_components:
 list_install_components/fast: list_install_components
 
 .PHONY : list_install_components/fast
+
+# Special rule for the target rebuild_cache
+rebuild_cache:
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Running CMake to regenerate build system..."
+	/usr/bin/cmake -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR)
+.PHONY : rebuild_cache
+
+# Special rule for the target rebuild_cache
+rebuild_cache/fast: rebuild_cache
+
+.PHONY : rebuild_cache/fast
 
 # Special rule for the target edit_cache
 edit_cache:
@@ -124,16 +112,28 @@ edit_cache/fast: edit_cache
 
 .PHONY : edit_cache/fast
 
-# Special rule for the target rebuild_cache
-rebuild_cache:
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Running CMake to regenerate build system..."
-	/usr/bin/cmake -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR)
-.PHONY : rebuild_cache
+# Special rule for the target test
+test:
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Running tests..."
+	/usr/bin/ctest --force-new-ctest-process $(ARGS)
+.PHONY : test
 
-# Special rule for the target rebuild_cache
-rebuild_cache/fast: rebuild_cache
+# Special rule for the target test
+test/fast: test
 
-.PHONY : rebuild_cache/fast
+.PHONY : test/fast
+
+# Special rule for the target install/strip
+install/strip: preinstall
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Installing the project stripped..."
+	/usr/bin/cmake -DCMAKE_INSTALL_DO_STRIP=1 -P cmake_install.cmake
+.PHONY : install/strip
+
+# Special rule for the target install/strip
+install/strip/fast: preinstall/fast
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Installing the project stripped..."
+	/usr/bin/cmake -DCMAKE_INSTALL_DO_STRIP=1 -P cmake_install.cmake
+.PHONY : install/strip/fast
 
 # The main all target
 all: cmake_check_build_system
@@ -168,246 +168,6 @@ depend:
 .PHONY : depend
 
 # Convenience name for target.
-cr5_planner/CMakeFiles/shape_msgs_generate_messages_py.dir/rule:
-	cd /home/roboert/MP_WS/build && $(MAKE) -f CMakeFiles/Makefile2 cr5_planner/CMakeFiles/shape_msgs_generate_messages_py.dir/rule
-.PHONY : cr5_planner/CMakeFiles/shape_msgs_generate_messages_py.dir/rule
-
-# Convenience name for target.
-shape_msgs_generate_messages_py: cr5_planner/CMakeFiles/shape_msgs_generate_messages_py.dir/rule
-
-.PHONY : shape_msgs_generate_messages_py
-
-# fast build rule for target.
-shape_msgs_generate_messages_py/fast:
-	cd /home/roboert/MP_WS/build && $(MAKE) -f cr5_planner/CMakeFiles/shape_msgs_generate_messages_py.dir/build.make cr5_planner/CMakeFiles/shape_msgs_generate_messages_py.dir/build
-.PHONY : shape_msgs_generate_messages_py/fast
-
-# Convenience name for target.
-cr5_planner/CMakeFiles/octomap_msgs_generate_messages_eus.dir/rule:
-	cd /home/roboert/MP_WS/build && $(MAKE) -f CMakeFiles/Makefile2 cr5_planner/CMakeFiles/octomap_msgs_generate_messages_eus.dir/rule
-.PHONY : cr5_planner/CMakeFiles/octomap_msgs_generate_messages_eus.dir/rule
-
-# Convenience name for target.
-octomap_msgs_generate_messages_eus: cr5_planner/CMakeFiles/octomap_msgs_generate_messages_eus.dir/rule
-
-.PHONY : octomap_msgs_generate_messages_eus
-
-# fast build rule for target.
-octomap_msgs_generate_messages_eus/fast:
-	cd /home/roboert/MP_WS/build && $(MAKE) -f cr5_planner/CMakeFiles/octomap_msgs_generate_messages_eus.dir/build.make cr5_planner/CMakeFiles/octomap_msgs_generate_messages_eus.dir/build
-.PHONY : octomap_msgs_generate_messages_eus/fast
-
-# Convenience name for target.
-cr5_planner/CMakeFiles/object_recognition_msgs_generate_messages_eus.dir/rule:
-	cd /home/roboert/MP_WS/build && $(MAKE) -f CMakeFiles/Makefile2 cr5_planner/CMakeFiles/object_recognition_msgs_generate_messages_eus.dir/rule
-.PHONY : cr5_planner/CMakeFiles/object_recognition_msgs_generate_messages_eus.dir/rule
-
-# Convenience name for target.
-object_recognition_msgs_generate_messages_eus: cr5_planner/CMakeFiles/object_recognition_msgs_generate_messages_eus.dir/rule
-
-.PHONY : object_recognition_msgs_generate_messages_eus
-
-# fast build rule for target.
-object_recognition_msgs_generate_messages_eus/fast:
-	cd /home/roboert/MP_WS/build && $(MAKE) -f cr5_planner/CMakeFiles/object_recognition_msgs_generate_messages_eus.dir/build.make cr5_planner/CMakeFiles/object_recognition_msgs_generate_messages_eus.dir/build
-.PHONY : object_recognition_msgs_generate_messages_eus/fast
-
-# Convenience name for target.
-cr5_planner/CMakeFiles/object_recognition_msgs_generate_messages_cpp.dir/rule:
-	cd /home/roboert/MP_WS/build && $(MAKE) -f CMakeFiles/Makefile2 cr5_planner/CMakeFiles/object_recognition_msgs_generate_messages_cpp.dir/rule
-.PHONY : cr5_planner/CMakeFiles/object_recognition_msgs_generate_messages_cpp.dir/rule
-
-# Convenience name for target.
-object_recognition_msgs_generate_messages_cpp: cr5_planner/CMakeFiles/object_recognition_msgs_generate_messages_cpp.dir/rule
-
-.PHONY : object_recognition_msgs_generate_messages_cpp
-
-# fast build rule for target.
-object_recognition_msgs_generate_messages_cpp/fast:
-	cd /home/roboert/MP_WS/build && $(MAKE) -f cr5_planner/CMakeFiles/object_recognition_msgs_generate_messages_cpp.dir/build.make cr5_planner/CMakeFiles/object_recognition_msgs_generate_messages_cpp.dir/build
-.PHONY : object_recognition_msgs_generate_messages_cpp/fast
-
-# Convenience name for target.
-cr5_planner/CMakeFiles/object_recognition_msgs_generate_messages_lisp.dir/rule:
-	cd /home/roboert/MP_WS/build && $(MAKE) -f CMakeFiles/Makefile2 cr5_planner/CMakeFiles/object_recognition_msgs_generate_messages_lisp.dir/rule
-.PHONY : cr5_planner/CMakeFiles/object_recognition_msgs_generate_messages_lisp.dir/rule
-
-# Convenience name for target.
-object_recognition_msgs_generate_messages_lisp: cr5_planner/CMakeFiles/object_recognition_msgs_generate_messages_lisp.dir/rule
-
-.PHONY : object_recognition_msgs_generate_messages_lisp
-
-# fast build rule for target.
-object_recognition_msgs_generate_messages_lisp/fast:
-	cd /home/roboert/MP_WS/build && $(MAKE) -f cr5_planner/CMakeFiles/object_recognition_msgs_generate_messages_lisp.dir/build.make cr5_planner/CMakeFiles/object_recognition_msgs_generate_messages_lisp.dir/build
-.PHONY : object_recognition_msgs_generate_messages_lisp/fast
-
-# Convenience name for target.
-cr5_planner/CMakeFiles/moveit_msgs_generate_messages_py.dir/rule:
-	cd /home/roboert/MP_WS/build && $(MAKE) -f CMakeFiles/Makefile2 cr5_planner/CMakeFiles/moveit_msgs_generate_messages_py.dir/rule
-.PHONY : cr5_planner/CMakeFiles/moveit_msgs_generate_messages_py.dir/rule
-
-# Convenience name for target.
-moveit_msgs_generate_messages_py: cr5_planner/CMakeFiles/moveit_msgs_generate_messages_py.dir/rule
-
-.PHONY : moveit_msgs_generate_messages_py
-
-# fast build rule for target.
-moveit_msgs_generate_messages_py/fast:
-	cd /home/roboert/MP_WS/build && $(MAKE) -f cr5_planner/CMakeFiles/moveit_msgs_generate_messages_py.dir/build.make cr5_planner/CMakeFiles/moveit_msgs_generate_messages_py.dir/build
-.PHONY : moveit_msgs_generate_messages_py/fast
-
-# Convenience name for target.
-cr5_planner/CMakeFiles/moveit_msgs_generate_messages_nodejs.dir/rule:
-	cd /home/roboert/MP_WS/build && $(MAKE) -f CMakeFiles/Makefile2 cr5_planner/CMakeFiles/moveit_msgs_generate_messages_nodejs.dir/rule
-.PHONY : cr5_planner/CMakeFiles/moveit_msgs_generate_messages_nodejs.dir/rule
-
-# Convenience name for target.
-moveit_msgs_generate_messages_nodejs: cr5_planner/CMakeFiles/moveit_msgs_generate_messages_nodejs.dir/rule
-
-.PHONY : moveit_msgs_generate_messages_nodejs
-
-# fast build rule for target.
-moveit_msgs_generate_messages_nodejs/fast:
-	cd /home/roboert/MP_WS/build && $(MAKE) -f cr5_planner/CMakeFiles/moveit_msgs_generate_messages_nodejs.dir/build.make cr5_planner/CMakeFiles/moveit_msgs_generate_messages_nodejs.dir/build
-.PHONY : moveit_msgs_generate_messages_nodejs/fast
-
-# Convenience name for target.
-cr5_planner/CMakeFiles/shape_msgs_generate_messages_cpp.dir/rule:
-	cd /home/roboert/MP_WS/build && $(MAKE) -f CMakeFiles/Makefile2 cr5_planner/CMakeFiles/shape_msgs_generate_messages_cpp.dir/rule
-.PHONY : cr5_planner/CMakeFiles/shape_msgs_generate_messages_cpp.dir/rule
-
-# Convenience name for target.
-shape_msgs_generate_messages_cpp: cr5_planner/CMakeFiles/shape_msgs_generate_messages_cpp.dir/rule
-
-.PHONY : shape_msgs_generate_messages_cpp
-
-# fast build rule for target.
-shape_msgs_generate_messages_cpp/fast:
-	cd /home/roboert/MP_WS/build && $(MAKE) -f cr5_planner/CMakeFiles/shape_msgs_generate_messages_cpp.dir/build.make cr5_planner/CMakeFiles/shape_msgs_generate_messages_cpp.dir/build
-.PHONY : shape_msgs_generate_messages_cpp/fast
-
-# Convenience name for target.
-cr5_planner/CMakeFiles/moveit_msgs_generate_messages_lisp.dir/rule:
-	cd /home/roboert/MP_WS/build && $(MAKE) -f CMakeFiles/Makefile2 cr5_planner/CMakeFiles/moveit_msgs_generate_messages_lisp.dir/rule
-.PHONY : cr5_planner/CMakeFiles/moveit_msgs_generate_messages_lisp.dir/rule
-
-# Convenience name for target.
-moveit_msgs_generate_messages_lisp: cr5_planner/CMakeFiles/moveit_msgs_generate_messages_lisp.dir/rule
-
-.PHONY : moveit_msgs_generate_messages_lisp
-
-# fast build rule for target.
-moveit_msgs_generate_messages_lisp/fast:
-	cd /home/roboert/MP_WS/build && $(MAKE) -f cr5_planner/CMakeFiles/moveit_msgs_generate_messages_lisp.dir/build.make cr5_planner/CMakeFiles/moveit_msgs_generate_messages_lisp.dir/build
-.PHONY : moveit_msgs_generate_messages_lisp/fast
-
-# Convenience name for target.
-cr5_planner/CMakeFiles/cr5_planner.dir/rule:
-	cd /home/roboert/MP_WS/build && $(MAKE) -f CMakeFiles/Makefile2 cr5_planner/CMakeFiles/cr5_planner.dir/rule
-.PHONY : cr5_planner/CMakeFiles/cr5_planner.dir/rule
-
-# Convenience name for target.
-cr5_planner: cr5_planner/CMakeFiles/cr5_planner.dir/rule
-
-.PHONY : cr5_planner
-
-# fast build rule for target.
-cr5_planner/fast:
-	cd /home/roboert/MP_WS/build && $(MAKE) -f cr5_planner/CMakeFiles/cr5_planner.dir/build.make cr5_planner/CMakeFiles/cr5_planner.dir/build
-.PHONY : cr5_planner/fast
-
-# Convenience name for target.
-cr5_planner/CMakeFiles/moveit_msgs_generate_messages_eus.dir/rule:
-	cd /home/roboert/MP_WS/build && $(MAKE) -f CMakeFiles/Makefile2 cr5_planner/CMakeFiles/moveit_msgs_generate_messages_eus.dir/rule
-.PHONY : cr5_planner/CMakeFiles/moveit_msgs_generate_messages_eus.dir/rule
-
-# Convenience name for target.
-moveit_msgs_generate_messages_eus: cr5_planner/CMakeFiles/moveit_msgs_generate_messages_eus.dir/rule
-
-.PHONY : moveit_msgs_generate_messages_eus
-
-# fast build rule for target.
-moveit_msgs_generate_messages_eus/fast:
-	cd /home/roboert/MP_WS/build && $(MAKE) -f cr5_planner/CMakeFiles/moveit_msgs_generate_messages_eus.dir/build.make cr5_planner/CMakeFiles/moveit_msgs_generate_messages_eus.dir/build
-.PHONY : moveit_msgs_generate_messages_eus/fast
-
-# Convenience name for target.
-cr5_planner/CMakeFiles/moveit_msgs_generate_messages_cpp.dir/rule:
-	cd /home/roboert/MP_WS/build && $(MAKE) -f CMakeFiles/Makefile2 cr5_planner/CMakeFiles/moveit_msgs_generate_messages_cpp.dir/rule
-.PHONY : cr5_planner/CMakeFiles/moveit_msgs_generate_messages_cpp.dir/rule
-
-# Convenience name for target.
-moveit_msgs_generate_messages_cpp: cr5_planner/CMakeFiles/moveit_msgs_generate_messages_cpp.dir/rule
-
-.PHONY : moveit_msgs_generate_messages_cpp
-
-# fast build rule for target.
-moveit_msgs_generate_messages_cpp/fast:
-	cd /home/roboert/MP_WS/build && $(MAKE) -f cr5_planner/CMakeFiles/moveit_msgs_generate_messages_cpp.dir/build.make cr5_planner/CMakeFiles/moveit_msgs_generate_messages_cpp.dir/build
-.PHONY : moveit_msgs_generate_messages_cpp/fast
-
-# Convenience name for target.
-cr5_planner/CMakeFiles/shape_msgs_generate_messages_nodejs.dir/rule:
-	cd /home/roboert/MP_WS/build && $(MAKE) -f CMakeFiles/Makefile2 cr5_planner/CMakeFiles/shape_msgs_generate_messages_nodejs.dir/rule
-.PHONY : cr5_planner/CMakeFiles/shape_msgs_generate_messages_nodejs.dir/rule
-
-# Convenience name for target.
-shape_msgs_generate_messages_nodejs: cr5_planner/CMakeFiles/shape_msgs_generate_messages_nodejs.dir/rule
-
-.PHONY : shape_msgs_generate_messages_nodejs
-
-# fast build rule for target.
-shape_msgs_generate_messages_nodejs/fast:
-	cd /home/roboert/MP_WS/build && $(MAKE) -f cr5_planner/CMakeFiles/shape_msgs_generate_messages_nodejs.dir/build.make cr5_planner/CMakeFiles/shape_msgs_generate_messages_nodejs.dir/build
-.PHONY : shape_msgs_generate_messages_nodejs/fast
-
-# Convenience name for target.
-cr5_planner/CMakeFiles/object_recognition_msgs_generate_messages_py.dir/rule:
-	cd /home/roboert/MP_WS/build && $(MAKE) -f CMakeFiles/Makefile2 cr5_planner/CMakeFiles/object_recognition_msgs_generate_messages_py.dir/rule
-.PHONY : cr5_planner/CMakeFiles/object_recognition_msgs_generate_messages_py.dir/rule
-
-# Convenience name for target.
-object_recognition_msgs_generate_messages_py: cr5_planner/CMakeFiles/object_recognition_msgs_generate_messages_py.dir/rule
-
-.PHONY : object_recognition_msgs_generate_messages_py
-
-# fast build rule for target.
-object_recognition_msgs_generate_messages_py/fast:
-	cd /home/roboert/MP_WS/build && $(MAKE) -f cr5_planner/CMakeFiles/object_recognition_msgs_generate_messages_py.dir/build.make cr5_planner/CMakeFiles/object_recognition_msgs_generate_messages_py.dir/build
-.PHONY : object_recognition_msgs_generate_messages_py/fast
-
-# Convenience name for target.
-cr5_planner/CMakeFiles/shape_msgs_generate_messages_lisp.dir/rule:
-	cd /home/roboert/MP_WS/build && $(MAKE) -f CMakeFiles/Makefile2 cr5_planner/CMakeFiles/shape_msgs_generate_messages_lisp.dir/rule
-.PHONY : cr5_planner/CMakeFiles/shape_msgs_generate_messages_lisp.dir/rule
-
-# Convenience name for target.
-shape_msgs_generate_messages_lisp: cr5_planner/CMakeFiles/shape_msgs_generate_messages_lisp.dir/rule
-
-.PHONY : shape_msgs_generate_messages_lisp
-
-# fast build rule for target.
-shape_msgs_generate_messages_lisp/fast:
-	cd /home/roboert/MP_WS/build && $(MAKE) -f cr5_planner/CMakeFiles/shape_msgs_generate_messages_lisp.dir/build.make cr5_planner/CMakeFiles/shape_msgs_generate_messages_lisp.dir/build
-.PHONY : shape_msgs_generate_messages_lisp/fast
-
-# Convenience name for target.
-cr5_planner/CMakeFiles/shape_msgs_generate_messages_eus.dir/rule:
-	cd /home/roboert/MP_WS/build && $(MAKE) -f CMakeFiles/Makefile2 cr5_planner/CMakeFiles/shape_msgs_generate_messages_eus.dir/rule
-.PHONY : cr5_planner/CMakeFiles/shape_msgs_generate_messages_eus.dir/rule
-
-# Convenience name for target.
-shape_msgs_generate_messages_eus: cr5_planner/CMakeFiles/shape_msgs_generate_messages_eus.dir/rule
-
-.PHONY : shape_msgs_generate_messages_eus
-
-# fast build rule for target.
-shape_msgs_generate_messages_eus/fast:
-	cd /home/roboert/MP_WS/build && $(MAKE) -f cr5_planner/CMakeFiles/shape_msgs_generate_messages_eus.dir/build.make cr5_planner/CMakeFiles/shape_msgs_generate_messages_eus.dir/build
-.PHONY : shape_msgs_generate_messages_eus/fast
-
-# Convenience name for target.
 cr5_planner/CMakeFiles/dynamic_test.dir/rule:
 	cd /home/roboert/MP_WS/build && $(MAKE) -f CMakeFiles/Makefile2 cr5_planner/CMakeFiles/dynamic_test.dir/rule
 .PHONY : cr5_planner/CMakeFiles/dynamic_test.dir/rule
@@ -421,51 +181,6 @@ dynamic_test: cr5_planner/CMakeFiles/dynamic_test.dir/rule
 dynamic_test/fast:
 	cd /home/roboert/MP_WS/build && $(MAKE) -f cr5_planner/CMakeFiles/dynamic_test.dir/build.make cr5_planner/CMakeFiles/dynamic_test.dir/build
 .PHONY : dynamic_test/fast
-
-# Convenience name for target.
-cr5_planner/CMakeFiles/object_recognition_msgs_generate_messages_nodejs.dir/rule:
-	cd /home/roboert/MP_WS/build && $(MAKE) -f CMakeFiles/Makefile2 cr5_planner/CMakeFiles/object_recognition_msgs_generate_messages_nodejs.dir/rule
-.PHONY : cr5_planner/CMakeFiles/object_recognition_msgs_generate_messages_nodejs.dir/rule
-
-# Convenience name for target.
-object_recognition_msgs_generate_messages_nodejs: cr5_planner/CMakeFiles/object_recognition_msgs_generate_messages_nodejs.dir/rule
-
-.PHONY : object_recognition_msgs_generate_messages_nodejs
-
-# fast build rule for target.
-object_recognition_msgs_generate_messages_nodejs/fast:
-	cd /home/roboert/MP_WS/build && $(MAKE) -f cr5_planner/CMakeFiles/object_recognition_msgs_generate_messages_nodejs.dir/build.make cr5_planner/CMakeFiles/object_recognition_msgs_generate_messages_nodejs.dir/build
-.PHONY : object_recognition_msgs_generate_messages_nodejs/fast
-
-# Convenience name for target.
-cr5_planner/CMakeFiles/octomap_msgs_generate_messages_cpp.dir/rule:
-	cd /home/roboert/MP_WS/build && $(MAKE) -f CMakeFiles/Makefile2 cr5_planner/CMakeFiles/octomap_msgs_generate_messages_cpp.dir/rule
-.PHONY : cr5_planner/CMakeFiles/octomap_msgs_generate_messages_cpp.dir/rule
-
-# Convenience name for target.
-octomap_msgs_generate_messages_cpp: cr5_planner/CMakeFiles/octomap_msgs_generate_messages_cpp.dir/rule
-
-.PHONY : octomap_msgs_generate_messages_cpp
-
-# fast build rule for target.
-octomap_msgs_generate_messages_cpp/fast:
-	cd /home/roboert/MP_WS/build && $(MAKE) -f cr5_planner/CMakeFiles/octomap_msgs_generate_messages_cpp.dir/build.make cr5_planner/CMakeFiles/octomap_msgs_generate_messages_cpp.dir/build
-.PHONY : octomap_msgs_generate_messages_cpp/fast
-
-# Convenience name for target.
-cr5_planner/CMakeFiles/octomap_msgs_generate_messages_py.dir/rule:
-	cd /home/roboert/MP_WS/build && $(MAKE) -f CMakeFiles/Makefile2 cr5_planner/CMakeFiles/octomap_msgs_generate_messages_py.dir/rule
-.PHONY : cr5_planner/CMakeFiles/octomap_msgs_generate_messages_py.dir/rule
-
-# Convenience name for target.
-octomap_msgs_generate_messages_py: cr5_planner/CMakeFiles/octomap_msgs_generate_messages_py.dir/rule
-
-.PHONY : octomap_msgs_generate_messages_py
-
-# fast build rule for target.
-octomap_msgs_generate_messages_py/fast:
-	cd /home/roboert/MP_WS/build && $(MAKE) -f cr5_planner/CMakeFiles/octomap_msgs_generate_messages_py.dir/build.make cr5_planner/CMakeFiles/octomap_msgs_generate_messages_py.dir/build
-.PHONY : octomap_msgs_generate_messages_py/fast
 
 # Convenience name for target.
 cr5_planner/CMakeFiles/plan_test.dir/rule:
@@ -483,64 +198,19 @@ plan_test/fast:
 .PHONY : plan_test/fast
 
 # Convenience name for target.
-cr5_planner/CMakeFiles/moveit_ros_planning_gencfg.dir/rule:
-	cd /home/roboert/MP_WS/build && $(MAKE) -f CMakeFiles/Makefile2 cr5_planner/CMakeFiles/moveit_ros_planning_gencfg.dir/rule
-.PHONY : cr5_planner/CMakeFiles/moveit_ros_planning_gencfg.dir/rule
+cr5_planner/CMakeFiles/cr5_planner.dir/rule:
+	cd /home/roboert/MP_WS/build && $(MAKE) -f CMakeFiles/Makefile2 cr5_planner/CMakeFiles/cr5_planner.dir/rule
+.PHONY : cr5_planner/CMakeFiles/cr5_planner.dir/rule
 
 # Convenience name for target.
-moveit_ros_planning_gencfg: cr5_planner/CMakeFiles/moveit_ros_planning_gencfg.dir/rule
+cr5_planner: cr5_planner/CMakeFiles/cr5_planner.dir/rule
 
-.PHONY : moveit_ros_planning_gencfg
+.PHONY : cr5_planner
 
 # fast build rule for target.
-moveit_ros_planning_gencfg/fast:
-	cd /home/roboert/MP_WS/build && $(MAKE) -f cr5_planner/CMakeFiles/moveit_ros_planning_gencfg.dir/build.make cr5_planner/CMakeFiles/moveit_ros_planning_gencfg.dir/build
-.PHONY : moveit_ros_planning_gencfg/fast
-
-# Convenience name for target.
-cr5_planner/CMakeFiles/octomap_msgs_generate_messages_lisp.dir/rule:
-	cd /home/roboert/MP_WS/build && $(MAKE) -f CMakeFiles/Makefile2 cr5_planner/CMakeFiles/octomap_msgs_generate_messages_lisp.dir/rule
-.PHONY : cr5_planner/CMakeFiles/octomap_msgs_generate_messages_lisp.dir/rule
-
-# Convenience name for target.
-octomap_msgs_generate_messages_lisp: cr5_planner/CMakeFiles/octomap_msgs_generate_messages_lisp.dir/rule
-
-.PHONY : octomap_msgs_generate_messages_lisp
-
-# fast build rule for target.
-octomap_msgs_generate_messages_lisp/fast:
-	cd /home/roboert/MP_WS/build && $(MAKE) -f cr5_planner/CMakeFiles/octomap_msgs_generate_messages_lisp.dir/build.make cr5_planner/CMakeFiles/octomap_msgs_generate_messages_lisp.dir/build
-.PHONY : octomap_msgs_generate_messages_lisp/fast
-
-# Convenience name for target.
-cr5_planner/CMakeFiles/octomap_msgs_generate_messages_nodejs.dir/rule:
-	cd /home/roboert/MP_WS/build && $(MAKE) -f CMakeFiles/Makefile2 cr5_planner/CMakeFiles/octomap_msgs_generate_messages_nodejs.dir/rule
-.PHONY : cr5_planner/CMakeFiles/octomap_msgs_generate_messages_nodejs.dir/rule
-
-# Convenience name for target.
-octomap_msgs_generate_messages_nodejs: cr5_planner/CMakeFiles/octomap_msgs_generate_messages_nodejs.dir/rule
-
-.PHONY : octomap_msgs_generate_messages_nodejs
-
-# fast build rule for target.
-octomap_msgs_generate_messages_nodejs/fast:
-	cd /home/roboert/MP_WS/build && $(MAKE) -f cr5_planner/CMakeFiles/octomap_msgs_generate_messages_nodejs.dir/build.make cr5_planner/CMakeFiles/octomap_msgs_generate_messages_nodejs.dir/build
-.PHONY : octomap_msgs_generate_messages_nodejs/fast
-
-# Convenience name for target.
-cr5_planner/CMakeFiles/moveit_ros_manipulation_gencfg.dir/rule:
-	cd /home/roboert/MP_WS/build && $(MAKE) -f CMakeFiles/Makefile2 cr5_planner/CMakeFiles/moveit_ros_manipulation_gencfg.dir/rule
-.PHONY : cr5_planner/CMakeFiles/moveit_ros_manipulation_gencfg.dir/rule
-
-# Convenience name for target.
-moveit_ros_manipulation_gencfg: cr5_planner/CMakeFiles/moveit_ros_manipulation_gencfg.dir/rule
-
-.PHONY : moveit_ros_manipulation_gencfg
-
-# fast build rule for target.
-moveit_ros_manipulation_gencfg/fast:
-	cd /home/roboert/MP_WS/build && $(MAKE) -f cr5_planner/CMakeFiles/moveit_ros_manipulation_gencfg.dir/build.make cr5_planner/CMakeFiles/moveit_ros_manipulation_gencfg.dir/build
-.PHONY : moveit_ros_manipulation_gencfg/fast
+cr5_planner/fast:
+	cd /home/roboert/MP_WS/build && $(MAKE) -f cr5_planner/CMakeFiles/cr5_planner.dir/build.make cr5_planner/CMakeFiles/cr5_planner.dir/build
+.PHONY : cr5_planner/fast
 
 src/dynamic_test.o: src/dynamic_test.cpp.o
 
@@ -737,38 +407,16 @@ help:
 	@echo "... all (the default if no target is provided)"
 	@echo "... clean"
 	@echo "... depend"
-	@echo "... install/strip"
 	@echo "... install/local"
 	@echo "... install"
-	@echo "... shape_msgs_generate_messages_py"
-	@echo "... octomap_msgs_generate_messages_eus"
-	@echo "... object_recognition_msgs_generate_messages_eus"
-	@echo "... object_recognition_msgs_generate_messages_cpp"
-	@echo "... object_recognition_msgs_generate_messages_lisp"
-	@echo "... moveit_msgs_generate_messages_py"
-	@echo "... moveit_msgs_generate_messages_nodejs"
-	@echo "... shape_msgs_generate_messages_cpp"
-	@echo "... moveit_msgs_generate_messages_lisp"
-	@echo "... cr5_planner"
-	@echo "... moveit_msgs_generate_messages_eus"
-	@echo "... moveit_msgs_generate_messages_cpp"
-	@echo "... test"
-	@echo "... shape_msgs_generate_messages_nodejs"
-	@echo "... object_recognition_msgs_generate_messages_py"
-	@echo "... shape_msgs_generate_messages_lisp"
-	@echo "... shape_msgs_generate_messages_eus"
-	@echo "... dynamic_test"
-	@echo "... object_recognition_msgs_generate_messages_nodejs"
-	@echo "... octomap_msgs_generate_messages_cpp"
-	@echo "... octomap_msgs_generate_messages_py"
-	@echo "... plan_test"
-	@echo "... moveit_ros_planning_gencfg"
-	@echo "... octomap_msgs_generate_messages_lisp"
-	@echo "... octomap_msgs_generate_messages_nodejs"
 	@echo "... list_install_components"
-	@echo "... moveit_ros_manipulation_gencfg"
-	@echo "... edit_cache"
 	@echo "... rebuild_cache"
+	@echo "... edit_cache"
+	@echo "... test"
+	@echo "... dynamic_test"
+	@echo "... install/strip"
+	@echo "... plan_test"
+	@echo "... cr5_planner"
 	@echo "... src/dynamic_test.o"
 	@echo "... src/dynamic_test.i"
 	@echo "... src/dynamic_test.s"
