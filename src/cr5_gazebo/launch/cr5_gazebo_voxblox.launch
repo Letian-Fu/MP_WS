@@ -1,0 +1,20 @@
+<launch>
+  <param name="/voxblox_ground_truth/voxel_size" value="0.2"/>
+  <!-- Save the ground truth voxblox map with:
+       rosservice call /gazebo/save_voxblox_ground_truth_to_file "file_path: '/home/you/ground_truth_map_name.tsdf'"-->
+
+  <arg name="show_gazebo" default="true"/>
+
+  <!-- Launch Gazebo world -->
+  <group>
+    <include file="$(find gazebo_ros)/launch/empty_world.launch">
+      <arg name="world_name" value="$(find cr5_gazebo)/worlds/obs_voxblox.world"/>
+      <!--<arg name="debug" value="true"/>-->
+      <!--<arg name="paused" value="true"/>-->
+    </include>
+  </group>
+
+
+  <arg name="rviz_file" default="$(find cr5_gazebo)/config/debug_gazebo_plugin.rviz" />
+  <node pkg="rviz" type="rviz" name="$(anon rviz)" respawn="false" args="-d $(arg rviz_file)" output="screen"/>
+</launch>

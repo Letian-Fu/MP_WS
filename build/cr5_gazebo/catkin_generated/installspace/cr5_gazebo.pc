@@ -1,0 +1,8 @@
+prefix=/home/roboert/MP_WS/install
+
+Name: cr5_gazebo
+Description: Description of cr5_gazebo
+Version: 0.0.0
+Cflags: 
+Libs: -L${prefix}/lib 
+Requires: 

@@ -132,6 +132,7 @@ if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for each subdirectory.
   include("/home/roboert/MP_WS/build/gtest/cmake_install.cmake")
   include("/home/roboert/MP_WS/build/cr5_dh_moveit_config/cmake_install.cmake")
+  include("/home/roboert/MP_WS/build/cr5_gazebo/cmake_install.cmake")
   include("/home/roboert/MP_WS/build/cr5_description/cmake_install.cmake")
   include("/home/roboert/MP_WS/build/cr5_moveit_config/cmake_install.cmake")
 
