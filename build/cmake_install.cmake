@@ -135,6 +135,7 @@ if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   include("/home/roboert/MP_WS/build/cr5_gazebo/cmake_install.cmake")
   include("/home/roboert/MP_WS/build/cr5_description/cmake_install.cmake")
   include("/home/roboert/MP_WS/build/cr5_moveit_config/cmake_install.cmake")
+  include("/home/roboert/MP_WS/build/cr5_planner/cmake_install.cmake")
 
 endif()
 

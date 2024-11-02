@@ -1,0 +1,8 @@
+prefix=/home/roboert/MP_WS/install
+
+Name: cr5_planner
+Description: Description of cr5_planner
+Version: 0.0.0
+Cflags: 
+Libs: -L${prefix}/lib 
+Requires: 

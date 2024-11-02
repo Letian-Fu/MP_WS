@@ -1,0 +1,2 @@
+- setup-file:
+    local-name: /home/letianfu/catkin_ws/src/cr5_planner/cmake-build-debug/devel/setup.sh
