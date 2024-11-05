@@ -13,7 +13,6 @@
         <chain base_link="base_link" tip_link="Link6"/>
     </group>
     <group name="gripper">
-        <joint name="dh_joint"/>
         <joint name="finger1_joint"/>
         <joint name="finger2_joint"/>
     </group>
