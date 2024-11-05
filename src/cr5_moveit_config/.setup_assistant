@@ -1,11 +1,11 @@
 moveit_setup_assistant_config:
   URDF:
     package: cr5_description
-    relative_path: urdf/cr5.urdf.xacro
+    relative_path: urdf/cr5_dh.urdf.xacro
     xacro_args: ""
   SRDF:
     relative_path: config/cr5.srdf
   CONFIG:
-    author_name: FLT
+    author_name: letianfu
     author_email: 1052838452@qq.com
-    generated_timestamp: 1642404410
+    generated_timestamp: 1730791973

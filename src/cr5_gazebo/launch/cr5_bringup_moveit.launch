@@ -1,15 +1,19 @@
 <launch>
   
-    <!-- Launch Gazebo  -->
-    <include file="$(find cr5_gazebo)/launch/cr5_gazebo_world.launch" />
+  <!-- Launch Gazebo  -->
+  <include file="$(find cr5_gazebo)/launch/cr5_gazebo.launch" />
 
-    <!-- ros_control arm launch file -->
-    <include file="$(find cr5_gazebo)/launch/cr5_gazebo_states.launch" />   
+  <!-- Load the controller parameters onto the parameter server -->
+  <rosparam file="$(find cr5_gazebo)/config/cr5_gazebo_controllers.yaml" />
+  <include file="$(dirname)/cr5_controllers.launch"/>
 
-    <!-- ros_control trajectory control dof arm launch file -->
-    <include file="$(find cr5_gazebo)/launch/cr5_trajectory_controller.launch" />
+  <!-- Spawn the Gazebo ROS controllers -->
+  <node name="gazebo_controller_spawner" pkg="controller_manager" type="spawner" respawn="false" output="screen" args="joint_state_controller" />
 
-    <!-- moveit launch file -->
-    <include file="$(find cr5_moveit_config)/launch/moveit_planning_execution.launch" />
+  <!-- Given the published joint states, publish tf for the robot links -->
+  <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" respawn="true" output="screen" />
+
+  <!-- moveit launch file -->
+  <include file="$(find cr5_moveit_config)/launch/moveit_planning_execution.launch" />
 
 </launch>

@@ -54,22 +54,20 @@ CMAKE_BINARY_DIR = /home/roboert/MP_WS/build
 
 # The main recursive "all" target.
 all: gtest/all
-all: cr5_dh_moveit_config/all
+all: cr5_moveit_config/all
 all: gpmp2_planner_py/all
 all: cr5_gazebo/all
 all: cr5_description/all
-all: cr5_moveit_config/all
 all: cr5_planner/all
 
 .PHONY : all
 
 # The main recursive "preinstall" target.
 preinstall: gtest/preinstall
-preinstall: cr5_dh_moveit_config/preinstall
+preinstall: cr5_moveit_config/preinstall
 preinstall: gpmp2_planner_py/preinstall
 preinstall: cr5_gazebo/preinstall
 preinstall: cr5_description/preinstall
-preinstall: cr5_moveit_config/preinstall
 preinstall: cr5_planner/preinstall
 
 .PHONY : preinstall
@@ -81,11 +79,10 @@ clean: CMakeFiles/clean_test_results.dir/clean
 clean: CMakeFiles/tests.dir/clean
 clean: CMakeFiles/download_extra_data.dir/clean
 clean: gtest/clean
-clean: cr5_dh_moveit_config/clean
+clean: cr5_moveit_config/clean
 clean: gpmp2_planner_py/clean
 clean: cr5_gazebo/clean
 clean: cr5_description/clean
-clean: cr5_moveit_config/clean
 clean: cr5_planner/clean
 
 .PHONY : clean
@@ -107,24 +104,6 @@ cr5_description/preinstall:
 cr5_description/clean: cr5_description/CMakeFiles/cr5_description_xacro_generated_to_devel_space_.dir/clean
 
 .PHONY : cr5_description/clean
-
-#=============================================================================
-# Directory level rules for directory cr5_dh_moveit_config
-
-# Recursive "all" directory target.
-cr5_dh_moveit_config/all:
-
-.PHONY : cr5_dh_moveit_config/all
-
-# Recursive "preinstall" directory target.
-cr5_dh_moveit_config/preinstall:
-
-.PHONY : cr5_dh_moveit_config/preinstall
-
-# Recursive "clean" directory target.
-cr5_dh_moveit_config/clean: cr5_dh_moveit_config/CMakeFiles/_catkin_empty_exported_target.dir/clean
-
-.PHONY : cr5_dh_moveit_config/clean
 
 #=============================================================================
 # Directory level rules for directory cr5_gazebo
@@ -190,7 +169,7 @@ cr5_moveit_config/preinstall:
 .PHONY : cr5_moveit_config/preinstall
 
 # Recursive "clean" directory target.
-cr5_moveit_config/clean:
+cr5_moveit_config/clean: cr5_moveit_config/CMakeFiles/_catkin_empty_exported_target.dir/clean
 
 .PHONY : cr5_moveit_config/clean
 
@@ -633,31 +612,31 @@ gtest/googletest/CMakeFiles/gtest.dir/clean:
 .PHONY : gtest/googletest/CMakeFiles/gtest.dir/clean
 
 #=============================================================================
-# Target rules for target cr5_dh_moveit_config/CMakeFiles/_catkin_empty_exported_target.dir
+# Target rules for target cr5_moveit_config/CMakeFiles/_catkin_empty_exported_target.dir
 
 # All Build rule for target.
-cr5_dh_moveit_config/CMakeFiles/_catkin_empty_exported_target.dir/all:
-	$(MAKE) -f cr5_dh_moveit_config/CMakeFiles/_catkin_empty_exported_target.dir/build.make cr5_dh_moveit_config/CMakeFiles/_catkin_empty_exported_target.dir/depend
-	$(MAKE) -f cr5_dh_moveit_config/CMakeFiles/_catkin_empty_exported_target.dir/build.make cr5_dh_moveit_config/CMakeFiles/_catkin_empty_exported_target.dir/build
+cr5_moveit_config/CMakeFiles/_catkin_empty_exported_target.dir/all:
+	$(MAKE) -f cr5_moveit_config/CMakeFiles/_catkin_empty_exported_target.dir/build.make cr5_moveit_config/CMakeFiles/_catkin_empty_exported_target.dir/depend
+	$(MAKE) -f cr5_moveit_config/CMakeFiles/_catkin_empty_exported_target.dir/build.make cr5_moveit_config/CMakeFiles/_catkin_empty_exported_target.dir/build
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/roboert/MP_WS/build/CMakeFiles --progress-num= "Built target _catkin_empty_exported_target"
-.PHONY : cr5_dh_moveit_config/CMakeFiles/_catkin_empty_exported_target.dir/all
+.PHONY : cr5_moveit_config/CMakeFiles/_catkin_empty_exported_target.dir/all
 
 # Build rule for subdir invocation for target.
-cr5_dh_moveit_config/CMakeFiles/_catkin_empty_exported_target.dir/rule: cmake_check_build_system
+cr5_moveit_config/CMakeFiles/_catkin_empty_exported_target.dir/rule: cmake_check_build_system
 	$(CMAKE_COMMAND) -E cmake_progress_start /home/roboert/MP_WS/build/CMakeFiles 0
-	$(MAKE) -f CMakeFiles/Makefile2 cr5_dh_moveit_config/CMakeFiles/_catkin_empty_exported_target.dir/all
+	$(MAKE) -f CMakeFiles/Makefile2 cr5_moveit_config/CMakeFiles/_catkin_empty_exported_target.dir/all
 	$(CMAKE_COMMAND) -E cmake_progress_start /home/roboert/MP_WS/build/CMakeFiles 0
-.PHONY : cr5_dh_moveit_config/CMakeFiles/_catkin_empty_exported_target.dir/rule
+.PHONY : cr5_moveit_config/CMakeFiles/_catkin_empty_exported_target.dir/rule
 
 # Convenience name for target.
-_catkin_empty_exported_target: cr5_dh_moveit_config/CMakeFiles/_catkin_empty_exported_target.dir/rule
+_catkin_empty_exported_target: cr5_moveit_config/CMakeFiles/_catkin_empty_exported_target.dir/rule
 
 .PHONY : _catkin_empty_exported_target
 
 # clean rule for target.
-cr5_dh_moveit_config/CMakeFiles/_catkin_empty_exported_target.dir/clean:
-	$(MAKE) -f cr5_dh_moveit_config/CMakeFiles/_catkin_empty_exported_target.dir/build.make cr5_dh_moveit_config/CMakeFiles/_catkin_empty_exported_target.dir/clean
-.PHONY : cr5_dh_moveit_config/CMakeFiles/_catkin_empty_exported_target.dir/clean
+cr5_moveit_config/CMakeFiles/_catkin_empty_exported_target.dir/clean:
+	$(MAKE) -f cr5_moveit_config/CMakeFiles/_catkin_empty_exported_target.dir/build.make cr5_moveit_config/CMakeFiles/_catkin_empty_exported_target.dir/clean
+.PHONY : cr5_moveit_config/CMakeFiles/_catkin_empty_exported_target.dir/clean
 
 #=============================================================================
 # Target rules for target gpmp2_planner_py/CMakeFiles/std_srvs_generate_messages_nodejs.dir

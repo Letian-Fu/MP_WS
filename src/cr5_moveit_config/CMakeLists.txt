@@ -1,8 +1,6 @@
 cmake_minimum_required(VERSION 3.1.3)
 project(cr5_moveit_config)
 
-set( CMAKE_CXX_FLAGS "-std=c++11 -O3" )
-
 find_package(catkin REQUIRED)
 
 catkin_package()
