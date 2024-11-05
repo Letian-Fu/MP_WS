@@ -8,6 +8,9 @@ find_package(catkin REQUIRED COMPONENTS
   gazebo_plugins
   gazebo_ros
   gazebo_ros_control
+  rospy
+  rosmsg
+  roscpp
 )
 find_package(roslaunch)
 

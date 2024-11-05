@@ -1,2 +1,2 @@
 cr5_description:cr5_gazebo:cr5_moveit_config:cr5_planner:gpmp2_planner_py
--DCMAKE_BUILD_TYPE=RelWithDebInfo -DCATKIN_DEVEL_PREFIX=/home/roboert/MP_WS/devel -DCMAKE_INSTALL_PREFIX=/home/roboert/MP_WS/install -G Unix Makefiles
+-DCATKIN_DEVEL_PREFIX=/home/roboert/MP_WS/devel -DCMAKE_INSTALL_PREFIX=/home/roboert/MP_WS/install -G Unix Makefiles
