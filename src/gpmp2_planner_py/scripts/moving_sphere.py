@@ -3,6 +3,9 @@ import rospy
 from gazebo_msgs.srv import SetModelState
 from gazebo_msgs.msg import ModelState
 from geometry_msgs.msg import Pose
+from shape_msgs.msg import SolidPrimitive
+from moveit_msgs.msg import CollisionObject
+from moveit_commander import PlanningSceneInterface
 import math
 
 def move_obstacle_in_circle():
@@ -22,6 +25,9 @@ def move_obstacle_in_circle():
     height = 1.0  # 障碍物的z坐标
     angular_speed = 0.5  # 角速度，单位：弧度/秒
     rate = rospy.Rate(30)  # 控制循环的频率
+
+    # 创建MoveIt PlanningSceneInterface对象
+    planning_scene_interface = PlanningSceneInterface()
 
     while not rospy.is_shutdown():
         # 计算障碍物当前的位置
@@ -46,6 +52,24 @@ def move_obstacle_in_circle():
 
         # 调用服务设置障碍物的位姿
         set_state(state)
+
+        # 更新MoveIt中的规划场景
+        collision_object = CollisionObject()
+        collision_object.header.frame_id = "world"
+        collision_object.header.stamp = rospy.Time.now()
+        collision_object.id = model_name
+
+        # 假设障碍物是一个球体
+        primitive = SolidPrimitive()
+        primitive.type = primitive.SPHERE
+        primitive.dimensions.append(0.1)
+
+        collision_object.primitives.append(primitive)
+        collision_object.primitive_poses.append(model_pose)
+        collision_object.operation = CollisionObject.ADD
+
+        # 应用碰撞对象到规划场景
+        planning_scene_interface.add_object(collision_object)
 
         # 控制循环频率
         rate.sleep()

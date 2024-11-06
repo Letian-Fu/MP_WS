@@ -21,6 +21,10 @@ find_package(catkin REQUIRED COMPONENTS
     pluginlib
     tf2_eigen
     tf2_ros
+    gazebo_msgs
+    gazebo_plugins
+    gazebo_ros
+    gazebo_ros_control
 )
 
 catkin_package(
