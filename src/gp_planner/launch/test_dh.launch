@@ -1,0 +1,8 @@
+<launch>
+  <!-- Launch Gazebo MoveIt and Rviz -->
+  <!--include file="$(find cr5_moveit_config)/launch/demo.launch"/-->
+  <include file="$(find cr5_moveit_config)/launch/demo.launch"/>
+
+  <rosparam command="load" file="$(find gp_planner)config//parameters.yaml" />
+
+</launch>

@@ -120,20 +120,6 @@ class GPMP2Planner:
                                 self.problem.delta_t,
                                 tau,
                             ))
-                        graph_obs.push_back(
-                            ObstacleSDFFactorGPArm(
-                                key_pos1,
-                                key_vel1,
-                                key_pos2,
-                                key_vel2,
-                                self.problem.robot.arm,
-                                self.problem.sdf,
-                                self.problem.cost_sigma,
-                                self.problem.epsilon,
-                                self.problem.Qc_model,
-                                self.problem.delta_t,
-                                tau,
-                            ))
 
         ## optimize!
         if self.problem.opt_type == "LM":

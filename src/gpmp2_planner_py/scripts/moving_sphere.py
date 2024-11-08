@@ -8,6 +8,21 @@ from moveit_msgs.msg import CollisionObject
 from moveit_commander import PlanningSceneInterface
 import math
 
+# # 回调函数，处理接收到的ModelStates消息
+# def model_states_callback(msg):
+#     for name in msg.name:
+#         if name == "my_obstacle":  # 替换为你的障碍物模型名称
+#             # 获取障碍物的位置和姿态
+#             pose = msg.pose[msg.name.index(name)]
+#             print("Obstacle Position:")
+#             print("X:", pose.position.x)
+#             print("Y:", pose.position.y)
+#             print("Z:", pose.position.z)
+
+# # 订阅/gazebo/model_states话题
+# rospy.Subscriber("/gazebo/model_states", ModelState, model_states_callback)
+
+
 def move_obstacle_in_circle():
     # 初始化ROS节点
     rospy.init_node('obstacle_circle_mover')
@@ -19,10 +34,10 @@ def move_obstacle_in_circle():
     model_name = 'moving_sphere'  # 替换为你的障碍物模型名称
 
     # 圆形轨迹的参数
-    radius = 1.0  # 圆的半径
+    radius = 0.6  # 圆的半径
     center_x = 0.0  # 圆心的x坐标
     center_y = 0.0  # 圆心的y坐标
-    height = 1.0  # 障碍物的z坐标
+    height = 0.7  # 障碍物的z坐标
     angular_speed = 0.5  # 角速度，单位：弧度/秒
     rate = rospy.Rate(30)  # 控制循环的频率
 

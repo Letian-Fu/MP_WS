@@ -58,7 +58,7 @@ all: cr5_moveit_config/all
 all: cr5_gazebo/all
 all: gpmp2_planner_py/all
 all: cr5_description/all
-all: cr5_planner/all
+all: gp_planner/all
 
 .PHONY : all
 
@@ -68,7 +68,7 @@ preinstall: cr5_moveit_config/preinstall
 preinstall: cr5_gazebo/preinstall
 preinstall: gpmp2_planner_py/preinstall
 preinstall: cr5_description/preinstall
-preinstall: cr5_planner/preinstall
+preinstall: gp_planner/preinstall
 
 .PHONY : preinstall
 
@@ -83,7 +83,7 @@ clean: cr5_moveit_config/clean
 clean: cr5_gazebo/clean
 clean: gpmp2_planner_py/clean
 clean: cr5_description/clean
-clean: cr5_planner/clean
+clean: gp_planner/clean
 
 .PHONY : clean
 
@@ -245,26 +245,28 @@ cr5_moveit_config/clean: cr5_moveit_config/CMakeFiles/_catkin_empty_exported_tar
 .PHONY : cr5_moveit_config/clean
 
 #=============================================================================
-# Directory level rules for directory cr5_planner
+# Directory level rules for directory gp_planner
 
 # Recursive "all" directory target.
-cr5_planner/all: cr5_planner/CMakeFiles/dynamic_test.dir/all
-cr5_planner/all: cr5_planner/CMakeFiles/plan_test.dir/all
-cr5_planner/all: cr5_planner/CMakeFiles/cr5_planner.dir/all
+gp_planner/all: gp_planner/CMakeFiles/rrt_dynamic_test.dir/all
+gp_planner/all: gp_planner/CMakeFiles/rrt_plan_test.dir/all
+gp_planner/all: gp_planner/CMakeFiles/Local_Planner.dir/all
+gp_planner/all: gp_planner/CMakeFiles/Global_Planner.dir/all
 
-.PHONY : cr5_planner/all
+.PHONY : gp_planner/all
 
 # Recursive "preinstall" directory target.
-cr5_planner/preinstall:
+gp_planner/preinstall:
 
-.PHONY : cr5_planner/preinstall
+.PHONY : gp_planner/preinstall
 
 # Recursive "clean" directory target.
-cr5_planner/clean: cr5_planner/CMakeFiles/dynamic_test.dir/clean
-cr5_planner/clean: cr5_planner/CMakeFiles/plan_test.dir/clean
-cr5_planner/clean: cr5_planner/CMakeFiles/cr5_planner.dir/clean
+gp_planner/clean: gp_planner/CMakeFiles/rrt_dynamic_test.dir/clean
+gp_planner/clean: gp_planner/CMakeFiles/rrt_plan_test.dir/clean
+gp_planner/clean: gp_planner/CMakeFiles/Local_Planner.dir/clean
+gp_planner/clean: gp_planner/CMakeFiles/Global_Planner.dir/clean
 
-.PHONY : cr5_planner/clean
+.PHONY : gp_planner/clean
 
 #=============================================================================
 # Directory level rules for directory gpmp2_planner_py
@@ -4203,85 +4205,112 @@ cr5_description/CMakeFiles/cr5_description_xacro_generated_to_devel_space_.dir/c
 .PHONY : cr5_description/CMakeFiles/cr5_description_xacro_generated_to_devel_space_.dir/clean
 
 #=============================================================================
-# Target rules for target cr5_planner/CMakeFiles/dynamic_test.dir
+# Target rules for target gp_planner/CMakeFiles/rrt_dynamic_test.dir
 
 # All Build rule for target.
-cr5_planner/CMakeFiles/dynamic_test.dir/all: cr5_planner/CMakeFiles/cr5_planner.dir/all
-	$(MAKE) -f cr5_planner/CMakeFiles/dynamic_test.dir/build.make cr5_planner/CMakeFiles/dynamic_test.dir/depend
-	$(MAKE) -f cr5_planner/CMakeFiles/dynamic_test.dir/build.make cr5_planner/CMakeFiles/dynamic_test.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/roboert/MP_WS/build/CMakeFiles --progress-num=7,8 "Built target dynamic_test"
-.PHONY : cr5_planner/CMakeFiles/dynamic_test.dir/all
+gp_planner/CMakeFiles/rrt_dynamic_test.dir/all: gp_planner/CMakeFiles/Global_Planner.dir/all
+	$(MAKE) -f gp_planner/CMakeFiles/rrt_dynamic_test.dir/build.make gp_planner/CMakeFiles/rrt_dynamic_test.dir/depend
+	$(MAKE) -f gp_planner/CMakeFiles/rrt_dynamic_test.dir/build.make gp_planner/CMakeFiles/rrt_dynamic_test.dir/build
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/roboert/MP_WS/build/CMakeFiles --progress-num=17,18 "Built target rrt_dynamic_test"
+.PHONY : gp_planner/CMakeFiles/rrt_dynamic_test.dir/all
 
 # Build rule for subdir invocation for target.
-cr5_planner/CMakeFiles/dynamic_test.dir/rule: cmake_check_build_system
+gp_planner/CMakeFiles/rrt_dynamic_test.dir/rule: cmake_check_build_system
 	$(CMAKE_COMMAND) -E cmake_progress_start /home/roboert/MP_WS/build/CMakeFiles 8
-	$(MAKE) -f CMakeFiles/Makefile2 cr5_planner/CMakeFiles/dynamic_test.dir/all
+	$(MAKE) -f CMakeFiles/Makefile2 gp_planner/CMakeFiles/rrt_dynamic_test.dir/all
 	$(CMAKE_COMMAND) -E cmake_progress_start /home/roboert/MP_WS/build/CMakeFiles 0
-.PHONY : cr5_planner/CMakeFiles/dynamic_test.dir/rule
+.PHONY : gp_planner/CMakeFiles/rrt_dynamic_test.dir/rule
 
 # Convenience name for target.
-dynamic_test: cr5_planner/CMakeFiles/dynamic_test.dir/rule
+rrt_dynamic_test: gp_planner/CMakeFiles/rrt_dynamic_test.dir/rule
 
-.PHONY : dynamic_test
+.PHONY : rrt_dynamic_test
 
 # clean rule for target.
-cr5_planner/CMakeFiles/dynamic_test.dir/clean:
-	$(MAKE) -f cr5_planner/CMakeFiles/dynamic_test.dir/build.make cr5_planner/CMakeFiles/dynamic_test.dir/clean
-.PHONY : cr5_planner/CMakeFiles/dynamic_test.dir/clean
+gp_planner/CMakeFiles/rrt_dynamic_test.dir/clean:
+	$(MAKE) -f gp_planner/CMakeFiles/rrt_dynamic_test.dir/build.make gp_planner/CMakeFiles/rrt_dynamic_test.dir/clean
+.PHONY : gp_planner/CMakeFiles/rrt_dynamic_test.dir/clean
 
 #=============================================================================
-# Target rules for target cr5_planner/CMakeFiles/plan_test.dir
+# Target rules for target gp_planner/CMakeFiles/rrt_plan_test.dir
 
 # All Build rule for target.
-cr5_planner/CMakeFiles/plan_test.dir/all: cr5_planner/CMakeFiles/cr5_planner.dir/all
-	$(MAKE) -f cr5_planner/CMakeFiles/plan_test.dir/build.make cr5_planner/CMakeFiles/plan_test.dir/depend
-	$(MAKE) -f cr5_planner/CMakeFiles/plan_test.dir/build.make cr5_planner/CMakeFiles/plan_test.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/roboert/MP_WS/build/CMakeFiles --progress-num=17,18 "Built target plan_test"
-.PHONY : cr5_planner/CMakeFiles/plan_test.dir/all
+gp_planner/CMakeFiles/rrt_plan_test.dir/all: gp_planner/CMakeFiles/Global_Planner.dir/all
+	$(MAKE) -f gp_planner/CMakeFiles/rrt_plan_test.dir/build.make gp_planner/CMakeFiles/rrt_plan_test.dir/depend
+	$(MAKE) -f gp_planner/CMakeFiles/rrt_plan_test.dir/build.make gp_planner/CMakeFiles/rrt_plan_test.dir/build
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/roboert/MP_WS/build/CMakeFiles --progress-num=19,20 "Built target rrt_plan_test"
+.PHONY : gp_planner/CMakeFiles/rrt_plan_test.dir/all
 
 # Build rule for subdir invocation for target.
-cr5_planner/CMakeFiles/plan_test.dir/rule: cmake_check_build_system
+gp_planner/CMakeFiles/rrt_plan_test.dir/rule: cmake_check_build_system
 	$(CMAKE_COMMAND) -E cmake_progress_start /home/roboert/MP_WS/build/CMakeFiles 8
-	$(MAKE) -f CMakeFiles/Makefile2 cr5_planner/CMakeFiles/plan_test.dir/all
+	$(MAKE) -f CMakeFiles/Makefile2 gp_planner/CMakeFiles/rrt_plan_test.dir/all
 	$(CMAKE_COMMAND) -E cmake_progress_start /home/roboert/MP_WS/build/CMakeFiles 0
-.PHONY : cr5_planner/CMakeFiles/plan_test.dir/rule
+.PHONY : gp_planner/CMakeFiles/rrt_plan_test.dir/rule
 
 # Convenience name for target.
-plan_test: cr5_planner/CMakeFiles/plan_test.dir/rule
+rrt_plan_test: gp_planner/CMakeFiles/rrt_plan_test.dir/rule
 
-.PHONY : plan_test
+.PHONY : rrt_plan_test
 
 # clean rule for target.
-cr5_planner/CMakeFiles/plan_test.dir/clean:
-	$(MAKE) -f cr5_planner/CMakeFiles/plan_test.dir/build.make cr5_planner/CMakeFiles/plan_test.dir/clean
-.PHONY : cr5_planner/CMakeFiles/plan_test.dir/clean
+gp_planner/CMakeFiles/rrt_plan_test.dir/clean:
+	$(MAKE) -f gp_planner/CMakeFiles/rrt_plan_test.dir/build.make gp_planner/CMakeFiles/rrt_plan_test.dir/clean
+.PHONY : gp_planner/CMakeFiles/rrt_plan_test.dir/clean
 
 #=============================================================================
-# Target rules for target cr5_planner/CMakeFiles/cr5_planner.dir
+# Target rules for target gp_planner/CMakeFiles/Local_Planner.dir
 
 # All Build rule for target.
-cr5_planner/CMakeFiles/cr5_planner.dir/all:
-	$(MAKE) -f cr5_planner/CMakeFiles/cr5_planner.dir/build.make cr5_planner/CMakeFiles/cr5_planner.dir/depend
-	$(MAKE) -f cr5_planner/CMakeFiles/cr5_planner.dir/build.make cr5_planner/CMakeFiles/cr5_planner.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/roboert/MP_WS/build/CMakeFiles --progress-num=1,2,3,4,5,6 "Built target cr5_planner"
-.PHONY : cr5_planner/CMakeFiles/cr5_planner.dir/all
+gp_planner/CMakeFiles/Local_Planner.dir/all:
+	$(MAKE) -f gp_planner/CMakeFiles/Local_Planner.dir/build.make gp_planner/CMakeFiles/Local_Planner.dir/depend
+	$(MAKE) -f gp_planner/CMakeFiles/Local_Planner.dir/build.make gp_planner/CMakeFiles/Local_Planner.dir/build
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/roboert/MP_WS/build/CMakeFiles --progress-num=7,8 "Built target Local_Planner"
+.PHONY : gp_planner/CMakeFiles/Local_Planner.dir/all
 
 # Build rule for subdir invocation for target.
-cr5_planner/CMakeFiles/cr5_planner.dir/rule: cmake_check_build_system
+gp_planner/CMakeFiles/Local_Planner.dir/rule: cmake_check_build_system
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/roboert/MP_WS/build/CMakeFiles 2
+	$(MAKE) -f CMakeFiles/Makefile2 gp_planner/CMakeFiles/Local_Planner.dir/all
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/roboert/MP_WS/build/CMakeFiles 0
+.PHONY : gp_planner/CMakeFiles/Local_Planner.dir/rule
+
+# Convenience name for target.
+Local_Planner: gp_planner/CMakeFiles/Local_Planner.dir/rule
+
+.PHONY : Local_Planner
+
+# clean rule for target.
+gp_planner/CMakeFiles/Local_Planner.dir/clean:
+	$(MAKE) -f gp_planner/CMakeFiles/Local_Planner.dir/build.make gp_planner/CMakeFiles/Local_Planner.dir/clean
+.PHONY : gp_planner/CMakeFiles/Local_Planner.dir/clean
+
+#=============================================================================
+# Target rules for target gp_planner/CMakeFiles/Global_Planner.dir
+
+# All Build rule for target.
+gp_planner/CMakeFiles/Global_Planner.dir/all:
+	$(MAKE) -f gp_planner/CMakeFiles/Global_Planner.dir/build.make gp_planner/CMakeFiles/Global_Planner.dir/depend
+	$(MAKE) -f gp_planner/CMakeFiles/Global_Planner.dir/build.make gp_planner/CMakeFiles/Global_Planner.dir/build
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/roboert/MP_WS/build/CMakeFiles --progress-num=1,2,3,4,5,6 "Built target Global_Planner"
+.PHONY : gp_planner/CMakeFiles/Global_Planner.dir/all
+
+# Build rule for subdir invocation for target.
+gp_planner/CMakeFiles/Global_Planner.dir/rule: cmake_check_build_system
 	$(CMAKE_COMMAND) -E cmake_progress_start /home/roboert/MP_WS/build/CMakeFiles 6
-	$(MAKE) -f CMakeFiles/Makefile2 cr5_planner/CMakeFiles/cr5_planner.dir/all
+	$(MAKE) -f CMakeFiles/Makefile2 gp_planner/CMakeFiles/Global_Planner.dir/all
 	$(CMAKE_COMMAND) -E cmake_progress_start /home/roboert/MP_WS/build/CMakeFiles 0
-.PHONY : cr5_planner/CMakeFiles/cr5_planner.dir/rule
+.PHONY : gp_planner/CMakeFiles/Global_Planner.dir/rule
 
 # Convenience name for target.
-cr5_planner: cr5_planner/CMakeFiles/cr5_planner.dir/rule
+Global_Planner: gp_planner/CMakeFiles/Global_Planner.dir/rule
 
-.PHONY : cr5_planner
+.PHONY : Global_Planner
 
 # clean rule for target.
-cr5_planner/CMakeFiles/cr5_planner.dir/clean:
-	$(MAKE) -f cr5_planner/CMakeFiles/cr5_planner.dir/build.make cr5_planner/CMakeFiles/cr5_planner.dir/clean
-.PHONY : cr5_planner/CMakeFiles/cr5_planner.dir/clean
+gp_planner/CMakeFiles/Global_Planner.dir/clean:
+	$(MAKE) -f gp_planner/CMakeFiles/Global_Planner.dir/build.make gp_planner/CMakeFiles/Global_Planner.dir/clean
+.PHONY : gp_planner/CMakeFiles/Global_Planner.dir/clean
 
 #=============================================================================
 # Special targets to cleanup operation of make.

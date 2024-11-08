@@ -2014,43 +2014,56 @@ cr5_description_xacro_generated_to_devel_space_/fast:
 .PHONY : cr5_description_xacro_generated_to_devel_space_/fast
 
 #=============================================================================
-# Target rules for targets named dynamic_test
+# Target rules for targets named rrt_dynamic_test
 
 # Build rule for target.
-dynamic_test: cmake_check_build_system
-	$(MAKE) -f CMakeFiles/Makefile2 dynamic_test
-.PHONY : dynamic_test
+rrt_dynamic_test: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 rrt_dynamic_test
+.PHONY : rrt_dynamic_test
 
 # fast build rule for target.
-dynamic_test/fast:
-	$(MAKE) -f cr5_planner/CMakeFiles/dynamic_test.dir/build.make cr5_planner/CMakeFiles/dynamic_test.dir/build
-.PHONY : dynamic_test/fast
+rrt_dynamic_test/fast:
+	$(MAKE) -f gp_planner/CMakeFiles/rrt_dynamic_test.dir/build.make gp_planner/CMakeFiles/rrt_dynamic_test.dir/build
+.PHONY : rrt_dynamic_test/fast
 
 #=============================================================================
-# Target rules for targets named plan_test
+# Target rules for targets named rrt_plan_test
 
 # Build rule for target.
-plan_test: cmake_check_build_system
-	$(MAKE) -f CMakeFiles/Makefile2 plan_test
-.PHONY : plan_test
+rrt_plan_test: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 rrt_plan_test
+.PHONY : rrt_plan_test
 
 # fast build rule for target.
-plan_test/fast:
-	$(MAKE) -f cr5_planner/CMakeFiles/plan_test.dir/build.make cr5_planner/CMakeFiles/plan_test.dir/build
-.PHONY : plan_test/fast
+rrt_plan_test/fast:
+	$(MAKE) -f gp_planner/CMakeFiles/rrt_plan_test.dir/build.make gp_planner/CMakeFiles/rrt_plan_test.dir/build
+.PHONY : rrt_plan_test/fast
 
 #=============================================================================
-# Target rules for targets named cr5_planner
+# Target rules for targets named Local_Planner
 
 # Build rule for target.
-cr5_planner: cmake_check_build_system
-	$(MAKE) -f CMakeFiles/Makefile2 cr5_planner
-.PHONY : cr5_planner
+Local_Planner: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 Local_Planner
+.PHONY : Local_Planner
 
 # fast build rule for target.
-cr5_planner/fast:
-	$(MAKE) -f cr5_planner/CMakeFiles/cr5_planner.dir/build.make cr5_planner/CMakeFiles/cr5_planner.dir/build
-.PHONY : cr5_planner/fast
+Local_Planner/fast:
+	$(MAKE) -f gp_planner/CMakeFiles/Local_Planner.dir/build.make gp_planner/CMakeFiles/Local_Planner.dir/build
+.PHONY : Local_Planner/fast
+
+#=============================================================================
+# Target rules for targets named Global_Planner
+
+# Build rule for target.
+Global_Planner: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 Global_Planner
+.PHONY : Global_Planner
+
+# fast build rule for target.
+Global_Planner/fast:
+	$(MAKE) -f gp_planner/CMakeFiles/Global_Planner.dir/build.make gp_planner/CMakeFiles/Global_Planner.dir/build
+.PHONY : Global_Planner/fast
 
 # Help Target
 help:
@@ -2207,9 +2220,10 @@ help:
 	@echo "... graph_msgs_generate_messages_py"
 	@echo "... moveit_ros_manipulation_gencfg"
 	@echo "... cr5_description_xacro_generated_to_devel_space_"
-	@echo "... dynamic_test"
-	@echo "... plan_test"
-	@echo "... cr5_planner"
+	@echo "... rrt_dynamic_test"
+	@echo "... rrt_plan_test"
+	@echo "... Local_Planner"
+	@echo "... Global_Planner"
 .PHONY : help
 
 
