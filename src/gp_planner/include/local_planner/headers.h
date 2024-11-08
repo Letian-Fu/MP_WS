@@ -41,6 +41,7 @@
 #include <arpa/inet.h>
 // 包含gtsam相关
 #include <gtsam/geometry/Pose3.h>
+#include <gtsam/geometry/Rot3.h>
 
 
 

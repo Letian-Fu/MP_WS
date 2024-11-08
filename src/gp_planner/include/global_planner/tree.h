@@ -4,6 +4,8 @@
 #ifndef RRT_PLANNER_TREE_H
 #define RRT_PLANNER_TREE_H
 
+#pragma once
+
 #include "header.h"
 
 namespace rrt_planner{

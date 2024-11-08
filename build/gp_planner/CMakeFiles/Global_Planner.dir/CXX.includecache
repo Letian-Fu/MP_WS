@@ -128,6 +128,12 @@ header.h
 env.h
 /home/roboert/MP_WS/src/gp_planner/src/global_planner/env.h
 
+/home/roboert/MP_WS/src/gp_planner/src/global_planner/interpolation.cpp
+interpolation.h
+/home/roboert/MP_WS/src/gp_planner/src/global_planner/interpolation.h
+time.h
+-
+
 /home/roboert/MP_WS/src/gp_planner/src/global_planner/kinematics.cpp
 kinematics.h
 /home/roboert/MP_WS/src/gp_planner/src/global_planner/kinematics.h

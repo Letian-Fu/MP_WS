@@ -76,6 +76,9 @@ CMAKE_BUILD_TYPE:STRING=RelWithDebInfo
 //Enable/Disable color output during build.
 CMAKE_COLOR_MAKEFILE:BOOL=ON
 
+//Build configurations
+CMAKE_CONFIGURATION_TYPES:STRING=Debug;Release;Timing;Profiling;RelWithDebInfo;MinSizeRel
+
 //CXX compiler
 CMAKE_CXX_COMPILER:FILEPATH=/usr/bin/c++
 
@@ -336,11 +339,140 @@ GMock_DIR:PATH=GMock_DIR-NOTFOUND
 //The directory containing a CMake configuration file for GTSAMCMakeTools.
 GTSAMCMakeTools_DIR:PATH=/usr/local/lib/cmake/GTSAMCMakeTools
 
+//Build examples with 'make all' (build with 'make examples' if
+// not)
+GTSAM_BUILD_EXAMPLES_ALWAYS:BOOL=ON
+
+//Enable/Disable building of tests
+GTSAM_BUILD_TESTS:BOOL=ON
+
+//Build timing scripts with 'make all' (build with 'make timing'
+// if not
+GTSAM_BUILD_TIMING_ALWAYS:BOOL=OFF
+
+//Enable/Disable appending the build type to the name of compiled
+// libraries
+GTSAM_BUILD_TYPE_POSTFIXES:BOOL=ON
+
+//Enable/Disable building with all instructions supported by native
+// architecture (binary may not be portable!)
+GTSAM_BUILD_WITH_MARCH_NATIVE:BOOL=OFF
+
+//Build types available to MSVC and XCode
+GTSAM_CMAKE_CONFIGURATION_TYPES:STRING=Debug;Release;Timing;Profiling;RelWithDebInfo;MinSizeRel
+
+//Linker flags during profiling builds.
+GTSAM_CMAKE_EXE_LINKER_FLAGS_PROFILING:STRING=
+
+//Linker flags during timing builds.
+GTSAM_CMAKE_EXE_LINKER_FLAGS_TIMING:STRING=
+
+//Linker flags during profiling builds.
+GTSAM_CMAKE_MODULE_LINKER_FLAGS_PROFILING:STRING=
+
+//Linker flags during timing builds.
+GTSAM_CMAKE_MODULE_LINKER_FLAGS_TIMING:STRING=
+
+//Linker flags during profiling builds.
+GTSAM_CMAKE_SHARED_LINKER_FLAGS_PROFILING:STRING=
+
+//Linker flags during timing builds.
+GTSAM_CMAKE_SHARED_LINKER_FLAGS_TIMING:STRING=
+
+//(Do not edit) Private preprocessor macros for all build configurations.
+GTSAM_COMPILE_DEFINITIONS_PRIVATE:STRING=$<$<CONFIG:Debug>:_DEBUG;EIGEN_INITIALIZE_MATRICES_BY_NAN>;$<$<CONFIG:Release>:NDEBUG>;$<$<CONFIG:Timing>:NDEBUG;ENABLE_TIMING>;$<$<CONFIG:Profiling>:NDEBUG>;$<$<CONFIG:RelWithDebInfo>:NDEBUG>
+
+//(User editable) Private preprocessor macros for Debug configuration.
+GTSAM_COMPILE_DEFINITIONS_PRIVATE_DEBUG:STRING=_DEBUG;EIGEN_INITIALIZE_MATRICES_BY_NAN
+
+//(User editable) Private preprocessor macros for Profiling configuration.
+GTSAM_COMPILE_DEFINITIONS_PRIVATE_PROFILING:STRING=NDEBUG
+
+//(User editable) Private preprocessor macros for Release configuration.
+GTSAM_COMPILE_DEFINITIONS_PRIVATE_RELEASE:STRING=NDEBUG
+
+//(User editable) Private preprocessor macros for RelWithDebInfo
+// configuration.
+GTSAM_COMPILE_DEFINITIONS_PRIVATE_RELWITHDEBINFO:STRING=NDEBUG
+
+//(User editable) Private preprocessor macros for Timing configuration.
+GTSAM_COMPILE_DEFINITIONS_PRIVATE_TIMING:STRING=NDEBUG;ENABLE_TIMING
+
+//(User editable) Public preprocessor macros for `DEBUG` configuration.
+GTSAM_COMPILE_DEFINITIONS_PUBLIC_DEBUG:STRING=
+
+//(User editable) Public preprocessor macros for `MINSIZEREL` configuration.
+GTSAM_COMPILE_DEFINITIONS_PUBLIC_MINSIZEREL:STRING=
+
+//(User editable) Public preprocessor macros for `PROFILING` configuration.
+GTSAM_COMPILE_DEFINITIONS_PUBLIC_PROFILING:STRING=
+
+//(User editable) Public preprocessor macros for `RELEASE` configuration.
+GTSAM_COMPILE_DEFINITIONS_PUBLIC_RELEASE:STRING=
+
+//(User editable) Public preprocessor macros for `RELWITHDEBINFO`
+// configuration.
+GTSAM_COMPILE_DEFINITIONS_PUBLIC_RELWITHDEBINFO:STRING=
+
+//(User editable) Public preprocessor macros for `TIMING` configuration.
+GTSAM_COMPILE_DEFINITIONS_PUBLIC_TIMING:STRING=
+
+//CMake compile features property for all gtsam targets.
+GTSAM_COMPILE_FEATURES_PUBLIC:STRING=cxx_std_11
+
+//(Do not edit) Private compiler flags for all build configurations.
+GTSAM_COMPILE_OPTIONS_PRIVATE:STRING=-Wall;-fPIC;$<$<CXX_COMPILER_ID:GNU>:-Wreturn-local-addr;-Werror=return-local-addr>;$<$<CXX_COMPILER_ID:Clang>:-Wreturn-stack-address;-Werror=return-stack-address>;-Wreturn-type;-Werror=return-type;-Wformat;-Werror=format-security;$<$<COMPILE_LANGUAGE:CXX>:-Wsuggest-override>;$<$<CONFIG:Debug>:-g;-fno-inline>;$<$<CONFIG:Release>:-O3>;$<$<CONFIG:Timing>:-g;-O3>;$<$<CONFIG:Profiling>:-O3>;$<$<CONFIG:RelWithDebInfo>:-g;-O3>
+
+//(User editable) Private compiler flags for all configurations.
+GTSAM_COMPILE_OPTIONS_PRIVATE_COMMON:STRING=-Wall;-fPIC;$<$<CXX_COMPILER_ID:GNU>:-Wreturn-local-addr;-Werror=return-local-addr>;$<$<CXX_COMPILER_ID:Clang>:-Wreturn-stack-address;-Werror=return-stack-address>;-Wreturn-type;-Werror=return-type;-Wformat;-Werror=format-security;$<$<COMPILE_LANGUAGE:CXX>:-Wsuggest-override>
+
+//(User editable) Private compiler flags for Debug configuration.
+GTSAM_COMPILE_OPTIONS_PRIVATE_DEBUG:STRING=-g;-fno-inline
+
+//(User editable) Private compiler flags for Profiling configuration.
+GTSAM_COMPILE_OPTIONS_PRIVATE_PROFILING:STRING=-O3
+
+//(User editable) Private compiler flags for Release configuration.
+GTSAM_COMPILE_OPTIONS_PRIVATE_RELEASE:STRING=-O3
+
+//(User editable) Private compiler flags for RelWithDebInfo configuration.
+GTSAM_COMPILE_OPTIONS_PRIVATE_RELWITHDEBINFO:STRING=-g;-O3
+
+//(User editable) Private compiler flags for Timing configuration.
+GTSAM_COMPILE_OPTIONS_PRIVATE_TIMING:STRING=-g;-O3
+
+//(User editable) Public compiler flags (exported to user projects)
+// for `DEBUG` configuration.
+GTSAM_COMPILE_OPTIONS_PUBLIC_DEBUG:STRING=
+
+//(User editable) Public compiler flags (exported to user projects)
+// for `MINSIZEREL` configuration.
+GTSAM_COMPILE_OPTIONS_PUBLIC_MINSIZEREL:STRING=
+
+//(User editable) Public compiler flags (exported to user projects)
+// for `PROFILING` configuration.
+GTSAM_COMPILE_OPTIONS_PUBLIC_PROFILING:STRING=
+
+//(User editable) Public compiler flags (exported to user projects)
+// for `RELEASE` configuration.
+GTSAM_COMPILE_OPTIONS_PUBLIC_RELEASE:STRING=
+
+//(User editable) Public compiler flags (exported to user projects)
+// for `RELWITHDEBINFO` configuration.
+GTSAM_COMPILE_OPTIONS_PUBLIC_RELWITHDEBINFO:STRING=
+
+//(User editable) Public compiler flags (exported to user projects)
+// for `TIMING` configuration.
+GTSAM_COMPILE_OPTIONS_PUBLIC_TIMING:STRING=
+
 //The directory containing a CMake configuration file for GTSAM.
 GTSAM_DIR:PATH=/usr/local/lib/cmake/GTSAM
 
 //GTSAM include directory
 GTSAM_INCLUDE_DIR:PATH=/usr/local/lib/cmake/GTSAM/../../../include
+
+//Combine unit tests into single executable (faster compile)
+GTSAM_SINGLE_TEST_EXE:BOOL=OFF
 
 //The directory containing a CMake configuration file for GTest.
 GTest_DIR:PATH=/home/roboert/anaconda3/lib/cmake/GTest
@@ -796,6 +928,8 @@ CATKIN_TEST_RESULTS_DIR:INTERNAL=/home/roboert/MP_WS/build/test_results
 CMAKE_ADDR2LINE-ADVANCED:INTERNAL=1
 //ADVANCED property for variable: CMAKE_AR
 CMAKE_AR-ADVANCED:INTERNAL=1
+//STRINGS property for variable: CMAKE_BUILD_TYPE
+CMAKE_BUILD_TYPE-STRINGS:INTERNAL=None;Debug;Release;Timing;Profiling;RelWithDebInfo;MinSizeRel
 //This is the directory where this CMakeCache.txt was created
 CMAKE_CACHEFILE_DIR:INTERNAL=/home/roboert/MP_WS/build
 //Major version of cmake used to create the current loaded cache
@@ -975,6 +1109,10 @@ CMAKE_STRIP-ADVANCED:INTERNAL=1
 CMAKE_UNAME:INTERNAL=/usr/bin/uname
 //ADVANCED property for variable: CMAKE_VERBOSE_MAKEFILE
 CMAKE_VERBOSE_MAKEFILE-ADVANCED:INTERNAL=1
+//Test COMPILER_HAS_WMISSING_OVERRIDE
+COMPILER_HAS_WMISSING_OVERRIDE:INTERNAL=
+//Test COMPILER_HAS_WSUGGEST_OVERRIDE
+COMPILER_HAS_WSUGGEST_OVERRIDE:INTERNAL=1
 //Details about finding Boost
 FIND_PACKAGE_MESSAGE_DETAILS_Boost:INTERNAL=[/usr/lib/x86_64-linux-gnu/cmake/Boost-1.71.0/BoostConfig.cmake][c ][v1.71.0()]
 //Details about finding PY_em
@@ -993,6 +1131,35 @@ GTEST_FROM_SOURCE_INCLUDE_DIRS:INTERNAL=/usr/include
 GTEST_FROM_SOURCE_LIBRARIES:INTERNAL=gtest
 GTEST_FROM_SOURCE_LIBRARY_DIRS:INTERNAL=/home/roboert/MP_WS/build/gtest
 GTEST_FROM_SOURCE_MAIN_LIBRARIES:INTERNAL=gtest_main
+//ADVANCED property for variable: GTSAM_CMAKE_CONFIGURATION_TYPES
+GTSAM_CMAKE_CONFIGURATION_TYPES-ADVANCED:INTERNAL=1
+//ADVANCED property for variable: GTSAM_CMAKE_EXE_LINKER_FLAGS_PROFILING
+GTSAM_CMAKE_EXE_LINKER_FLAGS_PROFILING-ADVANCED:INTERNAL=1
+//ADVANCED property for variable: GTSAM_CMAKE_EXE_LINKER_FLAGS_TIMING
+GTSAM_CMAKE_EXE_LINKER_FLAGS_TIMING-ADVANCED:INTERNAL=1
+//ADVANCED property for variable: GTSAM_CMAKE_MODULE_LINKER_FLAGS_PROFILING
+GTSAM_CMAKE_MODULE_LINKER_FLAGS_PROFILING-ADVANCED:INTERNAL=1
+//ADVANCED property for variable: GTSAM_CMAKE_MODULE_LINKER_FLAGS_TIMING
+GTSAM_CMAKE_MODULE_LINKER_FLAGS_TIMING-ADVANCED:INTERNAL=1
+//ADVANCED property for variable: GTSAM_CMAKE_SHARED_LINKER_FLAGS_PROFILING
+GTSAM_CMAKE_SHARED_LINKER_FLAGS_PROFILING-ADVANCED:INTERNAL=1
+//ADVANCED property for variable: GTSAM_CMAKE_SHARED_LINKER_FLAGS_TIMING
+GTSAM_CMAKE_SHARED_LINKER_FLAGS_TIMING-ADVANCED:INTERNAL=1
+//ADVANCED property for variable: GTSAM_COMPILE_DEFINITIONS_PRIVATE
+GTSAM_COMPILE_DEFINITIONS_PRIVATE-ADVANCED:INTERNAL=1
+//ADVANCED property for variable: GTSAM_COMPILE_DEFINITIONS_PUBLIC
+GTSAM_COMPILE_DEFINITIONS_PUBLIC-ADVANCED:INTERNAL=1
+//(Do not edit) Public preprocessor macros for all build configurations.
+GTSAM_COMPILE_DEFINITIONS_PUBLIC:INTERNAL=
+//ADVANCED property for variable: GTSAM_COMPILE_OPTIONS_PRIVATE
+GTSAM_COMPILE_OPTIONS_PRIVATE-ADVANCED:INTERNAL=1
+//ADVANCED property for variable: GTSAM_COMPILE_OPTIONS_PUBLIC
+GTSAM_COMPILE_OPTIONS_PUBLIC-ADVANCED:INTERNAL=1
+//(Do not edit) Public compiler flags (exported to user projects)
+// for all build configurations.
+GTSAM_COMPILE_OPTIONS_PUBLIC:INTERNAL=
+//ADVANCED property for variable: GTSAM_SINGLE_TEST_EXE
+GTSAM_SINGLE_TEST_EXE-ADVANCED:INTERNAL=1
 //ADVANCED property for variable: PYTHON_EXECUTABLE
 PYTHON_EXECUTABLE-ADVANCED:INTERNAL=1
 //This needs to be in PYTHONPATH when 'setup.py install' is called.

@@ -1,0 +1,19 @@
+robot:
+  DOF: 6
+  arm_base: {orientation: [0, 0, 0, 1], position: [0, 0, 0]}
+  DH:
+    alpha: [1.5708, 0.0, 0.0, 1.5708, -1.5708, 0.0]
+    a: [0, -0.427, -0.357, 0, 0, 0]
+    d: [0.147, 0, 0, 0.141, 0.116, 0.105]
+    theta: [0, -1.5708, 0, -1.5708, 0, 0]
+  spheres: 
+    js: [0,0,1,1,1,1,1,1,2,2,2,3,4,5]
+    xs: [0,0,0,0.105,0.210,0.315,0.420,0,0.11,0.22,0,0,0,0]
+    ys: [-0.1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+    zs: [0,0,0.1,0.1,0.1,0.1,0.1,0,0,0,0,0,0,0]
+    rs: [0.08,0.08,0.06,0.06,0.06,0.06,0.06,0.08,0.06,0.06,0.08,0.07,0.06,0.06]
+  arm_joint_names: [joint1, joint2, joint3, joint4, joint5, joint6]
+  trajectory_control_topic: /cr5/arm_joint_controller/follow_joint_trajectory
+  est_traj_pub_topic: /gpmp2_planner/est_traj
+  plan_traj_pub_topic: /gpmp2_planner/plan_traj
+  arm_state_topic: /cr5/joint_states

@@ -5,6 +5,8 @@
 #ifndef RRT_PLANNER_INTERPOLATION_H
 #define RRT_PLANNER_INTERPOLATION_H
 
+#pragma once
+
 #include <iostream>
 #include <vector>
 #include <cmath>

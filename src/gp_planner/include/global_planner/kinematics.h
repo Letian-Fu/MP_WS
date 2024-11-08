@@ -5,6 +5,8 @@
 #ifndef RRT_PLANNER_KINEMATICS_H
 #define RRT_PLANNER_KINEMATICS_H
 
+#pragma once
+
 #include "header.h"
 
 namespace rrt_planner{

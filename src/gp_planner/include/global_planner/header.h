@@ -5,6 +5,8 @@
 #ifndef RRT_PLANNER_HEADER_H
 #define RRT_PLANNER_HEADER_H
 
+#pragma once
+
 #include <ros/ros.h>
 #include <string>
 #include <cstdio>

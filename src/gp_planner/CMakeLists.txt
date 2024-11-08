@@ -35,9 +35,14 @@ find_package(catkin REQUIRED COMPONENTS
 include_directories( "/usr/include/eigen3" )
 
 # gtsam
+find_package(GTSAM REQUIRED) # Uses installed package
+include_directories(${GTSAM_INCLUDE_DIR})
+set(GTSAM_LIBRARIES gtsam)
+
 find_package(GTSAMCMakeTools)
-find_package( GTSAM REQUIRED )
-include_directories( ${GTSAM_INCLUDE_DIR} )
+include(GtsamMakeConfigFile)
+include(GtsamBuildTypes)
+include(GtsamTesting)
 
 #boost
 find_package(Boost COMPONENTS thread filesystem date_time system REQUIRED)
@@ -71,9 +76,9 @@ add_library(Global_Planner
 )
 
 add_library(Local_Planner
-  src/local_planner/ArmModel.cpp
+  src/local_planner/ArmKinematics.cpp
   include/local_planner/headers.h
-  include/local_planner/ArmModel.h
+  include/local_planner/ArmKinematics.h
 )
 
 catkin_package(
@@ -97,3 +102,10 @@ target_link_libraries(rrt_dynamic_test
   ${Boost_LIBRARIES}
 )
 
+add_executable(kinematics_test src/local_planner/kinematics_test.cpp)
+target_link_libraries(kinematics_test
+  Local_Planner
+  ${catkin_LIBRARIES}
+  ${Boost_LIBRARIES}
+  gtsam
+)

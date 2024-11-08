@@ -56,3 +56,20 @@ make: *** [Makefile:121: cmTC_55c9e/fast] Error 2
 
 
 
+Performing C++ SOURCE FILE Test COMPILER_HAS_WMISSING_OVERRIDE failed with the following output:
+Change Dir: /home/roboert/MP_WS/build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make cmTC_048e4/fast && make[1]: Entering directory '/home/roboert/MP_WS/build/CMakeFiles/CMakeTmp'
+/usr/bin/make -f CMakeFiles/cmTC_048e4.dir/build.make CMakeFiles/cmTC_048e4.dir/build
+make[2]: Entering directory '/home/roboert/MP_WS/build/CMakeFiles/CMakeTmp'
+Building CXX object CMakeFiles/cmTC_048e4.dir/src.cxx.o
+/usr/bin/c++    -DCOMPILER_HAS_WMISSING_OVERRIDE   -Wmissing -o CMakeFiles/cmTC_048e4.dir/src.cxx.o -c /home/roboert/MP_WS/build/CMakeFiles/CMakeTmp/src.cxx
+c++: error: unrecognized command line option '-Wmissing'; did you mean '-Waliasing'?
+make[2]: *** [CMakeFiles/cmTC_048e4.dir/build.make:66: CMakeFiles/cmTC_048e4.dir/src.cxx.o] Error 1
+make[2]: Leaving directory '/home/roboert/MP_WS/build/CMakeFiles/CMakeTmp'
+make[1]: *** [Makefile:121: cmTC_048e4/fast] Error 2
+make[1]: Leaving directory '/home/roboert/MP_WS/build/CMakeFiles/CMakeTmp'
+
+
+Source file was:
+int main() { return 0; }

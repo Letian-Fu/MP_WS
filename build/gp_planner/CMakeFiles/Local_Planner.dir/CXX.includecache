@@ -6,7 +6,7 @@
 
 #IncludeRegexTransform: 
 
-/home/roboert/MP_WS/src/gp_planner/include/local_planner/ArmModel.h
+/home/roboert/MP_WS/src/gp_planner/include/local_planner/ArmKinematics.h
 headers.h
 /home/roboert/MP_WS/src/gp_planner/include/local_planner/headers.h
 
@@ -83,10 +83,12 @@ arpa/inet.h
 -
 gtsam/geometry/Pose3.h
 -
+gtsam/geometry/Rot3.h
+-
 
-/home/roboert/MP_WS/src/gp_planner/src/local_planner/ArmModel.cpp
-ArmModel.h
-/home/roboert/MP_WS/src/gp_planner/src/local_planner/ArmModel.h
+/home/roboert/MP_WS/src/gp_planner/src/local_planner/ArmKinematics.cpp
+ArmKinematics.h
+/home/roboert/MP_WS/src/gp_planner/src/local_planner/ArmKinematics.h
 
 /opt/ros/noetic/include/actionlib/action_definition.h
 

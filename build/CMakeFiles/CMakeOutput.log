@@ -489,3 +489,20 @@ make[1]: Leaving directory '/home/roboert/MP_WS/build/CMakeFiles/CMakeTmp'
 
 
 
+Performing C++ SOURCE FILE Test COMPILER_HAS_WSUGGEST_OVERRIDE succeeded with the following output:
+Change Dir: /home/roboert/MP_WS/build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make cmTC_ddcd6/fast && make[1]: Entering directory '/home/roboert/MP_WS/build/CMakeFiles/CMakeTmp'
+/usr/bin/make -f CMakeFiles/cmTC_ddcd6.dir/build.make CMakeFiles/cmTC_ddcd6.dir/build
+make[2]: Entering directory '/home/roboert/MP_WS/build/CMakeFiles/CMakeTmp'
+Building CXX object CMakeFiles/cmTC_ddcd6.dir/src.cxx.o
+/usr/bin/c++    -DCOMPILER_HAS_WSUGGEST_OVERRIDE   -Wsuggest-override -o CMakeFiles/cmTC_ddcd6.dir/src.cxx.o -c /home/roboert/MP_WS/build/CMakeFiles/CMakeTmp/src.cxx
+Linking CXX executable cmTC_ddcd6
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_ddcd6.dir/link.txt --verbose=1
+/usr/bin/c++   -DCOMPILER_HAS_WSUGGEST_OVERRIDE    -rdynamic CMakeFiles/cmTC_ddcd6.dir/src.cxx.o  -o cmTC_ddcd6 
+make[2]: Leaving directory '/home/roboert/MP_WS/build/CMakeFiles/CMakeTmp'
+make[1]: Leaving directory '/home/roboert/MP_WS/build/CMakeFiles/CMakeTmp'
+
+
+Source file was:
+int main() { return 0; }

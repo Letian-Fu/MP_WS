@@ -57,34 +57,34 @@ include gp_planner/CMakeFiles/Local_Planner.dir/progress.make
 # Include the compile flags for this target's objects.
 include gp_planner/CMakeFiles/Local_Planner.dir/flags.make
 
-gp_planner/CMakeFiles/Local_Planner.dir/src/local_planner/ArmModel.cpp.o: gp_planner/CMakeFiles/Local_Planner.dir/flags.make
-gp_planner/CMakeFiles/Local_Planner.dir/src/local_planner/ArmModel.cpp.o: /home/roboert/MP_WS/src/gp_planner/src/local_planner/ArmModel.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/roboert/MP_WS/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object gp_planner/CMakeFiles/Local_Planner.dir/src/local_planner/ArmModel.cpp.o"
-	cd /home/roboert/MP_WS/build/gp_planner && /usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/Local_Planner.dir/src/local_planner/ArmModel.cpp.o -c /home/roboert/MP_WS/src/gp_planner/src/local_planner/ArmModel.cpp
+gp_planner/CMakeFiles/Local_Planner.dir/src/local_planner/ArmKinematics.cpp.o: gp_planner/CMakeFiles/Local_Planner.dir/flags.make
+gp_planner/CMakeFiles/Local_Planner.dir/src/local_planner/ArmKinematics.cpp.o: /home/roboert/MP_WS/src/gp_planner/src/local_planner/ArmKinematics.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/roboert/MP_WS/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object gp_planner/CMakeFiles/Local_Planner.dir/src/local_planner/ArmKinematics.cpp.o"
+	cd /home/roboert/MP_WS/build/gp_planner && /usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/Local_Planner.dir/src/local_planner/ArmKinematics.cpp.o -c /home/roboert/MP_WS/src/gp_planner/src/local_planner/ArmKinematics.cpp
 
-gp_planner/CMakeFiles/Local_Planner.dir/src/local_planner/ArmModel.cpp.i: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/Local_Planner.dir/src/local_planner/ArmModel.cpp.i"
-	cd /home/roboert/MP_WS/build/gp_planner && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/roboert/MP_WS/src/gp_planner/src/local_planner/ArmModel.cpp > CMakeFiles/Local_Planner.dir/src/local_planner/ArmModel.cpp.i
+gp_planner/CMakeFiles/Local_Planner.dir/src/local_planner/ArmKinematics.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/Local_Planner.dir/src/local_planner/ArmKinematics.cpp.i"
+	cd /home/roboert/MP_WS/build/gp_planner && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/roboert/MP_WS/src/gp_planner/src/local_planner/ArmKinematics.cpp > CMakeFiles/Local_Planner.dir/src/local_planner/ArmKinematics.cpp.i
 
-gp_planner/CMakeFiles/Local_Planner.dir/src/local_planner/ArmModel.cpp.s: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/Local_Planner.dir/src/local_planner/ArmModel.cpp.s"
-	cd /home/roboert/MP_WS/build/gp_planner && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/roboert/MP_WS/src/gp_planner/src/local_planner/ArmModel.cpp -o CMakeFiles/Local_Planner.dir/src/local_planner/ArmModel.cpp.s
+gp_planner/CMakeFiles/Local_Planner.dir/src/local_planner/ArmKinematics.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/Local_Planner.dir/src/local_planner/ArmKinematics.cpp.s"
+	cd /home/roboert/MP_WS/build/gp_planner && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/roboert/MP_WS/src/gp_planner/src/local_planner/ArmKinematics.cpp -o CMakeFiles/Local_Planner.dir/src/local_planner/ArmKinematics.cpp.s
 
 # Object files for target Local_Planner
 Local_Planner_OBJECTS = \
-"CMakeFiles/Local_Planner.dir/src/local_planner/ArmModel.cpp.o"
+"CMakeFiles/Local_Planner.dir/src/local_planner/ArmKinematics.cpp.o"
 
 # External object files for target Local_Planner
 Local_Planner_EXTERNAL_OBJECTS =
 
-/home/roboert/MP_WS/devel/lib/libLocal_Planner.so: gp_planner/CMakeFiles/Local_Planner.dir/src/local_planner/ArmModel.cpp.o
-/home/roboert/MP_WS/devel/lib/libLocal_Planner.so: gp_planner/CMakeFiles/Local_Planner.dir/build.make
-/home/roboert/MP_WS/devel/lib/libLocal_Planner.so: gp_planner/CMakeFiles/Local_Planner.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/home/roboert/MP_WS/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Linking CXX shared library /home/roboert/MP_WS/devel/lib/libLocal_Planner.so"
+/home/roboert/MP_WS/devel/lib/libLocal_PlannerRelWithDebInfo.so: gp_planner/CMakeFiles/Local_Planner.dir/src/local_planner/ArmKinematics.cpp.o
+/home/roboert/MP_WS/devel/lib/libLocal_PlannerRelWithDebInfo.so: gp_planner/CMakeFiles/Local_Planner.dir/build.make
+/home/roboert/MP_WS/devel/lib/libLocal_PlannerRelWithDebInfo.so: gp_planner/CMakeFiles/Local_Planner.dir/link.txt
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/home/roboert/MP_WS/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Linking CXX shared library /home/roboert/MP_WS/devel/lib/libLocal_PlannerRelWithDebInfo.so"
 	cd /home/roboert/MP_WS/build/gp_planner && $(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/Local_Planner.dir/link.txt --verbose=$(VERBOSE)
 
 # Rule to build all files generated by this target.
-gp_planner/CMakeFiles/Local_Planner.dir/build: /home/roboert/MP_WS/devel/lib/libLocal_Planner.so
+gp_planner/CMakeFiles/Local_Planner.dir/build: /home/roboert/MP_WS/devel/lib/libLocal_PlannerRelWithDebInfo.so
 
 .PHONY : gp_planner/CMakeFiles/Local_Planner.dir/build
 

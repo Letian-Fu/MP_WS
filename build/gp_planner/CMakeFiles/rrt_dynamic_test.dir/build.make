@@ -79,7 +79,7 @@ rrt_dynamic_test_EXTERNAL_OBJECTS =
 
 /home/roboert/MP_WS/devel/lib/gp_planner/rrt_dynamic_test: gp_planner/CMakeFiles/rrt_dynamic_test.dir/src/global_planner/dynamic_test.cpp.o
 /home/roboert/MP_WS/devel/lib/gp_planner/rrt_dynamic_test: gp_planner/CMakeFiles/rrt_dynamic_test.dir/build.make
-/home/roboert/MP_WS/devel/lib/gp_planner/rrt_dynamic_test: /home/roboert/MP_WS/devel/lib/libGlobal_Planner.so
+/home/roboert/MP_WS/devel/lib/gp_planner/rrt_dynamic_test: /home/roboert/MP_WS/devel/lib/libGlobal_PlannerRelWithDebInfo.so
 /home/roboert/MP_WS/devel/lib/gp_planner/rrt_dynamic_test: /opt/ros/noetic/lib/libvision_reconfigure.so
 /home/roboert/MP_WS/devel/lib/gp_planner/rrt_dynamic_test: /opt/ros/noetic/lib/libgazebo_ros_utils.so
 /home/roboert/MP_WS/devel/lib/gp_planner/rrt_dynamic_test: /opt/ros/noetic/lib/libgazebo_ros_camera_utils.so

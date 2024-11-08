@@ -5,6 +5,8 @@
 #ifndef RRT_PLANNER_PLANNER_H
 #define RRT_PLANNER_PLANNER_H
 
+#pragma once
+
 #include "header.h"
 #include "tree.h"
 #include "kinematics.h"
