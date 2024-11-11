@@ -91,9 +91,9 @@ endif()
 # flag project as catkin-based to distinguish if a find_package()-ed project is a catkin project
 set(gp_planner_FOUND_CATKIN_PROJECT TRUE)
 
-if(NOT "include " STREQUAL " ")
+if(NOT "include;/usr/include " STREQUAL " ")
   set(gp_planner_INCLUDE_DIRS "")
-  set(_include_dirs "include")
+  set(_include_dirs "include;/usr/include")
   if(NOT " " STREQUAL " ")
     set(_report "Check the issue tracker '' and consider creating a ticket if the problem has not been reported yet.")
   elseif(NOT " " STREQUAL " ")
@@ -116,7 +116,7 @@ if(NOT "include " STREQUAL " ")
   endforeach()
 endif()
 
-set(libraries "gp_planner;Global_Planner;Local_Planner")
+set(libraries "gp_planner;Global_Planner;Local_Planner;/usr/local/lib/libgtsam.so.4.3a0")
 foreach(library ${libraries})
   # keep build configuration keywords, target names and absolute libraries as-is
   if("${library}" MATCHES "^(debug|optimized|general)$")
@@ -185,7 +185,7 @@ foreach(t ${gp_planner_EXPORTED_TARGETS})
   endif()
 endforeach()
 
-set(depends "")
+set(depends "actionlib;control_msgs;gazebo_msgs;gazebo_plugins;gazebo_ros;gazebo_ros_control;geometry_msgs;moveit_core;moveit_ros_planning;moveit_ros_planning_interface;moveit_visual_tools;pluginlib;roscpp;roslib;rospy;sensor_msgs;std_msgs;tf2_eigen;tf2_ros;trajectory_msgs")
 foreach(depend ${depends})
   string(REPLACE " " ";" depend_list ${depend})
   # the package name of the dependency must be kept in a unique variable so that it is not overwritten in recursive calls

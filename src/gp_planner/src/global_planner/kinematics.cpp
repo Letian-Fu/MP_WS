@@ -32,6 +32,7 @@ Matrix<double,4,4> transformMatrix_DH(const VectorXd& dh_alpha,const VectorXd& d
         temp_Mat(3,2)=0.0;
         temp_Mat(3,3)=1.0;
         trans_Mat = trans_Mat * temp_Mat;
+        std::cout<<i<<std::endl<<trans_Mat<<std::endl;
     }
     return trans_Mat;
 }

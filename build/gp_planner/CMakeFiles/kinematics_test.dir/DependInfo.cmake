@@ -27,23 +27,26 @@ set(CMAKE_TARGET_DEFINITIONS_CXX
 
 # The include file search paths:
 set(CMAKE_CXX_TARGET_INCLUDE_PATH
-  "/usr/include/eigen3"
+  "/usr/local/include/eigen3"
   "/home/roboert/MP_WS/src/gp_planner/include"
   "/home/roboert/MP_WS/src/gp_planner/include/global_planner"
   "/home/roboert/MP_WS/src/gp_planner/include/local_planner"
   "/opt/ros/noetic/include"
   "/opt/ros/noetic/share/xmlrpcpp/cmake/../../../include/xmlrpcpp"
+  "/usr/include/eigen3"
   "/usr/include/bullet"
   "/usr/include/OGRE"
   "/usr/local/include/gtsam/3rdparty/SuiteSparse_config"
   "/usr/local/include/gtsam/3rdparty/CCOLAMD"
   "/usr/local/include/gtsam/3rdparty/metis"
+  "/usr/local/include/gtsam/3rdparty/cephes"
   "/usr/local/include/gtsam/3rdparty/Eigen"
   )
 
 # Targets to which this target links.
 set(CMAKE_TARGET_LINKED_INFO_FILES
   "/home/roboert/MP_WS/build/gp_planner/CMakeFiles/Local_Planner.dir/DependInfo.cmake"
+  "/home/roboert/MP_WS/build/gp_planner/CMakeFiles/Global_Planner.dir/DependInfo.cmake"
   )
 
 # Fortran module output directory.

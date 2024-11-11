@@ -168,6 +168,36 @@ depend:
 .PHONY : depend
 
 # Convenience name for target.
+gp_planner/CMakeFiles/planner_test.dir/rule:
+	cd /home/roboert/MP_WS/build && $(MAKE) -f CMakeFiles/Makefile2 gp_planner/CMakeFiles/planner_test.dir/rule
+.PHONY : gp_planner/CMakeFiles/planner_test.dir/rule
+
+# Convenience name for target.
+planner_test: gp_planner/CMakeFiles/planner_test.dir/rule
+
+.PHONY : planner_test
+
+# fast build rule for target.
+planner_test/fast:
+	cd /home/roboert/MP_WS/build && $(MAKE) -f gp_planner/CMakeFiles/planner_test.dir/build.make gp_planner/CMakeFiles/planner_test.dir/build
+.PHONY : planner_test/fast
+
+# Convenience name for target.
+gp_planner/CMakeFiles/all.tests.dir/rule:
+	cd /home/roboert/MP_WS/build && $(MAKE) -f CMakeFiles/Makefile2 gp_planner/CMakeFiles/all.tests.dir/rule
+.PHONY : gp_planner/CMakeFiles/all.tests.dir/rule
+
+# Convenience name for target.
+all.tests: gp_planner/CMakeFiles/all.tests.dir/rule
+
+.PHONY : all.tests
+
+# fast build rule for target.
+all.tests/fast:
+	cd /home/roboert/MP_WS/build && $(MAKE) -f gp_planner/CMakeFiles/all.tests.dir/build.make gp_planner/CMakeFiles/all.tests.dir/build
+.PHONY : all.tests/fast
+
+# Convenience name for target.
 gp_planner/CMakeFiles/check.dir/rule:
 	cd /home/roboert/MP_WS/build && $(MAKE) -f CMakeFiles/Makefile2 gp_planner/CMakeFiles/check.dir/rule
 .PHONY : gp_planner/CMakeFiles/check.dir/rule
@@ -228,21 +258,6 @@ examples/fast:
 .PHONY : examples/fast
 
 # Convenience name for target.
-gp_planner/CMakeFiles/all.tests.dir/rule:
-	cd /home/roboert/MP_WS/build && $(MAKE) -f CMakeFiles/Makefile2 gp_planner/CMakeFiles/all.tests.dir/rule
-.PHONY : gp_planner/CMakeFiles/all.tests.dir/rule
-
-# Convenience name for target.
-all.tests: gp_planner/CMakeFiles/all.tests.dir/rule
-
-.PHONY : all.tests
-
-# fast build rule for target.
-all.tests/fast:
-	cd /home/roboert/MP_WS/build && $(MAKE) -f gp_planner/CMakeFiles/all.tests.dir/build.make gp_planner/CMakeFiles/all.tests.dir/build
-.PHONY : all.tests/fast
-
-# Convenience name for target.
 gp_planner/CMakeFiles/Global_Planner.dir/rule:
 	cd /home/roboert/MP_WS/build && $(MAKE) -f CMakeFiles/Makefile2 gp_planner/CMakeFiles/Global_Planner.dir/rule
 .PHONY : gp_planner/CMakeFiles/Global_Planner.dir/rule
@@ -301,6 +316,36 @@ rrt_plan_test: gp_planner/CMakeFiles/rrt_plan_test.dir/rule
 rrt_plan_test/fast:
 	cd /home/roboert/MP_WS/build && $(MAKE) -f gp_planner/CMakeFiles/rrt_plan_test.dir/build.make gp_planner/CMakeFiles/rrt_plan_test.dir/build
 .PHONY : rrt_plan_test/fast
+
+# Convenience name for target.
+gp_planner/CMakeFiles/gtsam_test.dir/rule:
+	cd /home/roboert/MP_WS/build && $(MAKE) -f CMakeFiles/Makefile2 gp_planner/CMakeFiles/gtsam_test.dir/rule
+.PHONY : gp_planner/CMakeFiles/gtsam_test.dir/rule
+
+# Convenience name for target.
+gtsam_test: gp_planner/CMakeFiles/gtsam_test.dir/rule
+
+.PHONY : gtsam_test
+
+# fast build rule for target.
+gtsam_test/fast:
+	cd /home/roboert/MP_WS/build && $(MAKE) -f gp_planner/CMakeFiles/gtsam_test.dir/build.make gp_planner/CMakeFiles/gtsam_test.dir/build
+.PHONY : gtsam_test/fast
+
+# Convenience name for target.
+gp_planner/CMakeFiles/sdf_test.dir/rule:
+	cd /home/roboert/MP_WS/build && $(MAKE) -f CMakeFiles/Makefile2 gp_planner/CMakeFiles/sdf_test.dir/rule
+.PHONY : gp_planner/CMakeFiles/sdf_test.dir/rule
+
+# Convenience name for target.
+sdf_test: gp_planner/CMakeFiles/sdf_test.dir/rule
+
+.PHONY : sdf_test
+
+# fast build rule for target.
+sdf_test/fast:
+	cd /home/roboert/MP_WS/build && $(MAKE) -f gp_planner/CMakeFiles/sdf_test.dir/build.make gp_planner/CMakeFiles/sdf_test.dir/build
+.PHONY : sdf_test/fast
 
 # Convenience name for target.
 gp_planner/CMakeFiles/kinematics_test.dir/rule:
@@ -533,6 +578,114 @@ src/local_planner/ArmKinematics.cpp.s:
 	cd /home/roboert/MP_WS/build && $(MAKE) -f gp_planner/CMakeFiles/Local_Planner.dir/build.make gp_planner/CMakeFiles/Local_Planner.dir/src/local_planner/ArmKinematics.cpp.s
 .PHONY : src/local_planner/ArmKinematics.cpp.s
 
+src/local_planner/ArmModel.o: src/local_planner/ArmModel.cpp.o
+
+.PHONY : src/local_planner/ArmModel.o
+
+# target to build an object file
+src/local_planner/ArmModel.cpp.o:
+	cd /home/roboert/MP_WS/build && $(MAKE) -f gp_planner/CMakeFiles/Local_Planner.dir/build.make gp_planner/CMakeFiles/Local_Planner.dir/src/local_planner/ArmModel.cpp.o
+.PHONY : src/local_planner/ArmModel.cpp.o
+
+src/local_planner/ArmModel.i: src/local_planner/ArmModel.cpp.i
+
+.PHONY : src/local_planner/ArmModel.i
+
+# target to preprocess a source file
+src/local_planner/ArmModel.cpp.i:
+	cd /home/roboert/MP_WS/build && $(MAKE) -f gp_planner/CMakeFiles/Local_Planner.dir/build.make gp_planner/CMakeFiles/Local_Planner.dir/src/local_planner/ArmModel.cpp.i
+.PHONY : src/local_planner/ArmModel.cpp.i
+
+src/local_planner/ArmModel.s: src/local_planner/ArmModel.cpp.s
+
+.PHONY : src/local_planner/ArmModel.s
+
+# target to generate assembly for a file
+src/local_planner/ArmModel.cpp.s:
+	cd /home/roboert/MP_WS/build && $(MAKE) -f gp_planner/CMakeFiles/Local_Planner.dir/build.make gp_planner/CMakeFiles/Local_Planner.dir/src/local_planner/ArmModel.cpp.s
+.PHONY : src/local_planner/ArmModel.cpp.s
+
+src/local_planner/Optimizer.o: src/local_planner/Optimizer.cpp.o
+
+.PHONY : src/local_planner/Optimizer.o
+
+# target to build an object file
+src/local_planner/Optimizer.cpp.o:
+	cd /home/roboert/MP_WS/build && $(MAKE) -f gp_planner/CMakeFiles/Local_Planner.dir/build.make gp_planner/CMakeFiles/Local_Planner.dir/src/local_planner/Optimizer.cpp.o
+.PHONY : src/local_planner/Optimizer.cpp.o
+
+src/local_planner/Optimizer.i: src/local_planner/Optimizer.cpp.i
+
+.PHONY : src/local_planner/Optimizer.i
+
+# target to preprocess a source file
+src/local_planner/Optimizer.cpp.i:
+	cd /home/roboert/MP_WS/build && $(MAKE) -f gp_planner/CMakeFiles/Local_Planner.dir/build.make gp_planner/CMakeFiles/Local_Planner.dir/src/local_planner/Optimizer.cpp.i
+.PHONY : src/local_planner/Optimizer.cpp.i
+
+src/local_planner/Optimizer.s: src/local_planner/Optimizer.cpp.s
+
+.PHONY : src/local_planner/Optimizer.s
+
+# target to generate assembly for a file
+src/local_planner/Optimizer.cpp.s:
+	cd /home/roboert/MP_WS/build && $(MAKE) -f gp_planner/CMakeFiles/Local_Planner.dir/build.make gp_planner/CMakeFiles/Local_Planner.dir/src/local_planner/Optimizer.cpp.s
+.PHONY : src/local_planner/Optimizer.cpp.s
+
+src/local_planner/OptimizerSetting.o: src/local_planner/OptimizerSetting.cpp.o
+
+.PHONY : src/local_planner/OptimizerSetting.o
+
+# target to build an object file
+src/local_planner/OptimizerSetting.cpp.o:
+	cd /home/roboert/MP_WS/build && $(MAKE) -f gp_planner/CMakeFiles/Local_Planner.dir/build.make gp_planner/CMakeFiles/Local_Planner.dir/src/local_planner/OptimizerSetting.cpp.o
+.PHONY : src/local_planner/OptimizerSetting.cpp.o
+
+src/local_planner/OptimizerSetting.i: src/local_planner/OptimizerSetting.cpp.i
+
+.PHONY : src/local_planner/OptimizerSetting.i
+
+# target to preprocess a source file
+src/local_planner/OptimizerSetting.cpp.i:
+	cd /home/roboert/MP_WS/build && $(MAKE) -f gp_planner/CMakeFiles/Local_Planner.dir/build.make gp_planner/CMakeFiles/Local_Planner.dir/src/local_planner/OptimizerSetting.cpp.i
+.PHONY : src/local_planner/OptimizerSetting.cpp.i
+
+src/local_planner/OptimizerSetting.s: src/local_planner/OptimizerSetting.cpp.s
+
+.PHONY : src/local_planner/OptimizerSetting.s
+
+# target to generate assembly for a file
+src/local_planner/OptimizerSetting.cpp.s:
+	cd /home/roboert/MP_WS/build && $(MAKE) -f gp_planner/CMakeFiles/Local_Planner.dir/build.make gp_planner/CMakeFiles/Local_Planner.dir/src/local_planner/OptimizerSetting.cpp.s
+.PHONY : src/local_planner/OptimizerSetting.cpp.s
+
+src/local_planner/gtsam_test.o: src/local_planner/gtsam_test.cpp.o
+
+.PHONY : src/local_planner/gtsam_test.o
+
+# target to build an object file
+src/local_planner/gtsam_test.cpp.o:
+	cd /home/roboert/MP_WS/build && $(MAKE) -f gp_planner/CMakeFiles/gtsam_test.dir/build.make gp_planner/CMakeFiles/gtsam_test.dir/src/local_planner/gtsam_test.cpp.o
+.PHONY : src/local_planner/gtsam_test.cpp.o
+
+src/local_planner/gtsam_test.i: src/local_planner/gtsam_test.cpp.i
+
+.PHONY : src/local_planner/gtsam_test.i
+
+# target to preprocess a source file
+src/local_planner/gtsam_test.cpp.i:
+	cd /home/roboert/MP_WS/build && $(MAKE) -f gp_planner/CMakeFiles/gtsam_test.dir/build.make gp_planner/CMakeFiles/gtsam_test.dir/src/local_planner/gtsam_test.cpp.i
+.PHONY : src/local_planner/gtsam_test.cpp.i
+
+src/local_planner/gtsam_test.s: src/local_planner/gtsam_test.cpp.s
+
+.PHONY : src/local_planner/gtsam_test.s
+
+# target to generate assembly for a file
+src/local_planner/gtsam_test.cpp.s:
+	cd /home/roboert/MP_WS/build && $(MAKE) -f gp_planner/CMakeFiles/gtsam_test.dir/build.make gp_planner/CMakeFiles/gtsam_test.dir/src/local_planner/gtsam_test.cpp.s
+.PHONY : src/local_planner/gtsam_test.cpp.s
+
 src/local_planner/kinematics_test.o: src/local_planner/kinematics_test.cpp.o
 
 .PHONY : src/local_planner/kinematics_test.o
@@ -560,6 +713,60 @@ src/local_planner/kinematics_test.cpp.s:
 	cd /home/roboert/MP_WS/build && $(MAKE) -f gp_planner/CMakeFiles/kinematics_test.dir/build.make gp_planner/CMakeFiles/kinematics_test.dir/src/local_planner/kinematics_test.cpp.s
 .PHONY : src/local_planner/kinematics_test.cpp.s
 
+src/local_planner/planner_test.o: src/local_planner/planner_test.cpp.o
+
+.PHONY : src/local_planner/planner_test.o
+
+# target to build an object file
+src/local_planner/planner_test.cpp.o:
+	cd /home/roboert/MP_WS/build && $(MAKE) -f gp_planner/CMakeFiles/planner_test.dir/build.make gp_planner/CMakeFiles/planner_test.dir/src/local_planner/planner_test.cpp.o
+.PHONY : src/local_planner/planner_test.cpp.o
+
+src/local_planner/planner_test.i: src/local_planner/planner_test.cpp.i
+
+.PHONY : src/local_planner/planner_test.i
+
+# target to preprocess a source file
+src/local_planner/planner_test.cpp.i:
+	cd /home/roboert/MP_WS/build && $(MAKE) -f gp_planner/CMakeFiles/planner_test.dir/build.make gp_planner/CMakeFiles/planner_test.dir/src/local_planner/planner_test.cpp.i
+.PHONY : src/local_planner/planner_test.cpp.i
+
+src/local_planner/planner_test.s: src/local_planner/planner_test.cpp.s
+
+.PHONY : src/local_planner/planner_test.s
+
+# target to generate assembly for a file
+src/local_planner/planner_test.cpp.s:
+	cd /home/roboert/MP_WS/build && $(MAKE) -f gp_planner/CMakeFiles/planner_test.dir/build.make gp_planner/CMakeFiles/planner_test.dir/src/local_planner/planner_test.cpp.s
+.PHONY : src/local_planner/planner_test.cpp.s
+
+src/local_planner/sdf_test.o: src/local_planner/sdf_test.cpp.o
+
+.PHONY : src/local_planner/sdf_test.o
+
+# target to build an object file
+src/local_planner/sdf_test.cpp.o:
+	cd /home/roboert/MP_WS/build && $(MAKE) -f gp_planner/CMakeFiles/sdf_test.dir/build.make gp_planner/CMakeFiles/sdf_test.dir/src/local_planner/sdf_test.cpp.o
+.PHONY : src/local_planner/sdf_test.cpp.o
+
+src/local_planner/sdf_test.i: src/local_planner/sdf_test.cpp.i
+
+.PHONY : src/local_planner/sdf_test.i
+
+# target to preprocess a source file
+src/local_planner/sdf_test.cpp.i:
+	cd /home/roboert/MP_WS/build && $(MAKE) -f gp_planner/CMakeFiles/sdf_test.dir/build.make gp_planner/CMakeFiles/sdf_test.dir/src/local_planner/sdf_test.cpp.i
+.PHONY : src/local_planner/sdf_test.cpp.i
+
+src/local_planner/sdf_test.s: src/local_planner/sdf_test.cpp.s
+
+.PHONY : src/local_planner/sdf_test.s
+
+# target to generate assembly for a file
+src/local_planner/sdf_test.cpp.s:
+	cd /home/roboert/MP_WS/build && $(MAKE) -f gp_planner/CMakeFiles/sdf_test.dir/build.make gp_planner/CMakeFiles/sdf_test.dir/src/local_planner/sdf_test.cpp.s
+.PHONY : src/local_planner/sdf_test.cpp.s
+
 # Help Target
 help:
 	@echo "The following are some of the valid targets for this Makefile:"
@@ -570,18 +777,21 @@ help:
 	@echo "... install/local"
 	@echo "... install"
 	@echo "... list_install_components"
+	@echo "... test"
+	@echo "... planner_test"
+	@echo "... all.tests"
 	@echo "... check"
 	@echo "... timing"
 	@echo "... rrt_dynamic_test"
 	@echo "... examples"
-	@echo "... all.tests"
-	@echo "... test"
 	@echo "... rebuild_cache"
-	@echo "... Global_Planner"
 	@echo "... edit_cache"
+	@echo "... Global_Planner"
 	@echo "... Local_Planner"
 	@echo "... check_valgrind"
 	@echo "... rrt_plan_test"
+	@echo "... gtsam_test"
+	@echo "... sdf_test"
 	@echo "... kinematics_test"
 	@echo "... src/global_planner/dynamic_test.o"
 	@echo "... src/global_planner/dynamic_test.i"
@@ -607,9 +817,27 @@ help:
 	@echo "... src/local_planner/ArmKinematics.o"
 	@echo "... src/local_planner/ArmKinematics.i"
 	@echo "... src/local_planner/ArmKinematics.s"
+	@echo "... src/local_planner/ArmModel.o"
+	@echo "... src/local_planner/ArmModel.i"
+	@echo "... src/local_planner/ArmModel.s"
+	@echo "... src/local_planner/Optimizer.o"
+	@echo "... src/local_planner/Optimizer.i"
+	@echo "... src/local_planner/Optimizer.s"
+	@echo "... src/local_planner/OptimizerSetting.o"
+	@echo "... src/local_planner/OptimizerSetting.i"
+	@echo "... src/local_planner/OptimizerSetting.s"
+	@echo "... src/local_planner/gtsam_test.o"
+	@echo "... src/local_planner/gtsam_test.i"
+	@echo "... src/local_planner/gtsam_test.s"
 	@echo "... src/local_planner/kinematics_test.o"
 	@echo "... src/local_planner/kinematics_test.i"
 	@echo "... src/local_planner/kinematics_test.s"
+	@echo "... src/local_planner/planner_test.o"
+	@echo "... src/local_planner/planner_test.i"
+	@echo "... src/local_planner/planner_test.s"
+	@echo "... src/local_planner/sdf_test.o"
+	@echo "... src/local_planner/sdf_test.i"
+	@echo "... src/local_planner/sdf_test.s"
 .PHONY : help
 
 

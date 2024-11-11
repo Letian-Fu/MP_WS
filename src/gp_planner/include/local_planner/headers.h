@@ -1,17 +1,24 @@
 #ifndef GP_PLANNER_HEADERS_H
 #define GP_PLANNER_HEADERS_H
 
+#pragma once
+
 #include <ros/ros.h>
 #include <string>
 #include <cstdio>
 #include <cstdlib>
 #include <ctime>
 #include <cmath>
+#include <map>
+#include <optional>
+#include <tuple>
+#include <iostream>
+
+
+// 包含Eigen
 #include <Eigen/Dense>
 #include <Eigen/Core>
 #include <eigen_conversions/eigen_msg.h>
-#include <map>
-#include <optional>
 // 包含msgs
 #include <std_msgs/Bool.h>
 #include <sensor_msgs/JointState.h>
@@ -42,9 +49,14 @@
 // 包含gtsam相关
 #include <gtsam/geometry/Pose3.h>
 #include <gtsam/geometry/Rot3.h>
-
+#include <gtsam/geometry/Point3.h>
+#include <gtsam/linear/NoiseModel.h>
+#include <gtsam/nonlinear/NonlinearFactor.h>
+#include <gtsam/nonlinear/PriorFactor.h>
+#include <gtsam/base/Testable.h>
 
 
 using namespace Eigen;
+using namespace std;
 
 #endif //GP_PLANNER_HEADERS_H

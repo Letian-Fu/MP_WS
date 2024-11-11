@@ -2,9 +2,13 @@ cmake_minimum_required(VERSION 3.0.2)
 project(gp_planner)
 
 ## Compile as C++11, supported in ROS Kinetic and newer
-# add_compile_options(-std=c++17)
+# add_compile_options(-std=c++11)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
+# SET(CMAKE_BUILD_TYPE "Debug")
+# SET(CMAKE_CXX_FLAGS_DEBUG "$ENV{CXXFLAGS} -O0 -Wall -g -ggdb")
+# SET(CMAKE_CXX_FLAGS_RELEASE "$ENV{CXXFLAGS} -O3 -Wall")
+
 
 
 ## Find catkin macros and libraries
@@ -32,7 +36,8 @@ find_package(catkin REQUIRED COMPONENTS
 )
 
 # Eigen
-include_directories( "/usr/include/eigen3" )
+include_directories( "/usr/local/include/eigen3" )
+
 
 # gtsam
 find_package(GTSAM REQUIRED) # Uses installed package
@@ -77,15 +82,28 @@ add_library(Global_Planner
 
 add_library(Local_Planner
   src/local_planner/ArmKinematics.cpp
+  src/local_planner/ArmModel.cpp
+  src/local_planner/OptimizerSetting.cpp
+  src/local_planner/Optimizer.cpp
   include/local_planner/headers.h
   include/local_planner/ArmKinematics.h
+  include/local_planner/ArmModel.h
+  include/local_planner/SDF.h
+  include/local_planner/CostFunction.h
+  include/local_planner/OptimizerSetting.h
+  include/local_planner/GPInterpolate.h
+  include/local_planner/PriorFactor.h
+  include/local_planner/ObsFactor.h
+  include/local_planner/GaussianFactor.h
+  include/local_planner/LimitFactor.h
+  include/local_planner/Optimizer.h
 )
 
 catkin_package(
   INCLUDE_DIRS include
   LIBRARIES gp_planner Global_Planner Local_Planner
-#  CATKIN_DEPENDS actionlib control_msgs gazebo_msgs gazebo_plugins gazebo_ros gazebo_ros_control geometry_msgs moveit_core moveit_ros_planning moveit_ros_planning_interface moveit_visual_tools pluginlib roscpp roslib rospy sensor_msgs std_msgs tf2_eigen tf2_ros trajectory_msgs
-#  DEPENDS system_lib
+  CATKIN_DEPENDS actionlib control_msgs gazebo_msgs gazebo_plugins gazebo_ros gazebo_ros_control geometry_msgs moveit_core moveit_ros_planning moveit_ros_planning_interface moveit_visual_tools pluginlib roscpp roslib rospy sensor_msgs std_msgs tf2_eigen tf2_ros trajectory_msgs
+  DEPENDS Boost GTSAM
 )
 
 
@@ -105,7 +123,30 @@ target_link_libraries(rrt_dynamic_test
 add_executable(kinematics_test src/local_planner/kinematics_test.cpp)
 target_link_libraries(kinematics_test
   Local_Planner
+  Global_Planner
   ${catkin_LIBRARIES}
-  ${Boost_LIBRARIES}
-  gtsam
+  ${Boost_LIBRARIES} 
+  ${GTSAM_LIBRARIES}
+)
+
+add_executable(sdf_test src/local_planner/sdf_test.cpp)
+target_link_libraries(sdf_test
+  Local_Planner
+  ${catkin_LIBRARIES}
+  ${Boost_LIBRARIES} 
+  ${GTSAM_LIBRARIES}
+)
+
+add_executable(planner_test src/local_planner/planner_test.cpp)
+target_link_libraries(planner_test
+  Local_Planner
+  ${catkin_LIBRARIES}
+  ${Boost_LIBRARIES} 
+  ${GTSAM_LIBRARIES}
+)
+
+add_executable(gtsam_test src/local_planner/gtsam_test.cpp)
+target_link_libraries(gtsam_test
+  ${catkin_LIBRARIES}
+  ${GTSAM_LIBRARIES}
 )

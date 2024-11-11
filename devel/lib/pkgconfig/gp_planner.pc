@@ -3,6 +3,6 @@ prefix=/home/roboert/MP_WS/devel
 Name: gp_planner
 Description: Description of gp_planner
 Version: 0.0.0
-Cflags: -I/home/roboert/MP_WS/src/gp_planner/include
-Libs: -L${prefix}/lib -lgp_planner -lGlobal_Planner -lLocal_Planner
-Requires: 
+Cflags: -I/home/roboert/MP_WS/src/gp_planner/include -I/usr/include
+Libs: -L${prefix}/lib -lgp_planner -lGlobal_Planner -lLocal_Planner /usr/local/lib/libgtsam.so.4.3a0
+Requires: actionlib control_msgs gazebo_msgs gazebo_plugins gazebo_ros gazebo_ros_control geometry_msgs moveit_core moveit_ros_planning moveit_ros_planning_interface moveit_visual_tools pluginlib roscpp roslib rospy sensor_msgs std_msgs tf2_eigen tf2_ros trajectory_msgs

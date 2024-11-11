@@ -80,6 +80,7 @@
         "typeinfo": "cpp",
         "variant": "cpp",
         "core": "cpp",
-        "dense": "cpp"
+        "dense": "cpp",
+        "valarray": "cpp"
     }
 }

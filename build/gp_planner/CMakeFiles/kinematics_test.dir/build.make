@@ -80,6 +80,7 @@ kinematics_test_EXTERNAL_OBJECTS =
 /home/roboert/MP_WS/devel/lib/gp_planner/kinematics_test: gp_planner/CMakeFiles/kinematics_test.dir/src/local_planner/kinematics_test.cpp.o
 /home/roboert/MP_WS/devel/lib/gp_planner/kinematics_test: gp_planner/CMakeFiles/kinematics_test.dir/build.make
 /home/roboert/MP_WS/devel/lib/gp_planner/kinematics_test: /home/roboert/MP_WS/devel/lib/libLocal_PlannerRelWithDebInfo.so
+/home/roboert/MP_WS/devel/lib/gp_planner/kinematics_test: /home/roboert/MP_WS/devel/lib/libGlobal_PlannerRelWithDebInfo.so
 /home/roboert/MP_WS/devel/lib/gp_planner/kinematics_test: /opt/ros/noetic/lib/libvision_reconfigure.so
 /home/roboert/MP_WS/devel/lib/gp_planner/kinematics_test: /opt/ros/noetic/lib/libgazebo_ros_utils.so
 /home/roboert/MP_WS/devel/lib/gp_planner/kinematics_test: /opt/ros/noetic/lib/libgazebo_ros_camera_utils.so
@@ -232,7 +233,7 @@ kinematics_test_EXTERNAL_OBJECTS =
 /home/roboert/MP_WS/devel/lib/gp_planner/kinematics_test: /usr/lib/x86_64-linux-gnu/libboost_system.so.1.71.0
 /home/roboert/MP_WS/devel/lib/gp_planner/kinematics_test: /usr/lib/x86_64-linux-gnu/libboost_thread.so.1.71.0
 /home/roboert/MP_WS/devel/lib/gp_planner/kinematics_test: /usr/lib/x86_64-linux-gnu/libconsole_bridge.so.0.4
-/home/roboert/MP_WS/devel/lib/gp_planner/kinematics_test: /usr/local/lib/libgtsam.so.4.2.0
+/home/roboert/MP_WS/devel/lib/gp_planner/kinematics_test: /usr/local/lib/libgtsam.so.4.3a0
 /home/roboert/MP_WS/devel/lib/gp_planner/kinematics_test: /usr/lib/x86_64-linux-gnu/libboost_serialization.so.1.71.0
 /home/roboert/MP_WS/devel/lib/gp_planner/kinematics_test: /usr/lib/x86_64-linux-gnu/libboost_system.so.1.71.0
 /home/roboert/MP_WS/devel/lib/gp_planner/kinematics_test: /usr/lib/x86_64-linux-gnu/libboost_filesystem.so.1.71.0
@@ -242,7 +243,10 @@ kinematics_test_EXTERNAL_OBJECTS =
 /home/roboert/MP_WS/devel/lib/gp_planner/kinematics_test: /usr/lib/x86_64-linux-gnu/libboost_regex.so.1.71.0
 /home/roboert/MP_WS/devel/lib/gp_planner/kinematics_test: /usr/lib/x86_64-linux-gnu/libboost_timer.so.1.71.0
 /home/roboert/MP_WS/devel/lib/gp_planner/kinematics_test: /usr/lib/x86_64-linux-gnu/libboost_chrono.so.1.71.0
-/home/roboert/MP_WS/devel/lib/gp_planner/kinematics_test: /usr/local/lib/libmetis-gtsam.so
+/home/roboert/MP_WS/devel/lib/gp_planner/kinematics_test: /usr/lib/x86_64-linux-gnu/libtbb.so.2
+/home/roboert/MP_WS/devel/lib/gp_planner/kinematics_test: /usr/lib/x86_64-linux-gnu/libtbbmalloc.so.2
+/home/roboert/MP_WS/devel/lib/gp_planner/kinematics_test: /usr/local/lib/libmetis-gtsam.a
+/home/roboert/MP_WS/devel/lib/gp_planner/kinematics_test: /usr/local/lib/libcephes-gtsam.so.1.0.0
 /home/roboert/MP_WS/devel/lib/gp_planner/kinematics_test: gp_planner/CMakeFiles/kinematics_test.dir/link.txt
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/home/roboert/MP_WS/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Linking CXX executable /home/roboert/MP_WS/devel/lib/gp_planner/kinematics_test"
 	cd /home/roboert/MP_WS/build/gp_planner && $(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/kinematics_test.dir/link.txt --verbose=$(VERBOSE)
