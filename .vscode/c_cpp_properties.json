@@ -11,7 +11,10 @@
                 "/usr/include/**",
                 "${workspaceFolder}/src/gp_planner/include",
                 "${workspaceFolder}/src/gp_planner/include/local_planner",
-                "${workspaceFolder}/src/gp_planner/include/global_planner"
+                "${workspaceFolder}/src/gp_planner/include/global_planner",
+                "/opt/ros/noetic/include/rosconsole",
+                "/opt/ros/noetic/include",
+                "${workspaceFolder}/src/gp_planner/include/my_planner"
             ],
             "name": "ROS",
             "intelliSenseMode": "gcc-x64",

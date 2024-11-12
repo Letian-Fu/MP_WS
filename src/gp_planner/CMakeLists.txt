@@ -68,16 +68,14 @@ include_directories(
 
 add_library(Global_Planner
   src/global_planner/tree.cpp
-  src/global_planner/planner.cpp
-  src/global_planner/env.cpp
   src/global_planner/kinematics.cpp
   src/global_planner/interpolation.cpp
+  src/global_planner/rrtplanner.cpp
   include/global_planner/interpolation.h
-  include/global_planner/env.h
   include/global_planner/kinematics.h
-  include/global_planner/planner.h
   include/global_planner/tree.h
   include/global_planner/header.h
+  include/global_planner/rrtplanner.h
 )
 
 add_library(Local_Planner
@@ -97,56 +95,63 @@ add_library(Local_Planner
   include/local_planner/GaussianFactor.h
   include/local_planner/LimitFactor.h
   include/local_planner/Optimizer.h
+  include/local_planner/SelfCollisionFactor.h
+  include/local_planner/GoalFactor.h
+)
+
+add_library(My_Planner
+  src/my_planner/MyPlanner.cpp
+  include/my_planner/MyPlanner.h
+)
+
+# 链接 My_Planner 到 Global_Planner 和 Local_Planner
+target_link_libraries(My_Planner
+  Global_Planner
+  Local_Planner
+  ${catkin_LIBRARIES}
 )
 
 catkin_package(
   INCLUDE_DIRS include
-  LIBRARIES gp_planner Global_Planner Local_Planner
+  LIBRARIES gp_planner Global_Planner Local_Planner My_Planner
   CATKIN_DEPENDS actionlib control_msgs gazebo_msgs gazebo_plugins gazebo_ros gazebo_ros_control geometry_msgs moveit_core moveit_ros_planning moveit_ros_planning_interface moveit_visual_tools pluginlib roscpp roslib rospy sensor_msgs std_msgs tf2_eigen tf2_ros trajectory_msgs
   DEPENDS Boost GTSAM
 )
 
+# add_executable(kinematics_test src/local_planner/test/kinematics_test.cpp)
+# target_link_libraries(kinematics_test
+#   Local_Planner
+#   Global_Planner
+#   ${catkin_LIBRARIES}
+#   ${Boost_LIBRARIES} 
+#   ${GTSAM_LIBRARIES}
+# )
 
-add_executable(rrt_plan_test src/global_planner/plan_test.cpp)
-target_link_libraries(rrt_plan_test
-  Global_Planner
-	${catkin_LIBRARIES}
-	${Boost_LIBRARIES}
-)
-add_executable(rrt_dynamic_test src/global_planner/dynamic_test.cpp)
-target_link_libraries(rrt_dynamic_test
-  Global_Planner
-  ${catkin_LIBRARIES}
-  ${Boost_LIBRARIES}
-)
+# add_executable(sdf_test src/local_planner/test/sdf_test.cpp)
+# target_link_libraries(sdf_test
+#   Local_Planner
+#   ${catkin_LIBRARIES}
+#   ${Boost_LIBRARIES} 
+#   ${GTSAM_LIBRARIES}
+# )
 
-add_executable(kinematics_test src/local_planner/kinematics_test.cpp)
-target_link_libraries(kinematics_test
-  Local_Planner
-  Global_Planner
-  ${catkin_LIBRARIES}
-  ${Boost_LIBRARIES} 
-  ${GTSAM_LIBRARIES}
-)
+# add_executable(planner_test src/local_planner/test/planner_test.cpp)
+# target_link_libraries(planner_test
+#   Local_Planner
+#   ${catkin_LIBRARIES}
+#   ${Boost_LIBRARIES} 
+#   ${GTSAM_LIBRARIES}
+# )
 
-add_executable(sdf_test src/local_planner/sdf_test.cpp)
-target_link_libraries(sdf_test
-  Local_Planner
-  ${catkin_LIBRARIES}
-  ${Boost_LIBRARIES} 
-  ${GTSAM_LIBRARIES}
-)
+# add_executable(gtsam_test src/local_planner/test/gtsam_test.cpp)
+# target_link_libraries(gtsam_test
+#   ${catkin_LIBRARIES}
+#   ${GTSAM_LIBRARIES}
+# )
 
-add_executable(planner_test src/local_planner/planner_test.cpp)
-target_link_libraries(planner_test
-  Local_Planner
-  ${catkin_LIBRARIES}
-  ${Boost_LIBRARIES} 
-  ${GTSAM_LIBRARIES}
-)
-
-add_executable(gtsam_test src/local_planner/gtsam_test.cpp)
-target_link_libraries(gtsam_test
+add_executable(plan_test src/my_planner/plan_test.cpp)
+target_link_libraries(plan_test
+  My_Planner
   ${catkin_LIBRARIES}
   ${GTSAM_LIBRARIES}
 )

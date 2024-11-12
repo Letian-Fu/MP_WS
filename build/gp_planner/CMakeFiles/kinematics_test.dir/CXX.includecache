@@ -9,7 +9,7 @@
 /home/roboert/MP_WS/src/gp_planner/include/global_planner/header.h
 ros/ros.h
 -
-string
+cstring
 -
 cstdio
 -
@@ -192,13 +192,13 @@ gtsam/nonlinear/PriorFactor.h
 gtsam/base/Testable.h
 -
 
-/home/roboert/MP_WS/src/gp_planner/src/local_planner/kinematics_test.cpp
+/home/roboert/MP_WS/src/gp_planner/src/local_planner/test/kinematics_test.cpp
 headers.h
-/home/roboert/MP_WS/src/gp_planner/src/local_planner/headers.h
+/home/roboert/MP_WS/src/gp_planner/src/local_planner/test/headers.h
 ArmModel.h
-/home/roboert/MP_WS/src/gp_planner/src/local_planner/ArmModel.h
+/home/roboert/MP_WS/src/gp_planner/src/local_planner/test/ArmModel.h
 kinematics.h
-/home/roboert/MP_WS/src/gp_planner/src/local_planner/kinematics.h
+/home/roboert/MP_WS/src/gp_planner/src/local_planner/test/kinematics.h
 
 /opt/ros/noetic/include/actionlib/action_definition.h
 

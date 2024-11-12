@@ -72,7 +72,11 @@ gtsam::Values Optimizer(const ArmModel& arm, const SDF& sdf,
             }
         }
     }
-    return optimize(graph, init_values, setting);
+    cout<<"Initial Error: "<<graph.error(init_values)<<endl;
+    gtsam::Values result = optimize(graph, init_values, setting);
+    cout<<"Final Error: "<<graph.error(result)<<endl;
+
+    return result;
 }
 
 double CollisionCost(const ArmModel& arm, const SDF& sdf,

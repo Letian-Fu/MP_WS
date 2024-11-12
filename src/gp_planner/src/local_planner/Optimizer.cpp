@@ -44,8 +44,6 @@ gtsam::Values optimize(const gtsam::NonlinearFactorGraph& graph,
         graph, init_values, *(dynamic_cast<gtsam::GaussNewtonParams*>(params.get()))));
   }
   double currentError = opt->error();
-  std::cout<<currentError<<std::endl;
-
   // check if we're already close enough
   if (currentError <= params->errorTol) {
     if (params->verbosity >= gtsam::NonlinearOptimizerParams::ERROR)
@@ -120,9 +118,7 @@ gtsam::Values initArmTrajStraightLine(const gtsam::Vector& init_conf,
     else
       conf =
           static_cast<double>(i) / static_cast<double>(total_step) * end_conf +
-          (1.0 - static_cast<double>(i) / static_cast<double>(total_step)) *
-              init_conf;
-
+          (1.0 - static_cast<double>(i) / static_cast<double>(total_step)) * init_conf;
     init_values.insert(gtsam::Symbol('x', i), conf);
   }
   // init vel as avg vel

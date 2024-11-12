@@ -2014,30 +2014,17 @@ cr5_description_xacro_generated_to_devel_space_/fast:
 .PHONY : cr5_description_xacro_generated_to_devel_space_/fast
 
 #=============================================================================
-# Target rules for targets named planner_test
+# Target rules for targets named check_valgrind
 
 # Build rule for target.
-planner_test: cmake_check_build_system
-	$(MAKE) -f CMakeFiles/Makefile2 planner_test
-.PHONY : planner_test
+check_valgrind: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 check_valgrind
+.PHONY : check_valgrind
 
 # fast build rule for target.
-planner_test/fast:
-	$(MAKE) -f gp_planner/CMakeFiles/planner_test.dir/build.make gp_planner/CMakeFiles/planner_test.dir/build
-.PHONY : planner_test/fast
-
-#=============================================================================
-# Target rules for targets named all.tests
-
-# Build rule for target.
-all.tests: cmake_check_build_system
-	$(MAKE) -f CMakeFiles/Makefile2 all.tests
-.PHONY : all.tests
-
-# fast build rule for target.
-all.tests/fast:
-	$(MAKE) -f gp_planner/CMakeFiles/all.tests.dir/build.make gp_planner/CMakeFiles/all.tests.dir/build
-.PHONY : all.tests/fast
+check_valgrind/fast:
+	$(MAKE) -f gp_planner/CMakeFiles/check_valgrind.dir/build.make gp_planner/CMakeFiles/check_valgrind.dir/build
+.PHONY : check_valgrind/fast
 
 #=============================================================================
 # Target rules for targets named check
@@ -2066,30 +2053,17 @@ timing/fast:
 .PHONY : timing/fast
 
 #=============================================================================
-# Target rules for targets named rrt_dynamic_test
+# Target rules for targets named all.tests
 
 # Build rule for target.
-rrt_dynamic_test: cmake_check_build_system
-	$(MAKE) -f CMakeFiles/Makefile2 rrt_dynamic_test
-.PHONY : rrt_dynamic_test
+all.tests: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 all.tests
+.PHONY : all.tests
 
 # fast build rule for target.
-rrt_dynamic_test/fast:
-	$(MAKE) -f gp_planner/CMakeFiles/rrt_dynamic_test.dir/build.make gp_planner/CMakeFiles/rrt_dynamic_test.dir/build
-.PHONY : rrt_dynamic_test/fast
-
-#=============================================================================
-# Target rules for targets named examples
-
-# Build rule for target.
-examples: cmake_check_build_system
-	$(MAKE) -f CMakeFiles/Makefile2 examples
-.PHONY : examples
-
-# fast build rule for target.
-examples/fast:
-	$(MAKE) -f gp_planner/CMakeFiles/examples.dir/build.make gp_planner/CMakeFiles/examples.dir/build
-.PHONY : examples/fast
+all.tests/fast:
+	$(MAKE) -f gp_planner/CMakeFiles/all.tests.dir/build.make gp_planner/CMakeFiles/all.tests.dir/build
+.PHONY : all.tests/fast
 
 #=============================================================================
 # Target rules for targets named Global_Planner
@@ -2118,69 +2092,43 @@ Local_Planner/fast:
 .PHONY : Local_Planner/fast
 
 #=============================================================================
-# Target rules for targets named check_valgrind
+# Target rules for targets named My_Planner
 
 # Build rule for target.
-check_valgrind: cmake_check_build_system
-	$(MAKE) -f CMakeFiles/Makefile2 check_valgrind
-.PHONY : check_valgrind
+My_Planner: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 My_Planner
+.PHONY : My_Planner
 
 # fast build rule for target.
-check_valgrind/fast:
-	$(MAKE) -f gp_planner/CMakeFiles/check_valgrind.dir/build.make gp_planner/CMakeFiles/check_valgrind.dir/build
-.PHONY : check_valgrind/fast
+My_Planner/fast:
+	$(MAKE) -f gp_planner/CMakeFiles/My_Planner.dir/build.make gp_planner/CMakeFiles/My_Planner.dir/build
+.PHONY : My_Planner/fast
 
 #=============================================================================
-# Target rules for targets named rrt_plan_test
+# Target rules for targets named examples
 
 # Build rule for target.
-rrt_plan_test: cmake_check_build_system
-	$(MAKE) -f CMakeFiles/Makefile2 rrt_plan_test
-.PHONY : rrt_plan_test
+examples: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 examples
+.PHONY : examples
 
 # fast build rule for target.
-rrt_plan_test/fast:
-	$(MAKE) -f gp_planner/CMakeFiles/rrt_plan_test.dir/build.make gp_planner/CMakeFiles/rrt_plan_test.dir/build
-.PHONY : rrt_plan_test/fast
+examples/fast:
+	$(MAKE) -f gp_planner/CMakeFiles/examples.dir/build.make gp_planner/CMakeFiles/examples.dir/build
+.PHONY : examples/fast
 
 #=============================================================================
-# Target rules for targets named gtsam_test
+# Target rules for targets named plan_test
 
 # Build rule for target.
-gtsam_test: cmake_check_build_system
-	$(MAKE) -f CMakeFiles/Makefile2 gtsam_test
-.PHONY : gtsam_test
+plan_test: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 plan_test
+.PHONY : plan_test
 
 # fast build rule for target.
-gtsam_test/fast:
-	$(MAKE) -f gp_planner/CMakeFiles/gtsam_test.dir/build.make gp_planner/CMakeFiles/gtsam_test.dir/build
-.PHONY : gtsam_test/fast
-
-#=============================================================================
-# Target rules for targets named sdf_test
-
-# Build rule for target.
-sdf_test: cmake_check_build_system
-	$(MAKE) -f CMakeFiles/Makefile2 sdf_test
-.PHONY : sdf_test
-
-# fast build rule for target.
-sdf_test/fast:
-	$(MAKE) -f gp_planner/CMakeFiles/sdf_test.dir/build.make gp_planner/CMakeFiles/sdf_test.dir/build
-.PHONY : sdf_test/fast
-
-#=============================================================================
-# Target rules for targets named kinematics_test
-
-# Build rule for target.
-kinematics_test: cmake_check_build_system
-	$(MAKE) -f CMakeFiles/Makefile2 kinematics_test
-.PHONY : kinematics_test
-
-# fast build rule for target.
-kinematics_test/fast:
-	$(MAKE) -f gp_planner/CMakeFiles/kinematics_test.dir/build.make gp_planner/CMakeFiles/kinematics_test.dir/build
-.PHONY : kinematics_test/fast
+plan_test/fast:
+	$(MAKE) -f gp_planner/CMakeFiles/plan_test.dir/build.make gp_planner/CMakeFiles/plan_test.dir/build
+.PHONY : plan_test/fast
 
 # Help Target
 help:
@@ -2337,19 +2285,15 @@ help:
 	@echo "... graph_msgs_generate_messages_py"
 	@echo "... moveit_ros_manipulation_gencfg"
 	@echo "... cr5_description_xacro_generated_to_devel_space_"
-	@echo "... planner_test"
-	@echo "... all.tests"
+	@echo "... check_valgrind"
 	@echo "... check"
 	@echo "... timing"
-	@echo "... rrt_dynamic_test"
-	@echo "... examples"
+	@echo "... all.tests"
 	@echo "... Global_Planner"
 	@echo "... Local_Planner"
-	@echo "... check_valgrind"
-	@echo "... rrt_plan_test"
-	@echo "... gtsam_test"
-	@echo "... sdf_test"
-	@echo "... kinematics_test"
+	@echo "... My_Planner"
+	@echo "... examples"
+	@echo "... plan_test"
 .PHONY : help
 
 

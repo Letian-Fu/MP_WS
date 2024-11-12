@@ -17,7 +17,7 @@ planner.h
 /home/roboert/MP_WS/src/gp_planner/include/global_planner/header.h
 ros/ros.h
 -
-string
+cstring
 -
 cstdio
 -

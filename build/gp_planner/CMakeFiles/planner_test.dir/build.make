@@ -57,27 +57,27 @@ include gp_planner/CMakeFiles/planner_test.dir/progress.make
 # Include the compile flags for this target's objects.
 include gp_planner/CMakeFiles/planner_test.dir/flags.make
 
-gp_planner/CMakeFiles/planner_test.dir/src/local_planner/planner_test.cpp.o: gp_planner/CMakeFiles/planner_test.dir/flags.make
-gp_planner/CMakeFiles/planner_test.dir/src/local_planner/planner_test.cpp.o: /home/roboert/MP_WS/src/gp_planner/src/local_planner/planner_test.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/roboert/MP_WS/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object gp_planner/CMakeFiles/planner_test.dir/src/local_planner/planner_test.cpp.o"
-	cd /home/roboert/MP_WS/build/gp_planner && /usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/planner_test.dir/src/local_planner/planner_test.cpp.o -c /home/roboert/MP_WS/src/gp_planner/src/local_planner/planner_test.cpp
+gp_planner/CMakeFiles/planner_test.dir/src/local_planner/test/planner_test.cpp.o: gp_planner/CMakeFiles/planner_test.dir/flags.make
+gp_planner/CMakeFiles/planner_test.dir/src/local_planner/test/planner_test.cpp.o: /home/roboert/MP_WS/src/gp_planner/src/local_planner/test/planner_test.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/roboert/MP_WS/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object gp_planner/CMakeFiles/planner_test.dir/src/local_planner/test/planner_test.cpp.o"
+	cd /home/roboert/MP_WS/build/gp_planner && /usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/planner_test.dir/src/local_planner/test/planner_test.cpp.o -c /home/roboert/MP_WS/src/gp_planner/src/local_planner/test/planner_test.cpp
 
-gp_planner/CMakeFiles/planner_test.dir/src/local_planner/planner_test.cpp.i: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/planner_test.dir/src/local_planner/planner_test.cpp.i"
-	cd /home/roboert/MP_WS/build/gp_planner && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/roboert/MP_WS/src/gp_planner/src/local_planner/planner_test.cpp > CMakeFiles/planner_test.dir/src/local_planner/planner_test.cpp.i
+gp_planner/CMakeFiles/planner_test.dir/src/local_planner/test/planner_test.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/planner_test.dir/src/local_planner/test/planner_test.cpp.i"
+	cd /home/roboert/MP_WS/build/gp_planner && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/roboert/MP_WS/src/gp_planner/src/local_planner/test/planner_test.cpp > CMakeFiles/planner_test.dir/src/local_planner/test/planner_test.cpp.i
 
-gp_planner/CMakeFiles/planner_test.dir/src/local_planner/planner_test.cpp.s: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/planner_test.dir/src/local_planner/planner_test.cpp.s"
-	cd /home/roboert/MP_WS/build/gp_planner && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/roboert/MP_WS/src/gp_planner/src/local_planner/planner_test.cpp -o CMakeFiles/planner_test.dir/src/local_planner/planner_test.cpp.s
+gp_planner/CMakeFiles/planner_test.dir/src/local_planner/test/planner_test.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/planner_test.dir/src/local_planner/test/planner_test.cpp.s"
+	cd /home/roboert/MP_WS/build/gp_planner && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/roboert/MP_WS/src/gp_planner/src/local_planner/test/planner_test.cpp -o CMakeFiles/planner_test.dir/src/local_planner/test/planner_test.cpp.s
 
 # Object files for target planner_test
 planner_test_OBJECTS = \
-"CMakeFiles/planner_test.dir/src/local_planner/planner_test.cpp.o"
+"CMakeFiles/planner_test.dir/src/local_planner/test/planner_test.cpp.o"
 
 # External object files for target planner_test
 planner_test_EXTERNAL_OBJECTS =
 
-/home/roboert/MP_WS/devel/lib/gp_planner/planner_test: gp_planner/CMakeFiles/planner_test.dir/src/local_planner/planner_test.cpp.o
+/home/roboert/MP_WS/devel/lib/gp_planner/planner_test: gp_planner/CMakeFiles/planner_test.dir/src/local_planner/test/planner_test.cpp.o
 /home/roboert/MP_WS/devel/lib/gp_planner/planner_test: gp_planner/CMakeFiles/planner_test.dir/build.make
 /home/roboert/MP_WS/devel/lib/gp_planner/planner_test: /home/roboert/MP_WS/devel/lib/libLocal_PlannerRelWithDebInfo.so
 /home/roboert/MP_WS/devel/lib/gp_planner/planner_test: /opt/ros/noetic/lib/libvision_reconfigure.so

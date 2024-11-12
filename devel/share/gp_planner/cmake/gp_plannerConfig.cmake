@@ -116,7 +116,7 @@ if(NOT "/home/roboert/MP_WS/src/gp_planner/include;/usr/include " STREQUAL " ")
   endforeach()
 endif()
 
-set(libraries "gp_planner;Global_Planner;Local_Planner;/usr/local/lib/libgtsam.so.4.3a0")
+set(libraries "gp_planner;Global_Planner;Local_Planner;My_Planner;/usr/local/lib/libgtsam.so.4.3a0")
 foreach(library ${libraries})
   # keep build configuration keywords, target names and absolute libraries as-is
   if("${library}" MATCHES "^(debug|optimized|general)$")

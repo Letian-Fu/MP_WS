@@ -8,7 +8,7 @@
 #pragma once
 
 #include <ros/ros.h>
-#include <string>
+#include <cstring>
 #include <cstdio>
 #include <cstdlib>
 #include <ctime>

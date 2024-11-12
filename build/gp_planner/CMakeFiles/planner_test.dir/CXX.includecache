@@ -182,19 +182,19 @@ gtsam/nonlinear/PriorFactor.h
 gtsam/base/Testable.h
 -
 
-/home/roboert/MP_WS/src/gp_planner/src/local_planner/planner_test.cpp
+/home/roboert/MP_WS/src/gp_planner/src/local_planner/test/planner_test.cpp
 PriorFactor.h
-/home/roboert/MP_WS/src/gp_planner/src/local_planner/PriorFactor.h
+/home/roboert/MP_WS/src/gp_planner/src/local_planner/test/PriorFactor.h
 GaussianFactor.h
-/home/roboert/MP_WS/src/gp_planner/src/local_planner/GaussianFactor.h
+/home/roboert/MP_WS/src/gp_planner/src/local_planner/test/GaussianFactor.h
 ObsFactor.h
-/home/roboert/MP_WS/src/gp_planner/src/local_planner/ObsFactor.h
+/home/roboert/MP_WS/src/gp_planner/src/local_planner/test/ObsFactor.h
 Optimizer.h
-/home/roboert/MP_WS/src/gp_planner/src/local_planner/Optimizer.h
+/home/roboert/MP_WS/src/gp_planner/src/local_planner/test/Optimizer.h
 ArmModel.h
-/home/roboert/MP_WS/src/gp_planner/src/local_planner/ArmModel.h
+/home/roboert/MP_WS/src/gp_planner/src/local_planner/test/ArmModel.h
 SDF.h
-/home/roboert/MP_WS/src/gp_planner/src/local_planner/SDF.h
+/home/roboert/MP_WS/src/gp_planner/src/local_planner/test/SDF.h
 gtsam/nonlinear/NonlinearFactor.h
 -
 gtsam/geometry/Pose2.h

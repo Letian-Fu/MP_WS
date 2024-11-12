@@ -6,18 +6,10 @@
 
 #IncludeRegexTransform: 
 
-/home/roboert/MP_WS/src/gp_planner/include/global_planner/env.h
-header.h
-/home/roboert/MP_WS/src/gp_planner/include/global_planner/header.h
-kinematics.h
-/home/roboert/MP_WS/src/gp_planner/include/global_planner/kinematics.h
-planner.h
-/home/roboert/MP_WS/src/gp_planner/include/global_planner/planner.h
-
 /home/roboert/MP_WS/src/gp_planner/include/global_planner/header.h
 ros/ros.h
 -
-string
+cstring
 -
 cstdio
 -
@@ -110,7 +102,7 @@ Eigen/Dense
 header.h
 /home/roboert/MP_WS/src/gp_planner/include/global_planner/header.h
 
-/home/roboert/MP_WS/src/gp_planner/include/global_planner/planner.h
+/home/roboert/MP_WS/src/gp_planner/include/global_planner/rrtplanner.h
 header.h
 /home/roboert/MP_WS/src/gp_planner/include/global_planner/header.h
 tree.h
@@ -124,29 +116,13 @@ interpolation.h
 header.h
 /home/roboert/MP_WS/src/gp_planner/include/global_planner/header.h
 
-/home/roboert/MP_WS/src/gp_planner/src/global_planner/env.cpp
-env.h
-/home/roboert/MP_WS/src/gp_planner/src/global_planner/env.h
-
-/home/roboert/MP_WS/src/gp_planner/src/global_planner/interpolation.cpp
-interpolation.h
-/home/roboert/MP_WS/src/gp_planner/src/global_planner/interpolation.h
-time.h
--
-
-/home/roboert/MP_WS/src/gp_planner/src/global_planner/kinematics.cpp
-kinematics.h
-/home/roboert/MP_WS/src/gp_planner/src/global_planner/kinematics.h
-
-/home/roboert/MP_WS/src/gp_planner/src/global_planner/planner.cpp
-planner.h
-/home/roboert/MP_WS/src/gp_planner/src/global_planner/planner.h
+/home/roboert/MP_WS/src/gp_planner/src/global_planner/rrtplanner.cpp
+rrtplanner.h
+/home/roboert/MP_WS/src/gp_planner/src/global_planner/rrtplanner.h
 memory
 -
-
-/home/roboert/MP_WS/src/gp_planner/src/global_planner/tree.cpp
-tree.h
-/home/roboert/MP_WS/src/gp_planner/src/global_planner/tree.h
+string.h
+-
 
 /opt/ros/noetic/include/actionlib/action_definition.h
 

@@ -110,7 +110,6 @@ MatrixXd find_control_points(const std::vector<VectorXd> &data_points, std::vect
 //data_points数据点矩阵是一个列数为6的矩阵，包含的是6维数据点,degree为次数
 std::vector<VectorXd> interplote(const std::vector<VectorXd> &data_points, int inter_num, int dof) {
     clock_t start,finish;
-    start=clock();
     std::vector<VectorXd> inter_points;
     std::vector<double> nodes = create_nodes(data_points);
     MatrixXd control_points = find_control_points(data_points, nodes);
@@ -133,9 +132,6 @@ std::vector<VectorXd> interplote(const std::vector<VectorXd> &data_points, int i
         }
     }
     inter_points.push_back(data_points[n-1]);
-    finish=clock();
-    double duration=(double)(finish - start) * 1000 / CLOCKS_PER_SEC;
-//    std::cout<<"Interplote time: "<<duration<<" ms"<<std::endl;
     return inter_points;
 }
 }   // namespace rrt_planner

@@ -56,7 +56,9 @@ public:
     }
 
     gtsam::Vector evaluateError(const gtsam::Vector& x, gtsam::OptionalMatrixType H) const override{
-        return PriorCostConf(x, prior_, H);
+      // gtsam::Vector error = PriorCostConf(x, prior_, H);
+      // cout<<"PriorConfError: "<<error.transpose()<<endl;
+      return PriorCostConf(x, prior_, H);
     }
 
     /** Serialization function */
@@ -120,7 +122,9 @@ public:
     }
 
     gtsam::Vector evaluateError(const gtsam::Vector& x, gtsam::OptionalMatrixType H) const override{
-        return PriorCostVel(x, prior_, H);
+      // gtsam::Vector error = PriorCostVel(x, prior_, H);
+      // cout<<"PriorCostVel: "<<error.transpose()<<endl;
+      return PriorCostVel(x, prior_, H);
     }
 
     /** Serialization function */

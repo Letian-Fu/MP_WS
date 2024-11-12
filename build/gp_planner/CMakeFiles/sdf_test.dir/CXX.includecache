@@ -106,11 +106,11 @@ gtsam/nonlinear/PriorFactor.h
 gtsam/base/Testable.h
 -
 
-/home/roboert/MP_WS/src/gp_planner/src/local_planner/sdf_test.cpp
+/home/roboert/MP_WS/src/gp_planner/src/local_planner/test/sdf_test.cpp
 headers.h
-/home/roboert/MP_WS/src/gp_planner/src/local_planner/headers.h
+/home/roboert/MP_WS/src/gp_planner/src/local_planner/test/headers.h
 SDF.h
-/home/roboert/MP_WS/src/gp_planner/src/local_planner/SDF.h
+/home/roboert/MP_WS/src/gp_planner/src/local_planner/test/SDF.h
 
 /opt/ros/noetic/include/actionlib/action_definition.h
 

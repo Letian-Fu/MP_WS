@@ -50,6 +50,10 @@ public:
         gtsam::OptionalMatrixType H2,
         gtsam::OptionalMatrixType H3,
         gtsam::OptionalMatrixType H4) const override{
+
+        // gtsam::Vector error = GPCost(pose1, vel1, pose2, vel2, delta_t_, 
+        //             H1, H2, H3, H4);
+        // cout<<"GPCost: "<<error.transpose()<<endl;
         return GPCost(pose1, vel1, pose2, vel2, delta_t_, 
                     H1, H2, H3, H4);
     }

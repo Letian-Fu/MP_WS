@@ -6,3 +6,19 @@
 
 #IncludeRegexTransform: 
 
+/home/roboert/MP_WS/src/gp_planner/src/local_planner/test/gtsam_test.cpp
+gtsam/geometry/Pose2.h
+-
+gtsam/inference/Key.h
+-
+gtsam/slam/BetweenFactor.h
+-
+gtsam/nonlinear/NonlinearFactorGraph.h
+-
+gtsam/nonlinear/GaussNewtonOptimizer.h
+-
+gtsam/nonlinear/Marginals.h
+-
+gtsam/nonlinear/Values.h
+-
+

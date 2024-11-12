@@ -70,35 +70,9 @@ gp_planner/CMakeFiles/Global_Planner.dir/src/global_planner/tree.cpp.s: cmake_fo
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/Global_Planner.dir/src/global_planner/tree.cpp.s"
 	cd /home/roboert/MP_WS/build/gp_planner && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/roboert/MP_WS/src/gp_planner/src/global_planner/tree.cpp -o CMakeFiles/Global_Planner.dir/src/global_planner/tree.cpp.s
 
-gp_planner/CMakeFiles/Global_Planner.dir/src/global_planner/planner.cpp.o: gp_planner/CMakeFiles/Global_Planner.dir/flags.make
-gp_planner/CMakeFiles/Global_Planner.dir/src/global_planner/planner.cpp.o: /home/roboert/MP_WS/src/gp_planner/src/global_planner/planner.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/roboert/MP_WS/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building CXX object gp_planner/CMakeFiles/Global_Planner.dir/src/global_planner/planner.cpp.o"
-	cd /home/roboert/MP_WS/build/gp_planner && /usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/Global_Planner.dir/src/global_planner/planner.cpp.o -c /home/roboert/MP_WS/src/gp_planner/src/global_planner/planner.cpp
-
-gp_planner/CMakeFiles/Global_Planner.dir/src/global_planner/planner.cpp.i: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/Global_Planner.dir/src/global_planner/planner.cpp.i"
-	cd /home/roboert/MP_WS/build/gp_planner && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/roboert/MP_WS/src/gp_planner/src/global_planner/planner.cpp > CMakeFiles/Global_Planner.dir/src/global_planner/planner.cpp.i
-
-gp_planner/CMakeFiles/Global_Planner.dir/src/global_planner/planner.cpp.s: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/Global_Planner.dir/src/global_planner/planner.cpp.s"
-	cd /home/roboert/MP_WS/build/gp_planner && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/roboert/MP_WS/src/gp_planner/src/global_planner/planner.cpp -o CMakeFiles/Global_Planner.dir/src/global_planner/planner.cpp.s
-
-gp_planner/CMakeFiles/Global_Planner.dir/src/global_planner/env.cpp.o: gp_planner/CMakeFiles/Global_Planner.dir/flags.make
-gp_planner/CMakeFiles/Global_Planner.dir/src/global_planner/env.cpp.o: /home/roboert/MP_WS/src/gp_planner/src/global_planner/env.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/roboert/MP_WS/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Building CXX object gp_planner/CMakeFiles/Global_Planner.dir/src/global_planner/env.cpp.o"
-	cd /home/roboert/MP_WS/build/gp_planner && /usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/Global_Planner.dir/src/global_planner/env.cpp.o -c /home/roboert/MP_WS/src/gp_planner/src/global_planner/env.cpp
-
-gp_planner/CMakeFiles/Global_Planner.dir/src/global_planner/env.cpp.i: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/Global_Planner.dir/src/global_planner/env.cpp.i"
-	cd /home/roboert/MP_WS/build/gp_planner && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/roboert/MP_WS/src/gp_planner/src/global_planner/env.cpp > CMakeFiles/Global_Planner.dir/src/global_planner/env.cpp.i
-
-gp_planner/CMakeFiles/Global_Planner.dir/src/global_planner/env.cpp.s: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/Global_Planner.dir/src/global_planner/env.cpp.s"
-	cd /home/roboert/MP_WS/build/gp_planner && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/roboert/MP_WS/src/gp_planner/src/global_planner/env.cpp -o CMakeFiles/Global_Planner.dir/src/global_planner/env.cpp.s
-
 gp_planner/CMakeFiles/Global_Planner.dir/src/global_planner/kinematics.cpp.o: gp_planner/CMakeFiles/Global_Planner.dir/flags.make
 gp_planner/CMakeFiles/Global_Planner.dir/src/global_planner/kinematics.cpp.o: /home/roboert/MP_WS/src/gp_planner/src/global_planner/kinematics.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/roboert/MP_WS/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Building CXX object gp_planner/CMakeFiles/Global_Planner.dir/src/global_planner/kinematics.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/roboert/MP_WS/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building CXX object gp_planner/CMakeFiles/Global_Planner.dir/src/global_planner/kinematics.cpp.o"
 	cd /home/roboert/MP_WS/build/gp_planner && /usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/Global_Planner.dir/src/global_planner/kinematics.cpp.o -c /home/roboert/MP_WS/src/gp_planner/src/global_planner/kinematics.cpp
 
 gp_planner/CMakeFiles/Global_Planner.dir/src/global_planner/kinematics.cpp.i: cmake_force
@@ -111,7 +85,7 @@ gp_planner/CMakeFiles/Global_Planner.dir/src/global_planner/kinematics.cpp.s: cm
 
 gp_planner/CMakeFiles/Global_Planner.dir/src/global_planner/interpolation.cpp.o: gp_planner/CMakeFiles/Global_Planner.dir/flags.make
 gp_planner/CMakeFiles/Global_Planner.dir/src/global_planner/interpolation.cpp.o: /home/roboert/MP_WS/src/gp_planner/src/global_planner/interpolation.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/roboert/MP_WS/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Building CXX object gp_planner/CMakeFiles/Global_Planner.dir/src/global_planner/interpolation.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/roboert/MP_WS/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Building CXX object gp_planner/CMakeFiles/Global_Planner.dir/src/global_planner/interpolation.cpp.o"
 	cd /home/roboert/MP_WS/build/gp_planner && /usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/Global_Planner.dir/src/global_planner/interpolation.cpp.o -c /home/roboert/MP_WS/src/gp_planner/src/global_planner/interpolation.cpp
 
 gp_planner/CMakeFiles/Global_Planner.dir/src/global_planner/interpolation.cpp.i: cmake_force
@@ -122,25 +96,36 @@ gp_planner/CMakeFiles/Global_Planner.dir/src/global_planner/interpolation.cpp.s:
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/Global_Planner.dir/src/global_planner/interpolation.cpp.s"
 	cd /home/roboert/MP_WS/build/gp_planner && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/roboert/MP_WS/src/gp_planner/src/global_planner/interpolation.cpp -o CMakeFiles/Global_Planner.dir/src/global_planner/interpolation.cpp.s
 
+gp_planner/CMakeFiles/Global_Planner.dir/src/global_planner/rrtplanner.cpp.o: gp_planner/CMakeFiles/Global_Planner.dir/flags.make
+gp_planner/CMakeFiles/Global_Planner.dir/src/global_planner/rrtplanner.cpp.o: /home/roboert/MP_WS/src/gp_planner/src/global_planner/rrtplanner.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/roboert/MP_WS/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Building CXX object gp_planner/CMakeFiles/Global_Planner.dir/src/global_planner/rrtplanner.cpp.o"
+	cd /home/roboert/MP_WS/build/gp_planner && /usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/Global_Planner.dir/src/global_planner/rrtplanner.cpp.o -c /home/roboert/MP_WS/src/gp_planner/src/global_planner/rrtplanner.cpp
+
+gp_planner/CMakeFiles/Global_Planner.dir/src/global_planner/rrtplanner.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/Global_Planner.dir/src/global_planner/rrtplanner.cpp.i"
+	cd /home/roboert/MP_WS/build/gp_planner && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/roboert/MP_WS/src/gp_planner/src/global_planner/rrtplanner.cpp > CMakeFiles/Global_Planner.dir/src/global_planner/rrtplanner.cpp.i
+
+gp_planner/CMakeFiles/Global_Planner.dir/src/global_planner/rrtplanner.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/Global_Planner.dir/src/global_planner/rrtplanner.cpp.s"
+	cd /home/roboert/MP_WS/build/gp_planner && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/roboert/MP_WS/src/gp_planner/src/global_planner/rrtplanner.cpp -o CMakeFiles/Global_Planner.dir/src/global_planner/rrtplanner.cpp.s
+
 # Object files for target Global_Planner
 Global_Planner_OBJECTS = \
 "CMakeFiles/Global_Planner.dir/src/global_planner/tree.cpp.o" \
-"CMakeFiles/Global_Planner.dir/src/global_planner/planner.cpp.o" \
-"CMakeFiles/Global_Planner.dir/src/global_planner/env.cpp.o" \
 "CMakeFiles/Global_Planner.dir/src/global_planner/kinematics.cpp.o" \
-"CMakeFiles/Global_Planner.dir/src/global_planner/interpolation.cpp.o"
+"CMakeFiles/Global_Planner.dir/src/global_planner/interpolation.cpp.o" \
+"CMakeFiles/Global_Planner.dir/src/global_planner/rrtplanner.cpp.o"
 
 # External object files for target Global_Planner
 Global_Planner_EXTERNAL_OBJECTS =
 
 /home/roboert/MP_WS/devel/lib/libGlobal_PlannerRelWithDebInfo.so: gp_planner/CMakeFiles/Global_Planner.dir/src/global_planner/tree.cpp.o
-/home/roboert/MP_WS/devel/lib/libGlobal_PlannerRelWithDebInfo.so: gp_planner/CMakeFiles/Global_Planner.dir/src/global_planner/planner.cpp.o
-/home/roboert/MP_WS/devel/lib/libGlobal_PlannerRelWithDebInfo.so: gp_planner/CMakeFiles/Global_Planner.dir/src/global_planner/env.cpp.o
 /home/roboert/MP_WS/devel/lib/libGlobal_PlannerRelWithDebInfo.so: gp_planner/CMakeFiles/Global_Planner.dir/src/global_planner/kinematics.cpp.o
 /home/roboert/MP_WS/devel/lib/libGlobal_PlannerRelWithDebInfo.so: gp_planner/CMakeFiles/Global_Planner.dir/src/global_planner/interpolation.cpp.o
+/home/roboert/MP_WS/devel/lib/libGlobal_PlannerRelWithDebInfo.so: gp_planner/CMakeFiles/Global_Planner.dir/src/global_planner/rrtplanner.cpp.o
 /home/roboert/MP_WS/devel/lib/libGlobal_PlannerRelWithDebInfo.so: gp_planner/CMakeFiles/Global_Planner.dir/build.make
 /home/roboert/MP_WS/devel/lib/libGlobal_PlannerRelWithDebInfo.so: gp_planner/CMakeFiles/Global_Planner.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/home/roboert/MP_WS/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_6) "Linking CXX shared library /home/roboert/MP_WS/devel/lib/libGlobal_PlannerRelWithDebInfo.so"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/home/roboert/MP_WS/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Linking CXX shared library /home/roboert/MP_WS/devel/lib/libGlobal_PlannerRelWithDebInfo.so"
 	cd /home/roboert/MP_WS/build/gp_planner && $(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/Global_Planner.dir/link.txt --verbose=$(VERBOSE)
 
 # Rule to build all files generated by this target.

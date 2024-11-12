@@ -14,8 +14,31 @@ robot:
     rs: [0.08,0.08,0.06,0.06,0.06,0.06,0.06,0.08,0.06,0.06,0.08,0.07,0.06,0.06,0.06]
   arm_joint_names: [joint1, joint2, joint3, joint4, joint5, joint6]
   arm_state_topic: /joint_states
+  trajectory_control_topic: /arm_joint_controller/follow_joint_trajectory
+  est_traj_pub_topic: /gpmp2_planner/est_traj
+  plan_traj_pub_topic: /gpmp2_planner/plan_traj
 
-planner:
+global_planner:
   step_rate: 0.02
   fai_rate: 1.01
   MAX_TREE_NUM: 2000
+
+settings:
+  sdf_file: sdf/obs_test_one_box.bin
+  total_time: 6.0
+  total_step: 10
+  obs_check_inter: 5
+  control_inter: 5
+  cost_sigma: 0.2
+  epsilon: 0.1
+  fix_pose_sigma: 0.0001
+  fix_vel_sigma: 0.0001
+  Qc: 1.0
+  opt_type: LM
+  flag_pos_limit: true
+  flag_vel_limit: true
+  joint_pos_limits_up: 3.14
+  joint_pos_limits_down: -3.14
+  max_vel: 1.0
+  pos_limit_sigma: 0.0001
+  vel_limit_sigma: 0.0001

@@ -1,10 +1,10 @@
 <launch>
   
   <!-- Launch Gazebo  -->
-  <include file="$(find cr5_gazebo)/launch/cr5_gazebo.launch" />
+  <include file="$(find gp_planner)/launch/cr5_gazebo.launch" />
 
   <!-- Load the controller parameters onto the parameter server -->
-  <rosparam file="$(find cr5_gazebo)/config/cr5_gazebo_controllers.yaml" />
+  <rosparam file="$(find gp_planner)/config/cr5_gazebo_controllers.yaml" />
   <include file="$(dirname)/cr5_controllers.launch"/>
 
   <!-- Spawn the Gazebo ROS controllers -->

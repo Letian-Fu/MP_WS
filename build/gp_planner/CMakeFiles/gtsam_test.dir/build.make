@@ -57,27 +57,27 @@ include gp_planner/CMakeFiles/gtsam_test.dir/progress.make
 # Include the compile flags for this target's objects.
 include gp_planner/CMakeFiles/gtsam_test.dir/flags.make
 
-gp_planner/CMakeFiles/gtsam_test.dir/src/local_planner/gtsam_test.cpp.o: gp_planner/CMakeFiles/gtsam_test.dir/flags.make
-gp_planner/CMakeFiles/gtsam_test.dir/src/local_planner/gtsam_test.cpp.o: /home/roboert/MP_WS/src/gp_planner/src/local_planner/gtsam_test.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/roboert/MP_WS/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object gp_planner/CMakeFiles/gtsam_test.dir/src/local_planner/gtsam_test.cpp.o"
-	cd /home/roboert/MP_WS/build/gp_planner && /usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/gtsam_test.dir/src/local_planner/gtsam_test.cpp.o -c /home/roboert/MP_WS/src/gp_planner/src/local_planner/gtsam_test.cpp
+gp_planner/CMakeFiles/gtsam_test.dir/src/local_planner/test/gtsam_test.cpp.o: gp_planner/CMakeFiles/gtsam_test.dir/flags.make
+gp_planner/CMakeFiles/gtsam_test.dir/src/local_planner/test/gtsam_test.cpp.o: /home/roboert/MP_WS/src/gp_planner/src/local_planner/test/gtsam_test.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/roboert/MP_WS/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object gp_planner/CMakeFiles/gtsam_test.dir/src/local_planner/test/gtsam_test.cpp.o"
+	cd /home/roboert/MP_WS/build/gp_planner && /usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/gtsam_test.dir/src/local_planner/test/gtsam_test.cpp.o -c /home/roboert/MP_WS/src/gp_planner/src/local_planner/test/gtsam_test.cpp
 
-gp_planner/CMakeFiles/gtsam_test.dir/src/local_planner/gtsam_test.cpp.i: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/gtsam_test.dir/src/local_planner/gtsam_test.cpp.i"
-	cd /home/roboert/MP_WS/build/gp_planner && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/roboert/MP_WS/src/gp_planner/src/local_planner/gtsam_test.cpp > CMakeFiles/gtsam_test.dir/src/local_planner/gtsam_test.cpp.i
+gp_planner/CMakeFiles/gtsam_test.dir/src/local_planner/test/gtsam_test.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/gtsam_test.dir/src/local_planner/test/gtsam_test.cpp.i"
+	cd /home/roboert/MP_WS/build/gp_planner && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/roboert/MP_WS/src/gp_planner/src/local_planner/test/gtsam_test.cpp > CMakeFiles/gtsam_test.dir/src/local_planner/test/gtsam_test.cpp.i
 
-gp_planner/CMakeFiles/gtsam_test.dir/src/local_planner/gtsam_test.cpp.s: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/gtsam_test.dir/src/local_planner/gtsam_test.cpp.s"
-	cd /home/roboert/MP_WS/build/gp_planner && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/roboert/MP_WS/src/gp_planner/src/local_planner/gtsam_test.cpp -o CMakeFiles/gtsam_test.dir/src/local_planner/gtsam_test.cpp.s
+gp_planner/CMakeFiles/gtsam_test.dir/src/local_planner/test/gtsam_test.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/gtsam_test.dir/src/local_planner/test/gtsam_test.cpp.s"
+	cd /home/roboert/MP_WS/build/gp_planner && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/roboert/MP_WS/src/gp_planner/src/local_planner/test/gtsam_test.cpp -o CMakeFiles/gtsam_test.dir/src/local_planner/test/gtsam_test.cpp.s
 
 # Object files for target gtsam_test
 gtsam_test_OBJECTS = \
-"CMakeFiles/gtsam_test.dir/src/local_planner/gtsam_test.cpp.o"
+"CMakeFiles/gtsam_test.dir/src/local_planner/test/gtsam_test.cpp.o"
 
 # External object files for target gtsam_test
 gtsam_test_EXTERNAL_OBJECTS =
 
-/home/roboert/MP_WS/devel/lib/gp_planner/gtsam_test: gp_planner/CMakeFiles/gtsam_test.dir/src/local_planner/gtsam_test.cpp.o
+/home/roboert/MP_WS/devel/lib/gp_planner/gtsam_test: gp_planner/CMakeFiles/gtsam_test.dir/src/local_planner/test/gtsam_test.cpp.o
 /home/roboert/MP_WS/devel/lib/gp_planner/gtsam_test: gp_planner/CMakeFiles/gtsam_test.dir/build.make
 /home/roboert/MP_WS/devel/lib/gp_planner/gtsam_test: /opt/ros/noetic/lib/libvision_reconfigure.so
 /home/roboert/MP_WS/devel/lib/gp_planner/gtsam_test: /opt/ros/noetic/lib/libgazebo_ros_utils.so
