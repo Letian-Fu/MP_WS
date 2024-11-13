@@ -25,6 +25,8 @@ global_planner:
 
 settings:
   sdf_file: sdf/obs_test_one_box.bin
+  frequency: 10
+  ref_inter_num: 10
   total_time: 6.0
   total_step: 10
   obs_check_inter: 5
@@ -42,3 +44,5 @@ settings:
   max_vel: 1.0
   pos_limit_sigma: 0.0001
   vel_limit_sigma: 0.0001
+  goal_tolerance: 0.05
+  decay_factor: 0.5

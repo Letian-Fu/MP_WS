@@ -1,6 +1,11 @@
 #include "my_planner/MyPlanner.h"
+#include <control_msgs/FollowJointTrajectoryActionGoal.h>
+#include <trajectory_msgs/JointTrajectory.h>
+#include <trajectory_msgs/JointTrajectoryPoint.h>
+#include <nav_msgs/Path.h>
+#include <geometry_msgs/PoseStamped.h>
 
-MyPlanner::MyPlanner(ros::NodeHandle nh){
+MyPlanner::MyPlanner(ros::NodeHandle& nh):nh_(nh),client("/arm_controller/follow_joint_trajectory", true){
     move_group_ = new Move_Group("arm");
     planning_scene_ = new Scene();
     robot_model_loader_ = new Robot_Model_Loader("robot_description");
@@ -84,6 +89,8 @@ MyPlanner::MyPlanner(ros::NodeHandle nh){
     nh.getParam("settings/Qc", Qc);
     nh.getParam("settings/opt_type", opt_type);
     nh.getParam("settings/control_inter", control_inter_);
+    nh.getParam("settings/ref_inter_num", ref_inter_num_);
+    nh.getParam("settings/goal_tolerance", goal_tolerance_);
 
     gtsam::Vector joints_pos_limits_up(dof_), joints_pos_limits_down(dof_), vel_limits(dof_);
     gtsam::Vector pos_limit_sigmas(dof_), vel_limit_sigmas(dof_);
@@ -120,28 +127,31 @@ MyPlanner::MyPlanner(ros::NodeHandle nh){
     exec_step_ = opt_setting_.total_step + 10 * (opt_setting_.total_step - 1);
 
     // opt_setting_.setVerbosityError();
-
+    // esdf相关
     gtsam::Point3 origin(-1.5, -1.5, -0.35);
     double cell_size = 0.1;
     size_t rows = 30, cols = 30, z = 20;
-    std::vector<gtsam::Matrix> map(z, gtsam::Matrix::Zero(rows, cols));
-    std::vector<gtsam::Vector> corners;
+    static_data_ = std::vector<gtsam::Matrix>(z,gtsam::Matrix::Zero(rows,cols));
+    dynamic_data_ = std::vector<gtsam::Matrix>(z,gtsam::Matrix::Zero(rows,cols));
+    prob_map_ = std::vector<gtsam::Matrix>(z,gtsam::Matrix::Zero(rows,cols));
+    mergeMaps(static_data_, dynamic_data_, map_);
     // gp_planner::add_obstacle({20, 9, 10}, {3, 3, 3}, map, corners);
-    auto field = gp_planner::signedDistanceField3D(map, cell_size);
+    auto field = computeESDF(map_, cell_size);
     // 创建 SignedDistanceField 对象
     sdf_ = gp_planner::SDF(origin, cell_size, rows, cols, z);
     for (size_t z = 0; z < field.size(); ++z) {
         sdf_.initFieldData(z, field[z]);
     }
-    sdf_.saveSDF("/home/roboert/MP_WS/src/gp_planner/src/my_planner/sdf_data.txt");
-    sdf_.print();
+    // sdf_.saveSDF("/home/roboert/MP_WS/src/gp_planner/sdf_data/sdf_data.txt");
+    // sdf_.print();
 
     rrt_planner_ = rrt_planner::RRTPlanner(nh, kinematic_model_);
-    local_planner_frenquency_ = 10;
+    nh.getParam("settings/frequency", local_planner_frenquency_);
     timer = nh.createTimer(ros::Duration(1.0 / local_planner_frenquency_), &MyPlanner::LocalPlanningCallback, this);
     arm_state_sub_ = nh.subscribe(arm_state_topic_, 1, &MyPlanner::armStateCallback,this);
-    plan_sub_ = nh.subscribe("move_group/goal", 1, &MyPlanner::planCallback,this);
+    plan_sub_ = nh.subscribe("move_group/goal", 1, &MyPlanner::GlobalPlanCallback,this);
     obs_sub_ = nh.subscribe("/obstacle_info", 1, &MyPlanner::obstacleCallback, this);
+    path_pub_ = nh.advertise<nav_msgs::Path>("end_effector_path",10);
 
     is_plan_success_ = false;
     is_global_success_ = false;
@@ -157,9 +167,10 @@ gtsam::Values MyPlanner::InitWithRef(const std::vector<Eigen::VectorXd>& ref_pat
     // init pose
     for (size_t i = 0; i <= total_step; i++) {
         gtsam::Vector conf;
-        double t = i * stepSize;
-        int index = static_cast<int>(t);
-        conf = ConvertToGtsamVector(ref_path[index]);
+        // double t = i * stepSize;
+        // int index = static_cast<int>(t);
+        // conf = ConvertToGtsamVector(ref_path[index]);
+        conf = ConvertToGtsamVector(ref_path[i]);
         init_values.insert(gtsam::Symbol('x', i), conf);
     }
     // init vel as avg vel
@@ -173,7 +184,9 @@ int MyPlanner::findClosestPoint(const vector<VectorXd>& globalPath) {
     double minDistance = std::numeric_limits<double>::max();
     int closestIndex = -1;
     for (size_t i = 0; i < globalPath.size(); ++i) {
-        double distance = calculateDistance(globalPath[i], arm_pos_);
+        VectorXd global_point(6);
+        global_point<<globalPath[i](0),globalPath[i](1),globalPath[i](2),globalPath[i](3),globalPath[i](4),globalPath[i](5);
+        double distance = calculateDistance(global_point, arm_pos_);
         if (distance < minDistance) {
             minDistance = distance;
             closestIndex = i;
@@ -191,27 +204,115 @@ vector<VectorXd> MyPlanner::getLocalRefPath() {
     localRefPath.push_back(arm_pos_);
     int n = global_results_.size();
     for(int i=1;i<=opt_setting_.total_step;i++){
-        int index = closestIndex + i * 3;
+        int index = closestIndex + i * ref_inter_num_;
         if(index>=n){
             //如果全局路径的点数不足，进行插值
             int remaining = n - closestIndex;
-            double t = (index - n) / 3.0;
+            double t = (index - n) / static_cast<double>(ref_inter_num_);
             index = n - 1;
-            localRefPath.push_back(interpolatePoint(global_results_[index],global_results_[index-1],t));
+            VectorXd global_point_1(6);
+            VectorXd global_point_2(6);
+            global_point_1<<global_results_[index](0),global_results_[index](1),global_results_[index](2),global_results_[index](3),global_results_[index](4),global_results_[index](5);
+            global_point_2<<global_results_[index-1](0),global_results_[index-1](1),global_results_[index-1](2),global_results_[index-1](3),global_results_[index-1](4),global_results_[index-1](5);
+            localRefPath.push_back(interpolatePoint(global_point_1,global_point_2,t));
         } else {
-            localRefPath.push_back(global_results_[index]);
+            VectorXd global_point(6);
+            global_point<<global_results_[index](0),global_results_[index](1),global_results_[index](2),global_results_[index](3),global_results_[index](4),global_results_[index](5);
+            localRefPath.push_back(global_point);
         }
     }
     return localRefPath;
 }
 
+std::vector<gtsam::Matrix> MyPlanner::computeESDF(const std::vector<gtsam::Matrix>& ground_truth_map, double cell_size){
+    int depth = ground_truth_map.size();
+    int height = ground_truth_map[0].rows();
+    int width = ground_truth_map[0].cols();
+
+    std::vector<gtsam::Matrix> field(depth);
+
+    for (int d = 0; d < depth; ++d) {
+        cv::Mat slice = gtsamMatrixToCvMat(ground_truth_map[d]);
+        cv::Mat distMap, invDistMap;
+
+        // 计算正距离场
+        cv::distanceTransform(slice, distMap, cv::DIST_L2, 5);
+        distMap.convertTo(distMap, CV_32F);
+
+        // 交换障碍物和自由空间
+        cv::Mat invSlice;
+        cv::bitwise_not(slice, invSlice);
+
+        // 计算负距离场
+        cv::distanceTransform(invSlice, invDistMap, cv::DIST_L2, 5);
+        invDistMap.convertTo(invDistMap, CV_32F);
+
+        // 计算ESDF
+        cv::Mat sdf = distMap - invDistMap;
+        sdf *= cell_size;
+        field[d] = cvMatToGtsamMatrix(sdf);
+    }
+
+    return field;
+}
+
+void MyPlanner::add_dynamic_obstacle(const std::vector<double>& position, const double& size, 
+                  const double& velocity, const std::vector<double>& direction,
+                  double total_time, std::vector<gtsam::Matrix>& map, std::vector<gtsam::Matrix>& prob_map){
+    // 计算障碍物的半径
+    int half_size_row = std::floor((size - 1) / 2);
+    int half_size_col = std::floor((size - 1) / 2);
+    int half_size_z = std::floor((size - 1) / 2);
+
+    // 计算障碍物的未来位置
+    std::vector<double> future_position = {
+        position[0] + velocity * direction[0] * total_time,
+        position[1] + velocity * direction[1] * total_time,
+        position[2] + velocity * direction[2] * total_time
+    };
+    // // 遍历障碍物的每个单元格，并在地图上设置为障碍物（不衰减）
+    // for (int i = future_position[0] - half_size_row; i <= future_position[0] + half_size_row; ++i) {
+    //     for (int j = future_position[1] - half_size_col; j <= future_position[1] + half_size_col; ++j) {
+    //         for (int k = future_position[2] - half_size_z; k <= future_position[2] + half_size_z; ++k) {
+    //             if (i >= 0 && i < map[0].rows() && j >= 0 && j < map[0].cols() && k >= 0 && k < map.size()) {
+    //                 map[k](i, j) = 1.0;
+    //             }
+    //         }
+    //     }
+    // }
+
+    // 计算障碍物的移动距离
+    double distance_moved = velocity * total_time;
+
+    // 遍历障碍物的每个单元格，并在地图上设置为障碍物或衰减值
+    for (int i = future_position[0] - half_size_row; i <= future_position[0] + half_size_row; ++i) {
+        for (int j = future_position[1] - half_size_col; j <= future_position[1] + half_size_col; ++j) {
+            for (int k = future_position[2] - half_size_z; k <= future_position[2] + half_size_z; ++k) {
+                if (i >= 0 && i < map[0].rows() && j >= 0 && j < map[0].cols() && k >= 0 && k < map.size()) {
+                    double distance_to_future = std::sqrt(std::pow(i - future_position[0], 2) + 
+                                                          std::pow(j - future_position[1], 2) + 
+                                                          std::pow(k - future_position[2], 2));
+                    double decayed_distance = opt_setting_.epsilon * (1.0 - distance_to_future / distance_moved);
+                    double probability = 1.0 - std::min(1.0, distance_to_future / distance_moved);
+                    probability = std::max(0.0, std::min(1.0, probability));
+                    prob_map[k](i, j) = probability;
+                    if (decayed_distance > 0) {
+                        map[k](i, j) = 1.0;  // 障碍物位置
+                    } else {
+                        map[k](i, j) = std::max(0.0, map[k](i, j) - 0.1);  // 衰减值
+                    }
+                }
+            }
+        }
+    }
+}
 
 void MyPlanner::armStateCallback(const sensor_msgs::JointState::ConstPtr &msg) {
     for (int i=0;i<dof_;i++)
-        arm_pos_(i)=msg->position[i];
+        arm_pos_(i)=msg->position[i+2];
 }
 
-void MyPlanner::planCallback(const moveit_msgs::MoveGroupActionGoal::ConstPtr &msg) {
+void MyPlanner::GlobalPlanCallback(const moveit_msgs::MoveGroupActionGoal::ConstPtr &msg) {
     is_plan_success_ = false;
     is_global_success_ = false;
     is_local_success_ = false;
@@ -219,7 +320,6 @@ void MyPlanner::planCallback(const moveit_msgs::MoveGroupActionGoal::ConstPtr &m
         start_conf_(i) = arm_pos_(i);
         end_conf_(i) = msg->goal.request.goal_constraints[0].joint_constraints[i].position;
     }
-
     planning_scene_monitor::PlanningSceneMonitorPtr monitor_ptr_udef = std::make_shared<planning_scene_monitor::PlanningSceneMonitor>("robot_description");
     monitor_ptr_udef->requestPlanningSceneState("get_planning_scene");
     planning_scene_monitor::LockedPlanningSceneRW ps(monitor_ptr_udef);
@@ -232,11 +332,22 @@ void MyPlanner::planCallback(const moveit_msgs::MoveGroupActionGoal::ConstPtr &m
 void MyPlanner::LocalPlanningCallback(const ros::TimerEvent&){
     is_plan_success_ = false;
     is_local_success_ = false;
-    if(is_global_success_){
+    // sensor_msgs::JointStateConstPtr joint_states = ros::topic::waitForMessage<sensor_msgs::JointState>("joint_states", nh_);
+    // // cout<<"curr1: "<<arm_pos_.transpose()<<endl;
+    // if(joint_states){
+    //     for(int i=0;i<dof_;i++)    arm_pos_[i] = joint_states->position[i+2];
+    // }
+    if(is_global_success_ && calculateDistance(arm_pos_, end_conf_)> goal_tolerance_){
         vector<VectorXd> local_ref_path = getLocalRefPath();
         gtsam::Values init_values = InitWithRef(local_ref_path, opt_setting_.total_step);
         // gtsam::Values init_values = gp_planner::initArmTrajStraightLine(ConvertToGtsamVector(arm_pos_), ConvertToGtsamVector(end_conf_), opt_setting_.total_step);
-        gtsam::Values opt_values = gp_planner::Optimizer(robot_,sdf_,ConvertToGtsamVector(arm_pos_),ConvertToGtsamVector(end_conf_),
+        gtsam::Vector start_conf = ConvertToGtsamVector(arm_pos_);
+        gtsam::Vector end_conf = ConvertToGtsamVector(local_ref_path[local_ref_path.size()-1]);
+        // cout<<endl<<"start_conf: "<<start_conf.transpose()<<endl;
+        // cout<<"end_conf: "<<end_conf.transpose()<<endl<<endl;
+        start_vel_ = (end_conf - start_conf) / opt_setting_.total_time;
+        end_vel_ = (end_conf - start_conf) / opt_setting_.total_time;
+        gtsam::Values opt_values = gp_planner::Optimizer(robot_,sdf_,start_conf,end_conf,
                                                         ConvertToGtsamVector(start_vel_),ConvertToGtsamVector(end_vel_),init_values,opt_setting_);
 
         exec_values_ = gp_planner::interpolateTraj(opt_values, opt_setting_.Qc_model, delta_t_, control_inter_);
@@ -245,50 +356,128 @@ void MyPlanner::LocalPlanningCallback(const ros::TimerEvent&){
         double opt_coll_cost = gp_planner::CollisionCost(robot_, sdf_, opt_values, opt_setting_);
         // std::cout<<"Opt col_cost: "<<opt_coll_cost<<std::endl;
         if(opt_coll_cost<= init_coll_cost)    is_local_success_ = true;
-        if(is_local_success_){
-            exec_step_ = opt_setting_.total_step + control_inter_ * (opt_setting_.total_step - 1);
-            local_results_.resize(exec_step_);
-            for(size_t i = 0;i<exec_step_;i++){
-                gtsam::Vector temp = exec_values_.at<gtsam::Vector>(gtsam::Symbol('x',i));
-                local_results_[i].resize(dof_);
-                for(size_t j=0;j<dof_;j++)  local_results_[i](j) = temp(j);
-            }
-        }
     }
     is_plan_success_ = is_global_success_ && is_local_success_;
+    if(is_plan_success_){
+        // publishPlanningResult(local_results_);
+        publishPath();
+        publishTrajectory();
+        // execute();
+    }
+}
+
+void MyPlanner::publishPath(){
+    nav_msgs::Path path;
+    path.header.stamp = ros::Time::now();
+    path.header.frame_id="world";
+    path.poses.clear();
+    exec_step_ = opt_setting_.total_step + control_inter_ * (opt_setting_.total_step - 1);
+    local_results_.resize(exec_step_);
+    for(size_t i = 0;i<exec_step_;i++){
+        gtsam::Vector pos_temp = exec_values_.at<gtsam::Vector>(gtsam::Symbol('x',i));
+        gtsam::Vector vel_temp = exec_values_.at<gtsam::Vector>(gtsam::Symbol('v',i));
+        local_results_[i].resize(dof_* 2);
+        for(size_t j=0;j<dof_;j++){
+            local_results_[i](j) = pos_temp(j);
+            local_results_[i](j+dof_) = vel_temp(j);
+        }
+    }
+    for(size_t i=0;i<exec_step_;i++){
+        VectorXd theta(6);
+        theta<<local_results_[i](0),local_results_[i](1),local_results_[i](2),local_results_[i](3),local_results_[i](4),local_results_[i](5);
+        MatrixXd endT = rrt_planner::transformMatrix_DH(dh_alpha_,dh_a_,dh_d_,dh_theta_,theta);
+        VectorXd endPose(3);
+        endPose<<endT(0,3),endT(1,3),endT(2,3);
+        geometry_msgs::PoseStamped pose_stamped;
+        pose_stamped.header = path.header;
+        pose_stamped.pose.position.x = endPose(0);
+        pose_stamped.pose.position.y = endPose(1);
+        pose_stamped.pose.position.z = endPose(2);
+        pose_stamped.pose.orientation.w = 1.0; // 假设没有旋转
+        path.poses.push_back(pose_stamped);
+    }
+    path_pub_.publish(path);
+
+}
+
+void MyPlanner::publishTrajectory(){
+    // cout<<"Publish Trajectory"<<endl;
+    // // 发布轨迹消息
+    // control_msgs::FollowJointTrajectoryActionGoal action_goal_msg;
+    // ros::Time now = ros::Time::now();
+    // action_goal_msg.header.stamp = ros::Time::now();
+    // action_goal_msg.goal_id.stamp = ros::Time::now();
+    // action_goal_msg.goal.trajectory = trajectory_msgs::JointTrajectory();
+    // action_goal_msg.goal.trajectory.header.stamp = ros::Time::now();
+    // action_goal_msg.goal.trajectory.header.frame_id = "world";
+    // action_goal_msg.goal.trajectory.joint_names = {"joint1", "joint2", "joint3", "joint4", "joint5", "joint6"};
+    // double time_from_start = 0.0;
+    // for(int i = 0;i<exec_step_;i++){
+    //     trajectory_msgs::JointTrajectoryPoint traj_point;
+    //     for(int j=0;j<dof_;j++){
+    //         traj_point.positions.push_back(trajectory[i](j));
+    //         traj_point.velocities.push_back(trajectory[i](j+dof_));
+    //     }
+    //     time_from_start = (i * delta_t_ / (control_inter_ + 1));
+    //     traj_point.time_from_start = ros::Duration(now.toSec()+time_from_start);
+    //     action_goal_msg.goal.trajectory.points.push_back(traj_point);
+    // }
+    // action_goal_msg.goal.goal_time_tolerance = ros::Duration(0.0); // 设置时间容忍度
+    //  // 等待直到下一个ROS循环
+    // arm_trajectory_pub_.publish(action_goal_msg);
+    exec_step_ = opt_setting_.total_step + control_inter_ * (opt_setting_.total_step - 1);
+    exec_step_ = static_cast<int>(1.0 * exec_step_ / opt_setting_.total_time); 
+    local_results_.resize(exec_step_);
+    for(size_t i = 0;i<exec_step_;i++){
+        gtsam::Vector pos_temp = exec_values_.at<gtsam::Vector>(gtsam::Symbol('x',i));
+        gtsam::Vector vel_temp = exec_values_.at<gtsam::Vector>(gtsam::Symbol('v',i));
+        local_results_[i].resize(dof_* 2);
+        for(size_t j=0;j<dof_;j++){
+            local_results_[i](j) = pos_temp(j);
+            local_results_[i](j+dof_) = vel_temp(j);
+        }
+    }
+    control_msgs::FollowJointTrajectoryGoal goal;
+    goal.trajectory.joint_names = {"joint1", "joint2", "joint3", "joint4", "joint5", "joint6"};
+    goal.trajectory.points.resize(exec_step_);
+    for (int i = 0; i < exec_step_; i++) {
+        trajectory_msgs::JointTrajectoryPoint& traj_point = goal.trajectory.points[i];
+        traj_point.positions.resize(dof_);
+        traj_point.velocities.resize(dof_);
+        for(int j=0;j<dof_;j++){
+            traj_point.positions[j] = local_results_[i](j);
+            traj_point.velocities[j] = local_results_[i](j+dof_);
+        }
+        traj_point.time_from_start = ros::Duration(i * delta_t_ / control_inter_);
+    }
+    client.sendGoal(goal);
+    client.waitForResult();
+    
 }
 
 void MyPlanner::obstacleCallback(const std_msgs::Float64MultiArray::ConstPtr& msg){
-    double x = msg->data[0];
-    double y = msg->data[1];
-    double height = msg->data[2];
-    double radius = msg->data[3];
-    obs_info_.resize(4);
-    obs_info_<<x,y,height,radius;
-    // std::cout<<obs_info_.transpose()<<std::endl;
-    // 局部更新sdf
-}
+    obs_info_.resize(8);
+    if (msg->data.size() == 8) {
+        double x = msg->data[0];
+        double y = msg->data[1];
+        double z = msg->data[2];
+        double obs_size = msg->data[3];
+        double linear_speed = msg->data[4];
+        double direction_x = msg->data[5];
+        double direction_y = msg->data[6];
+        double direction_z = msg->data[7];
 
-void MyPlanner::execute() {
-    if(is_plan_success_){
-        double total_time = 10;
-        int exec_step = local_results_.size();
-        moveit_msgs::RobotTrajectory plan_traj = moveit_msgs::RobotTrajectory();
-        plan_traj.joint_trajectory.header.frame_id = move_group_->getPlanningFrame();
-        plan_traj.joint_trajectory.joint_names = move_group_->getActiveJoints();
-        plan_traj.joint_trajectory.points.resize(exec_step);
-        for (int i = 0; i < exec_step; i++) {
-            plan_traj.joint_trajectory.points[i].positions.resize(6);
-            ros::Duration time_from_start;
-            time_from_start = ros::Duration(total_time * i / exec_step);
-            for (int j = 0; j < dof_; j++)
-                plan_traj.joint_trajectory.points[i].positions[j] = local_results_[i](j);
-            plan_traj.joint_trajectory.points[i].time_from_start = time_from_start;
+        obs_info_<<x,y,z,obs_size,linear_speed,direction_x,direction_y,direction_z;
+        // 局部更新sdf
+        std::vector<double> position = {x,y,z};
+        std::vector<double> direction = {direction_x,direction_y,direction_z};
+        add_dynamic_obstacle(position,obs_size,linear_speed,direction,opt_setting_.total_time,dynamic_data_,prob_map_);
+        mergeMaps(static_data_,dynamic_data_, map_);
+        auto field = computeESDF(map_, sdf_.cell_size());
+        // 创建 SignedDistanceField 对象
+        for (size_t z = 0; z < field.size(); ++z) {
+            sdf_.initFieldData(z, field[z]);
         }
-        move_group_->execute(plan_traj);
-        move_group_->clearPoseTargets();
-        move_group_->setStartState(*move_group_->getCurrentState());
-        move_group_->stop();
     }
 }
 

@@ -390,7 +390,7 @@ public:
     }
 };
 
-void add_obstacle(const std::vector<int>& position, const std::vector<int>& size, std::vector<gtsam::Matrix>& map, std::vector<gtsam::Vector>& corners) {
+void add_obstacle(const std::vector<int>& position, const std::vector<int>& size, std::vector<gtsam::Matrix>& map) {
     int half_size_row = std::floor((size[0] - 1) / 2);
     int half_size_col = std::floor((size[1] - 1) / 2);
     int half_size_z = std::floor((size[2] - 1) / 2);
@@ -404,12 +404,6 @@ void add_obstacle(const std::vector<int>& position, const std::vector<int>& size
             }
         }
     }
-
-    gtsam::Vector corner(6);
-    corner << position[0] - half_size_row, position[0] + half_size_row,
-             position[1] - half_size_col, position[1] + half_size_col,
-             position[2] - half_size_z, position[2] + half_size_z;
-    corners.push_back(corner);
 }
 
 std::vector<gtsam::Matrix> signedDistanceField3D(const std::vector<gtsam::Matrix>& ground_truth_map, double cell_size) {

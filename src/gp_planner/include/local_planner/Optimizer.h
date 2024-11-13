@@ -47,6 +47,7 @@ gtsam::Values Optimizer(const ArmModel& arm, const SDF& sdf,
             graph.add(PriorFactorConf(pose_key,end_conf,setting.conf_prior_model));
             graph.add(PriorFactorVel(vel_key,end_vel,setting.vel_prior_model));
         }
+        // cout<<"PriorFactor Initialized"<<endl;
         // Limits for joints and velocity
         if(setting.flag_pos_limit){
             graph.add(JointLimitFactor(pose_key,setting.pos_limit_model,setting.joint_pos_limits_down,setting.joint_pos_limits_up,setting.pos_limit_thresh));
@@ -54,14 +55,17 @@ gtsam::Values Optimizer(const ArmModel& arm, const SDF& sdf,
         if(setting.flag_vel_limit){
             graph.add(VelLimitFactor(vel_key,setting.vel_limit_model,setting.vel_limits,setting.vel_limit_thresh));
         }
+        // cout<<"LimitFactor Initialized"<<endl;
         // non-interpolated cost factor
         graph.add(ObsFactor(pose_key, arm, sdf, setting.cost_sigma, setting.epsilon));
+        // cout<<"ObsFactor Initialized"<<endl;
         
         if(i>0){
             gtsam::Key last_pose_key = gtsam::Symbol('x', i - 1);
             gtsam::Key last_vel_key = gtsam::Symbol('v', i - 1);
             // GP factor
             graph.add(GPFactor(last_pose_key,last_vel_key,pose_key,vel_key,delta_t,setting.Qc_model));
+            // cout<<"GPFactor Initialized "<<i<<endl;
             // interpolated cost factor
             if(setting.obs_check_inter > 0){
                 for(size_t j = 1; j<=setting.obs_check_inter; j++){
@@ -69,12 +73,13 @@ gtsam::Values Optimizer(const ArmModel& arm, const SDF& sdf,
                     graph.add(ObsGPFactor(last_pose_key, last_vel_key, pose_key, vel_key,
                                         arm, sdf, setting.cost_sigma, setting.epsilon, setting.Qc_model, delta_t, tau));
                 }
+                // cout<<"ObsGPFactor Initialized "<<i<<endl;
             }
         }
     }
-    cout<<"Initial Error: "<<graph.error(init_values)<<endl;
+    // cout<<"Initial Error: "<<graph.error(init_values)<<endl;
     gtsam::Values result = optimize(graph, init_values, setting);
-    cout<<"Final Error: "<<graph.error(result)<<endl;
+    // cout<<"Final Error: "<<graph.error(result)<<endl;
 
     return result;
 }

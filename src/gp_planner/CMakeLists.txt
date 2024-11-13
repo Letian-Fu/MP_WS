@@ -33,11 +33,15 @@ find_package(catkin REQUIRED COMPONENTS
   tf2_eigen
   tf2_ros
   trajectory_msgs
+  nav_msgs
+  cv_bridge
 )
 
 # Eigen
 include_directories( "/usr/local/include/eigen3" )
 
+# Find OpenCV
+find_package(OpenCV REQUIRED)
 
 # gtsam
 find_package(GTSAM REQUIRED) # Uses installed package
@@ -109,12 +113,13 @@ target_link_libraries(My_Planner
   Global_Planner
   Local_Planner
   ${catkin_LIBRARIES}
+  ${OpenCV_LIBRARIES}
 )
 
 catkin_package(
   INCLUDE_DIRS include
   LIBRARIES gp_planner Global_Planner Local_Planner My_Planner
-  CATKIN_DEPENDS actionlib control_msgs gazebo_msgs gazebo_plugins gazebo_ros gazebo_ros_control geometry_msgs moveit_core moveit_ros_planning moveit_ros_planning_interface moveit_visual_tools pluginlib roscpp roslib rospy sensor_msgs std_msgs tf2_eigen tf2_ros trajectory_msgs
+  CATKIN_DEPENDS actionlib control_msgs gazebo_msgs gazebo_plugins gazebo_ros gazebo_ros_control geometry_msgs moveit_core moveit_ros_planning moveit_ros_planning_interface moveit_visual_tools pluginlib roscpp roslib rospy sensor_msgs std_msgs tf2_eigen tf2_ros trajectory_msgs cv_bridge
   DEPENDS Boost GTSAM
 )
 
@@ -154,4 +159,5 @@ target_link_libraries(plan_test
   My_Planner
   ${catkin_LIBRARIES}
   ${GTSAM_LIBRARIES}
+  ${OpenCV_LIBRARIES}
 )

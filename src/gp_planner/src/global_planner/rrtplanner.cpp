@@ -572,27 +572,6 @@ std::vector<VectorXd> RRTPlanner::Pruning_path(const planning_scene::PlanningSce
     return final_result;
 }
 
-// void RRTPlanner::armStateCallback(const sensor_msgs::JointState::ConstPtr &msg) {
-//     for (int i=0;i<dof_;i++)
-//         arm_pos_(i)=msg->position[i];
-// }
-
-// void RRTPlanner::planCallback(const moveit_msgs::MoveGroupActionGoal::ConstPtr &msg) {
-//     is_plan_success_=false;
-//     planning_scene_monitor::PlanningSceneMonitorPtr monitor_ptr_udef = std::make_shared<planning_scene_monitor::PlanningSceneMonitor>("robot_description");
-//     monitor_ptr_udef->requestPlanningSceneState("get_planning_scene");
-//     planning_scene_monitor::LockedPlanningSceneRW ps(monitor_ptr_udef);
-//     ps->getCurrentStateNonConst().update();
-//     planning_scene::PlanningScenePtr col_scene = ps->diff();
-//     col_scene->decoupleParent();
-//     for(int i=0;i<dof_;i++)
-//     {
-//         start_conf_(i) = arm_pos_(i);
-//         goal_conf_(i) = msg->goal.request.goal_constraints[0].joint_constraints[i].position;
-//     }
-//     is_plan_success_ = RRT_Plan(col_scene,start_conf_,goal_conf_,global_results_);
-// }
-
 
 RRTPlanner::~RRTPlanner() = default;
 

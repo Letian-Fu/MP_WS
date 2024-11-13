@@ -22,5 +22,7 @@
   </include>
 
   <rosparam command="load" file="$(find gp_planner)/config/parameters.yaml" />
+  <!-- <node name="trajectory_publisher" pkg="gp_planner" type="arm_controller.py" output="screen" /> -->
+  <!-- <node name="moving_sphere" pkg="gp_planner" type="moving_sphere.py" output="screen" /> -->
 
 </launch>
