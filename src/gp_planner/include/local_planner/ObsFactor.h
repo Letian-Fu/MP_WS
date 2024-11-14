@@ -50,6 +50,7 @@ private:
     gtsam::Vector evaluateError(
         const typename Robot::Pose& conf,
         gtsam::OptionalMatrixType H1) const override{
+            // cout<<"cost epsilon: "<<epsilon_<<endl;
             return ObsCost(conf , robot_, epsilon_, sdf_, H1);
         }
 

@@ -5,9 +5,9 @@ Panels:
     Property Tree Widget:
       Expanded:
         - /MotionPlanning1/Planned Path1
-        - /RobotModel1
+        - /LocalPath1
       Splitter Ratio: 0.5
-    Tree Height: 140
+    Tree Height: 194
   - Class: rviz/Help
     Name: Help
   - Class: rviz/Views
@@ -289,17 +289,17 @@ Visualization Manager:
       Transport Hint: raw
       Unreliable: false
       Value: true
-    - Alpha: 3
+    - Alpha: 1
       Buffer Length: 1
       Class: rviz/Path
-      Color: 239; 41; 41
+      Color: 25; 255; 0
       Enabled: true
       Head Diameter: 0.30000001192092896
       Head Length: 0.20000000298023224
       Length: 0.30000001192092896
       Line Style: Lines
       Line Width: 0.029999999329447746
-      Name: Path
+      Name: GlobalPath
       Offset:
         X: 0
         Y: 0
@@ -310,87 +310,48 @@ Visualization Manager:
       Radius: 0.029999999329447746
       Shaft Diameter: 0.10000000149011612
       Shaft Length: 0.10000000149011612
-      Topic: /end_effector_path
+      Topic: /global_path
+      Unreliable: false
+      Value: true
+    - Alpha: 3
+      Buffer Length: 1
+      Class: rviz/Path
+      Color: 239; 41; 41
+      Enabled: true
+      Head Diameter: 0.30000001192092896
+      Head Length: 0.20000000298023224
+      Length: 0.30000001192092896
+      Line Style: Lines
+      Line Width: 0.029999999329447746
+      Name: LocalPath
+      Offset:
+        X: 0
+        Y: 0
+        Z: 0
+      Pose Color: 255; 85; 255
+      Pose Style: None
+      Queue Size: 10
+      Radius: 0.029999999329447746
+      Shaft Diameter: 0.10000000149011612
+      Shaft Length: 0.10000000149011612
+      Topic: /local_path
       Unreliable: false
       Value: true
     - Alpha: 1
       Class: rviz/RobotModel
       Collision Enabled: false
-      Enabled: true
+      Enabled: false
       Links:
         All Links Enabled: true
         Expand Joint Details: false
         Expand Link Details: false
         Expand Tree: false
         Link Tree Style: Links in Alphabetic Order
-        Link1:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
-        Link2:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
-        Link3:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
-        Link4:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
-        Link5:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
-        Link6:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
-        base_link:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
-        dh_base_link:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
-        finger1_link:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
-        finger2_link:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
-        kinect_link:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
-        rgb:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-        world:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
       Name: RobotModel
       Robot Description: robot_description
       TF Prefix: ""
       Update Interval: 0
-      Value: true
+      Value: false
       Visual Enabled: true
   Enabled: true
   Global Options:
@@ -408,7 +369,7 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/Orbit
-      Distance: 2.372391939163208
+      Distance: 4.081049919128418
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
@@ -424,14 +385,14 @@ Visualization Manager:
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Pitch: 0.6799997687339783
+      Pitch: 0.5299999117851257
       Target Frame: world
-      Yaw: 5.449946880340576
+      Yaw: 5.1549272537231445
     Saved: ~
 Window Geometry:
   Displays:
     collapsed: false
-  Height: 848
+  Height: 1048
   Help:
     collapsed: false
   Hide Left Dock: false
@@ -442,9 +403,9 @@ Window Geometry:
     collapsed: false
   MotionPlanning - Trajectory Slider:
     collapsed: false
-  QMainWindow State: 000000ff00000000fd0000000100000000000001f3000002f6fc0200000008fb000000100044006900730070006c006100790073010000003d000000c9000000c900fffffffb0000000800480065006c00700000000342000000bb0000006e00fffffffb0000000a00560069006500770073000000010c000000a4000000a400fffffffb0000000c00430061006d00650072006100000002ff000001610000000000000000fb0000001e004d006f00740069006f006e00200050006c0061006e006e0069006e00670100000374000001890000000000000000fb00000044004d006f00740069006f006e0050006c0061006e006e0069006e00670020002d0020005400720061006a006500630074006f0072007900200053006c00690064006500720000000000ffffffff0000001600000016fb0000001c004d006f00740069006f006e0050006c0061006e006e0069006e0067010000010c000001b20000017d00fffffffb0000000a0049006d00610067006501000002c40000006f0000001600ffffff00000312000002f600000001000000020000000100000002fc0000000100000002000000010000000a0054006f006f006c00730100000000ffffffff0000000000000000
+  QMainWindow State: 000000ff00000000fd00000001000000000000023c000003befc0200000008fb000000100044006900730070006c006100790073010000003d000000ff000000c900fffffffb0000000800480065006c00700000000342000000bb0000006e00fffffffb0000000a00560069006500770073000000010c000000a4000000a400fffffffb0000000c00430061006d00650072006100000002ff000001610000000000000000fb0000001e004d006f00740069006f006e00200050006c0061006e006e0069006e00670100000374000001890000000000000000fb00000044004d006f00740069006f006e0050006c0061006e006e0069006e00670020002d0020005400720061006a006500630074006f0072007900200053006c00690064006500720000000000ffffffff0000001600000016fb0000001c004d006f00740069006f006e0050006c0061006e006e0069006e00670100000142000002260000017d00fffffffb0000000a0049006d006100670065010000036e0000008d0000001600ffffff000003cb000003be00000001000000020000000100000002fc0000000100000002000000010000000a0054006f006f006c00730100000000ffffffff0000000000000000
   Views:
     collapsed: false
-  Width: 1291
-  X: 2549
-  Y: 111
+  Width: 1549
+  X: 2291
+  Y: 0

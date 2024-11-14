@@ -116,8 +116,14 @@ public:
 
     /// tri-linear interpolation
     inline double signed_distance(const float_index& idx) const {
+        // size_t r,c,z;
+        // r = static_cast<size_t>(floor(idx.get<0>()));
+        // c = static_cast<size_t>(floor(idx.get<1>()));
+        // z = static_cast<size_t>(floor(idx.get<2>()));
+        // return signed_distance(r,c,z);
         const double lr = floor(idx.get<0>()), lc = floor(idx.get<1>()),
                  lz = floor(idx.get<2>());
+        // cout<<lr<<"  "<<lc<<"  "<<lz<<endl;
         const double hr = lr + 1.0, hc = lc + 1.0, hz = lz + 1.0;
         const size_t lri = static_cast<size_t>(lr), lci = static_cast<size_t>(lc),
                     lzi = static_cast<size_t>(lz), hri = static_cast<size_t>(hr),
@@ -337,7 +343,8 @@ public:
             std::istringstream iss_origin(line);
             iss_origin>>label;
             if (!(iss_origin >> origin_.x() >> origin_.y() >> origin_.z())) {
-                throw std::runtime_error("Failed to parse origin");
+                return false;
+                // throw std::runtime_error("Failed to parse origin");
             }
 
             // 从文件中读取 field_rows_, field_cols_, field_z_ 和 cell_size_

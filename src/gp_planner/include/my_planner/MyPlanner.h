@@ -52,18 +52,21 @@ public:
 
     // ros相关
     ros::NodeHandle nh_;
-    ros::Subscriber arm_state_sub_, plan_sub_,obs_sub_;
+    ros::Subscriber arm_state_sub_, plan_sub_,obs_sub_,map_sub_;
+    ros::Publisher read_pub_;
     std::string arm_state_topic_;
     bool is_plan_success_, is_global_success_, is_local_success_;
     Eigen::VectorXd start_conf_, end_conf_, arm_pos_, start_vel_, end_vel_;
     // 定时器相关
     double local_planner_frenquency_;
-    ros::Timer timer;
+    ros::Timer planner_timer_;
     // 动态障碍物参数
     VectorXd obs_info_;
     // 控制器相关
-    ros::Publisher path_pub_;
-    actionlib::SimpleActionClient<control_msgs::FollowJointTrajectoryAction> client;
+    ros::Publisher local_path_pub_, global_path_pub_;
+    actionlib::SimpleActionClient<control_msgs::FollowJointTrajectoryAction> client_;
+    std::shared_ptr<std::mutex> mutex_;  // 互斥锁
+    ros::Timer map_timer_;  // 定时器
 
 public:
     MyPlanner(ros::NodeHandle& nh);
@@ -71,33 +74,13 @@ public:
 
     void armStateCallback(const sensor_msgs::JointState::ConstPtr &msg);
     void GlobalPlanCallback(const moveit_msgs::MoveGroupActionGoal::ConstPtr &msg);
-    void obstacleCallback(const std_msgs::Float64MultiArray::ConstPtr& msg);
+    void DynamicCallback(const std_msgs::Float64MultiArray::ConstPtr& msg);
     void LocalPlanningCallback(const ros::TimerEvent&);
+    void readSDFFile(const ros::TimerEvent&);
     void publishTrajectory();
-    void publishPath();
-    inline void mergeMaps(const std::vector<gtsam::Matrix>& static_data, const std::vector<gtsam::Matrix>& dynamic_data, std::vector<gtsam::Matrix>& map) {
-        // 清空map_，以便重新填充
-        map.clear();
-        // 检查地图的维度是否相同
-        if (static_data.size() != dynamic_data.size()) {
-            throw std::runtime_error("Static and dynamic maps must have the same number of layers");
-        }
+    void publishLocalPath();
+    void publishGlobalPath();
 
-        // 合并static_data和dynamic_data
-        for (size_t i = 0; i < static_data.size(); ++i) {
-            const gtsam::Matrix& static_matrix = static_data[i];
-            const gtsam::Matrix& dynamic_matrix = dynamic_data[i];
-
-            // 检查每一层的维度是否相同
-            if (static_matrix.rows() != dynamic_matrix.rows() || static_matrix.cols() != dynamic_matrix.cols()) {
-                throw std::runtime_error("Static and dynamic matrices in layer " + std::to_string(i) + " must have the same dimensions");
-            }
-
-            // 逐元素相加
-            gtsam::Matrix merged_matrix = static_matrix.array() + dynamic_matrix.array();
-            map.push_back(merged_matrix);
-        }
-    }
     // 找到全局路径中距离当前位置最近的点
     int findClosestPoint(const vector<VectorXd>& globalPath);
     // 从全局路径获取局部参考路径
@@ -130,7 +113,7 @@ public:
     inline VectorXd interpolatePoint(const VectorXd& start, const VectorXd& end, double t) {
         return start + t * (end - start);
     }
-    // 将gtsam::Matrix转换为cv::Mat
+    // // 将gtsam::Matrix转换为cv::Mat
     inline cv::Mat gtsamMatrixToCvMat(const gtsam::Matrix& matrix) {
         cv::Mat cvMat(matrix.rows(), matrix.cols(), CV_8U);
         for (int i = 0; i < matrix.rows(); ++i) {
@@ -141,22 +124,102 @@ public:
         return cvMat;
     }
 
-    // 将cv::Mat转换为gtsam::Matrix
-    inline gtsam::Matrix cvMatToGtsamMatrix(const cv::Mat& cvMat) {
-        gtsam::Matrix matrix(cvMat.rows, cvMat.cols);
-        for (int i = 0; i < cvMat.rows; ++i) {
-            for (int j = 0; j < cvMat.cols; ++j) {
-                matrix(i, j) = static_cast<float>(cvMat.at<uchar>(i, j)) / 255.0;
-            }
-        }
-        return matrix;
-    }
-    // 计算三维ESDF
-    std::vector<gtsam::Matrix> computeESDF(const std::vector<gtsam::Matrix>& ground_truth_map, double cell_size);
-    // 更新动态地图
-    void add_dynamic_obstacle(const std::vector<double>& position, const double& size, 
-                  const double& velocity, const std::vector<double>& direction, 
-                  double total_time, std::vector<gtsam::Matrix>& map, std::vector<gtsam::Matrix>& prob_map);
+    // // 将cv::Mat转换为gtsam::Matrix
+    // inline gtsam::Matrix cvMatToGtsamMatrix(const cv::Mat& cvMat) {
+    //     gtsam::Matrix matrix(cvMat.rows, cvMat.cols);
+    //     for (int i = 0; i < cvMat.rows; ++i) {
+    //         for (int j = 0; j < cvMat.cols; ++j) {
+    //             matrix(i, j) = static_cast<float>(cvMat.at<uchar>(i, j)) / 255.0;
+    //         }
+    //     }
+    //     return matrix;
+    // }
+    // // Function to convert a 3D cv::Mat back to vector of gtsam::Matrix
+    // inline std::vector<gtsam::Matrix> convertToGtsamMatrices(const cv::Mat& mat3D) {
+    //     int depth = mat3D.size[0];
+    //     int rows = mat3D.size[1];
+    //     int cols = mat3D.size[2];
+    //     std::vector<gtsam::Matrix> gtsam_matrices;
+    //     gtsam_matrices.reserve(depth);
+    //     for (int z = 0; z < depth; ++z) {
+    //         gtsam::Matrix slice(rows, cols);
+    //         for (int i = 0; i < rows; ++i) {
+    //             for (int j = 0; j < cols; ++j) {
+    //                 slice(i, j) = mat3D.at<double>(z, i, j);
+    //             }
+    //         }
+    //         gtsam_matrices.push_back(slice);
+    //     }
+    //     return gtsam_matrices;
+    // }
+    // struct Voxel {
+    //     int x, y, z;
+    //     double dist;
+    // };
+    // inline cv::Mat compute3DDistanceTransform(const cv::Mat& binaryMap) {
+    //     int depth = binaryMap.size[0];
+    //     int rows = binaryMap.size[1];
+    //     int cols = binaryMap.size[2];
+    //     int sizes[] = {depth, rows, cols};
+    //     cv::Mat distMap(3, sizes, CV_64F, cv::Scalar(std::numeric_limits<double>::max()));
+    //     std::queue<Voxel> q;
+    //     for (int z = 0; z < depth; ++z) {
+    //         for (int y = 0; y < rows; ++y) {
+    //             for (int x = 0; x < cols; ++x) {
+    //                 if (binaryMap.at<uchar>(z, y, x) == 0) {
+    //                     distMap.at<double>(z, y, x) = 0;
+    //                     q.push({x, y, z, 0});
+    //                 }
+    //             }
+    //         }
+    //     }
+    //     int dX[6] = {1, -1, 0, 0, 0, 0};
+    //     int dY[6] = {0, 0, 1, -1, 0, 0};
+    //     int dZ[6] = {0, 0, 0, 0, 1, -1};
+    //     while (!q.empty()) {
+    //         Voxel v = q.front();
+    //         q.pop();
+    //         for (int i = 0; i < 6; ++i) {
+    //             int nx = v.x + dX[i];
+    //             int ny = v.y + dY[i];
+    //             int nz = v.z + dZ[i];
+    //             if (nx >= 0 && ny >= 0 && nz >= 0 && nx < cols && ny < rows && nz < depth) {
+    //                 double newDist = v.dist + 1;
+    //                 if (newDist < distMap.at<double>(nz, ny, nx)) {
+    //                     distMap.at<double>(nz, ny, nx) = newDist;
+    //                     q.push({nx, ny, nz, newDist});
+    //                 }
+    //             }
+    //         }
+    //     }
+    //     return distMap;
+    // }
+    // inline void mergeMaps(const std::vector<gtsam::Matrix>& static_data, const std::vector<gtsam::Matrix>& dynamic_data, std::vector<gtsam::Matrix>& map) {
+    //     // 清空map_，以便重新填充
+    //     map.clear();
+    //     // 检查地图的维度是否相同
+    //     if (static_data.size() != dynamic_data.size()) {
+    //         throw std::runtime_error("Static and dynamic maps must have the same number of layers");
+    //     }
+    //     // 合并static_data和dynamic_data
+    //     for (size_t i = 0; i < static_data.size(); ++i) {
+    //         const gtsam::Matrix& static_matrix = static_data[i];
+    //         const gtsam::Matrix& dynamic_matrix = dynamic_data[i];
+    //         // 检查每一层的维度是否相同
+    //         if (static_matrix.rows() != dynamic_matrix.rows() || static_matrix.cols() != dynamic_matrix.cols()) {
+    //             throw std::runtime_error("Static and dynamic matrices in layer " + std::to_string(i) + " must have the same dimensions");
+    //         }
+    //         // 逐元素相加
+    //         gtsam::Matrix merged_matrix = static_matrix.array() + dynamic_matrix.array();
+    //         map.push_back(merged_matrix);
+    //     }
+    // }
+    // // Function to compute the signed distance field for the entire 3D space
+    // cv::Mat signedDistanceField3D(const std::vector<gtsam::Matrix>& ground_truth_map, double cell_size);
+    // // 更新动态地图
+    // void add_dynamic_obstacle(const std::vector<int>& position, const double& size, 
+    //               const double& velocity, const std::vector<double>& direction, 
+    //               double total_time, std::vector<gtsam::Matrix>& map, std::vector<gtsam::Matrix>& prob_map);
 
 };
 

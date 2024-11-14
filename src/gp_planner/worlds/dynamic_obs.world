@@ -66,10 +66,10 @@
         <kinematic>0</kinematic>
       </link>
     </model>
-    <gravity>0 0 0</gravity>
+    <gravity>0 0 -9.8</gravity>
     <magnetic_field>6e-06 2.3e-05 -4.2e-05</magnetic_field>
     <atmosphere type='adiabatic'/>
-    <physics name='default_physics' default='0' type='ode'>
+    <physics type='ode'>
       <max_step_size>0.001</max_step_size>
       <real_time_factor>1</real_time_factor>
       <real_time_update_rate>1000</real_time_update_rate>
@@ -79,9 +79,6 @@
       <background>0.7 0.7 0.7 1</background>
       <shadows>1</shadows>
     </scene>
-    <audio>
-      <device>default</device>
-    </audio>
     <wind/>
     <spherical_coordinates>
       <surface_model>EARTH_WGS84</surface_model>
@@ -90,80 +87,26 @@
       <elevation>0</elevation>
       <heading_deg>0</heading_deg>
     </spherical_coordinates>
-    <actor name='animated_box'>
-      <link name='box_link'>
-        <visual name='visual'>
-          <geometry>
-            <box>
-              <size>0.2 0.2 0.2</size>
-            </box>
-          </geometry>
-        </visual>
-        <self_collide>0</self_collide>
-        <inertial>
-          <pose>0 0 0 0 -0 0</pose>
-          <inertia>
-            <ixx>1</ixx>
-            <ixy>0</ixy>
-            <ixz>0</ixz>
-            <iyy>1</iyy>
-            <iyz>0</iyz>
-            <izz>1</izz>
-          </inertia>
-          <mass>1</mass>
-        </inertial>
-        <enable_wind>0</enable_wind>
-      </link>
-      <script>
-        <loop>1</loop>
-        <auto_start>1</auto_start>
-        <trajectory id='0' type='square'>
-          <waypoint>
-            <time>0</time>
-            <pose>-0.5 -0.5 1 0 -0 0</pose>
-          </waypoint>
-          <waypoint>
-            <time>1</time>
-            <pose>-0.5 0.5 1 0 -0 0</pose>
-          </waypoint>
-          <waypoint>
-            <time>2</time>
-            <pose>0.5 0.5 1 0 -0 0</pose>
-          </waypoint>
-          <waypoint>
-            <time>3</time>
-            <pose>0.5 -0.5 1 0 -0 0</pose>
-          </waypoint>
-          <waypoint>
-            <time>4</time>
-            <pose>-0.5 -0.5 1 0 -0 0</pose>
-          </waypoint>
-        </trajectory>
-      </script>
-      <skin>
-        <filename>__default__</filename>
-      </skin>
-    </actor>
     <state world_name='default'>
-      <sim_time>79 161000000</sim_time>
-      <real_time>57 326791660</real_time>
-      <wall_time>1730816146 529572570</wall_time>
-      <iterations>56866</iterations>
-      <model name='animated_box'>
-        <pose>0.396386 -0.563048 1 0 -0 0</pose>
-        <scale>1 1 1</scale>
-        <link name='box_link'>
-          <pose>0.396386 -0.563048 1 0 -0 0</pose>
-          <velocity>0 0 0 0 -0 0</velocity>
-          <acceleration>0 0 0 0 -0 0</acceleration>
-          <wrench>0 0 0 0 -0 0</wrench>
-        </link>
-      </model>
+      <sim_time>828 200000000</sim_time>
+      <real_time>795 175764754</real_time>
+      <wall_time>1731596232 909615751</wall_time>
+      <iterations>784727</iterations>
       <model name='ground_plane'>
         <pose>0 0 0 0 -0 0</pose>
         <scale>1 1 1</scale>
         <link name='link'>
           <pose>0 0 0 0 -0 0</pose>
+          <velocity>0 0 0 0 -0 0</velocity>
+          <acceleration>0 0 0 0 -0 0</acceleration>
+          <wrench>0 0 0 0 -0 0</wrench>
+        </link>
+      </model>
+      <model name='moving_sphere'>
+        <pose>0.028849 -0.801237 0.447806 0 -0 0</pose>
+        <scale>1 1 1</scale>
+        <link name='link'>
+          <pose>0.028849 -0.801237 0.447806 0 -0 0</pose>
           <velocity>0 0 0 0 -0 0</velocity>
           <acceleration>0 0 0 0 -0 0</acceleration>
           <wrench>0 0 0 0 -0 0</wrench>
@@ -175,10 +118,112 @@
     </state>
     <gui fullscreen='0'>
       <camera name='user_camera'>
-        <pose>11.9974 -14.8646 12.8713 0 0.695098 2.4668</pose>
+        <pose>0.176356 -8.31584 3.07779 0 0.445661 1.36106</pose>
         <view_controller>orbit</view_controller>
         <projection_type>perspective</projection_type>
       </camera>
     </gui>
+    <model name='moving_sphere'>
+      <link name='link'>
+        <inertial>
+          <mass>1.06311</mass>
+          <inertia>
+            <ixx>0.00153089</ixx>
+            <ixy>0</ixy>
+            <ixz>0</ixz>
+            <iyy>0.00153089</iyy>
+            <iyz>0</iyz>
+            <izz>0.00153089</izz>
+          </inertia>
+          <pose>0 0 0 0 -0 0</pose>
+        </inertial>
+        <self_collide>0</self_collide>
+        <enable_wind>0</enable_wind>
+        <kinematic>0</kinematic>
+        <pose>0 0 0 0 -0 0</pose>
+        <gravity>0</gravity>
+        <visual name='visual'>
+          <geometry>
+            <sphere>
+              <radius>0.07</radius>
+            </sphere>
+          </geometry>
+          <material>
+            <script>
+              <name>Gazebo/Grey</name>
+              <uri>file://media/materials/scripts/gazebo.material</uri>
+            </script>
+            <shader type='pixel'>
+              <normal_map>__default__</normal_map>
+            </shader>
+            <ambient>0.3 0.3 0.3 1</ambient>
+            <diffuse>0.7 0.7 0.7 1</diffuse>
+            <specular>0.01 0.01 0.01 1</specular>
+            <emissive>0 0 0 1</emissive>
+          </material>
+          <pose>0 0 0 0 -0 0</pose>
+          <transparency>0</transparency>
+          <cast_shadows>1</cast_shadows>
+        </visual>
+        <collision name='collision'>
+          <laser_retro>0</laser_retro>
+          <max_contacts>1000</max_contacts>
+          <pose>0 0 0 0 -0 0</pose>
+          <geometry>
+            <sphere>
+              <radius>0.06</radius>
+            </sphere>
+          </geometry>
+          <surface>
+            <friction>
+              <ode>
+                <mu>1</mu>
+                <mu2>1</mu2>
+                <fdir1>0 0 0</fdir1>
+                <slip1>0</slip1>
+                <slip2>0</slip2>
+              </ode>
+              <torsional>
+                <coefficient>1</coefficient>
+                <patch_radius>0</patch_radius>
+                <surface_radius>0</surface_radius>
+                <use_patch_radius>1</use_patch_radius>
+                <ode>
+                  <slip>0</slip>
+                </ode>
+              </torsional>
+            </friction>
+            <bounce>
+              <restitution_coefficient>0</restitution_coefficient>
+              <threshold>1e+06</threshold>
+            </bounce>
+            <contact>
+              <collide_without_contact>0</collide_without_contact>
+              <collide_without_contact_bitmask>1</collide_without_contact_bitmask>
+              <collide_bitmask>1</collide_bitmask>
+              <ode>
+                <soft_cfm>0</soft_cfm>
+                <soft_erp>0.2</soft_erp>
+                <kp>1e+13</kp>
+                <kd>1</kd>
+                <max_vel>0.01</max_vel>
+                <min_depth>0</min_depth>
+              </ode>
+              <bullet>
+                <split_impulse>1</split_impulse>
+                <split_impulse_penetration_threshold>-0.01</split_impulse_penetration_threshold>
+                <soft_cfm>0</soft_cfm>
+                <soft_erp>0.2</soft_erp>
+                <kp>1e+13</kp>
+                <kd>1</kd>
+              </bullet>
+            </contact>
+          </surface>
+        </collision>
+      </link>
+      <static>0</static>
+      <allow_auto_disable>1</allow_auto_disable>
+      <pose>0 -0.5 0.5 0 -0 0</pose>
+    </model>
   </world>
 </sdf>

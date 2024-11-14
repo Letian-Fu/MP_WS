@@ -19,19 +19,19 @@ robot:
   plan_traj_pub_topic: /gpmp2_planner/plan_traj
 
 global_planner:
-  step_rate: 0.02
+  step_rate: 0.03
   fai_rate: 1.01
   MAX_TREE_NUM: 2000
 
 settings:
   sdf_file: sdf/obs_test_one_box.bin
-  frequency: 10
-  ref_inter_num: 10
-  total_time: 6.0
+  frequency: 5
+  ref_inter_num: 3
+  total_time: 2.0
   total_step: 10
   obs_check_inter: 5
   control_inter: 5
-  cost_sigma: 0.2
+  cost_sigma: 0.04
   epsilon: 0.1
   fix_pose_sigma: 0.0001
   fix_vel_sigma: 0.0001

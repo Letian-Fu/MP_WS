@@ -33,7 +33,6 @@ gtsam::Values Optimizer(const ArmModel& arm, const SDF& sdf,
                         const OptimizerSetting& setting){
     const double delta_t = setting.total_time / static_cast<double>(setting.total_step);
     const double inter_dt = delta_t / static_cast<double>(setting.obs_check_inter + 1);
-
     //build graph
     gtsam::NonlinearFactorGraph graph;
     for(size_t i=0;i<=setting.total_step;i++){
@@ -47,7 +46,6 @@ gtsam::Values Optimizer(const ArmModel& arm, const SDF& sdf,
             graph.add(PriorFactorConf(pose_key,end_conf,setting.conf_prior_model));
             graph.add(PriorFactorVel(vel_key,end_vel,setting.vel_prior_model));
         }
-        // cout<<"PriorFactor Initialized"<<endl;
         // Limits for joints and velocity
         if(setting.flag_pos_limit){
             graph.add(JointLimitFactor(pose_key,setting.pos_limit_model,setting.joint_pos_limits_down,setting.joint_pos_limits_up,setting.pos_limit_thresh));
@@ -55,17 +53,14 @@ gtsam::Values Optimizer(const ArmModel& arm, const SDF& sdf,
         if(setting.flag_vel_limit){
             graph.add(VelLimitFactor(vel_key,setting.vel_limit_model,setting.vel_limits,setting.vel_limit_thresh));
         }
-        // cout<<"LimitFactor Initialized"<<endl;
         // non-interpolated cost factor
         graph.add(ObsFactor(pose_key, arm, sdf, setting.cost_sigma, setting.epsilon));
-        // cout<<"ObsFactor Initialized"<<endl;
         
         if(i>0){
             gtsam::Key last_pose_key = gtsam::Symbol('x', i - 1);
             gtsam::Key last_vel_key = gtsam::Symbol('v', i - 1);
             // GP factor
             graph.add(GPFactor(last_pose_key,last_vel_key,pose_key,vel_key,delta_t,setting.Qc_model));
-            // cout<<"GPFactor Initialized "<<i<<endl;
             // interpolated cost factor
             if(setting.obs_check_inter > 0){
                 for(size_t j = 1; j<=setting.obs_check_inter; j++){
@@ -73,7 +68,6 @@ gtsam::Values Optimizer(const ArmModel& arm, const SDF& sdf,
                     graph.add(ObsGPFactor(last_pose_key, last_vel_key, pose_key, vel_key,
                                         arm, sdf, setting.cost_sigma, setting.epsilon, setting.Qc_model, delta_t, tau));
                 }
-                // cout<<"ObsGPFactor Initialized "<<i<<endl;
             }
         }
     }
@@ -103,19 +97,14 @@ gtsam::Values interpolateTraj(const gtsam::Values& opt_values,
     size_t inter_pos_count = 0;
     // results
     gtsam::Values results;
-
     // TODO: gtsam keyvector has issue: free invalid pointer
     gtsam::KeyVector key_vec = opt_values.keys();
-
     gtsam::Matrix Qc;
     gtsam::Matrix Lambda;
     gtsam::Matrix Psi;
-
     Qc = getQc(Qc_model);
-
     // sort key list
     std::sort(key_vec.begin(), key_vec.end());
-
     for(size_t i=0;i<key_vec.size();i++){
         gtsam::Key key = key_vec[i];
         if(gtsam::Symbol(key).chr()=='x'){
@@ -129,7 +118,6 @@ gtsam::Values interpolateTraj(const gtsam::Values& opt_values,
                                     opt_values.at<gtsam::Vector>(gtsam::Symbol('x', pos_idx)));
                         results.insert(gtsam::Symbol('v', inter_pos_count),
                                     opt_values.at<gtsam::Vector>(gtsam::Symbol('v', pos_idx)));
-
                     } else {
                         // inter pose
                         double tau = static_cast<double>(inter_idx) * inter_dt;
@@ -146,7 +134,6 @@ gtsam::Values interpolateTraj(const gtsam::Values& opt_values,
                     }
                     inter_pos_count++;
                 }   
-
             } else {
                 // cache first pose
                 results.insert(gtsam::Symbol('x', 0), opt_values.at<gtsam::Vector>(gtsam::Symbol('x', 0)));

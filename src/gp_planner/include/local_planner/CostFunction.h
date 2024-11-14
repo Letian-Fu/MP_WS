@@ -83,6 +83,7 @@ inline double hingeLossObstacleCost(
     double dist_signed;
     try {
         dist_signed = sdf.getSignedDistance(point, field_gradient);
+        // cout<<"dist_signed: "<<dist_signed<<endl;
     } catch (SDFQueryOutOfRange&) {
         // std::cout << "[hingeLossObstacleCost] WARNING: querying signed distance
         // out of range, "
@@ -110,6 +111,7 @@ gtsam::Vector ObsCost(const gtsam::Vector& conf,
                         gtsam::OptionalMatrixType H1){
     // if Jacobians used, initialize as zeros
     // size: arm_nr_points_ * DOF
+    // cout<<"cost epsilon: "<< epsilon <<endl;
     if (H1) *H1 = gtsam::Matrix::Zero(arm.nr_body_spheres(), arm.dof());
     // run forward kinematics of this configuration
     std::vector<gtsam::Point3> sph_centers;
@@ -123,6 +125,7 @@ gtsam::Vector ObsCost(const gtsam::Vector& conf,
     // for each point on arm stick, get error
     for (size_t sph_idx = 0; sph_idx < arm.nr_body_spheres(); sph_idx++) {
         const double total_eps = arm.sphere_radius(sph_idx) + epsilon;
+        // cout<<"total_eps: "<<total_eps<<"  "<<epsilon<<endl;
         if (H1) {
             gtsam::Matrix13 Jerr_point;
             err(sph_idx) = hingeLossObstacleCost(sph_centers[sph_idx], sdf,
@@ -132,6 +135,7 @@ gtsam::Vector ObsCost(const gtsam::Vector& conf,
         } else {
             err(sph_idx) =
                 hingeLossObstacleCost(sph_centers[sph_idx], sdf, total_eps);
+            // if(err(sph_idx)>0)  cout<<"hingeLoss: "<<sph_idx<<"  "<<sph_centers[sph_idx].transpose()<<"  "<<arm.sphere_radius(sph_idx)<<"  "<<err(sph_idx)<<endl;
         }
     }
     return err;
