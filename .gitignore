@@ -1,5 +1,7 @@
 /.vscode
-/build
-/devel
 /src/gp_planner/sdf_data
-/src/gp_planner/gp_planner/scripts/yolo_scripts
+/src/gp_planner/scripts/yolo_scripts
+*.pt
+*.wts
+*.zip
+

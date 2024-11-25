@@ -1,0 +1,17 @@
+<launch>
+    <!-- 启动 RealSense 相机 -->
+    <include file="$(find realsense2_camera)/launch/rs_camera.launch">
+        <arg name="enable_pointcloud" value="true" />
+    </include>
+
+    <!-- 启动 occupacy_map 节点 -->
+    <node name="occupacy_map" pkg="environment_perception" type="occupacy_map" output="screen">
+        <param name="resolution" value="0.1" />
+    </node>
+
+    <!-- 启动 cluster 节点 -->
+    <node name="cluster" pkg="environment_perception" type="cluster" output="screen" />
+
+    <!-- 启动 RViz，并加载预定义的 RViz 配置文件 -->
+    <node name="rviz" pkg="rviz" type="rviz" args="-d $(find environment_perception)/rviz/environment.rviz" />
+</launch>

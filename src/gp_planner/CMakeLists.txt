@@ -35,6 +35,9 @@ find_package(catkin REQUIRED COMPONENTS
   trajectory_msgs
   nav_msgs
   cv_bridge
+  pcl_conversions
+  pcl_ros
+  message_generation
 )
 
 # Eigen
@@ -69,6 +72,19 @@ include_directories(
  SYSTEM
  ${Boost_INCLUDE_DIRS}
 )
+
+# 添加消息文件
+add_message_files(
+  FILES
+  BoundingBoxArray.msg
+)
+
+# 生成依赖
+generate_messages(
+  DEPENDENCIES
+  std_msgs
+)
+
 
 add_library(Global_Planner
   src/global_planner/tree.cpp
@@ -119,7 +135,7 @@ target_link_libraries(My_Planner
 catkin_package(
   INCLUDE_DIRS include
   LIBRARIES gp_planner Global_Planner Local_Planner My_Planner
-  CATKIN_DEPENDS actionlib control_msgs gazebo_msgs gazebo_plugins gazebo_ros gazebo_ros_control geometry_msgs moveit_core moveit_ros_planning moveit_ros_planning_interface moveit_visual_tools pluginlib roscpp roslib rospy sensor_msgs std_msgs tf2_eigen tf2_ros trajectory_msgs cv_bridge
+  CATKIN_DEPENDS actionlib control_msgs gazebo_msgs gazebo_plugins gazebo_ros gazebo_ros_control geometry_msgs moveit_core moveit_ros_planning moveit_ros_planning_interface moveit_visual_tools pluginlib roscpp roslib rospy sensor_msgs std_msgs tf2_eigen tf2_ros trajectory_msgs cv_bridge message_runtime
   DEPENDS Boost GTSAM
 )
 
@@ -156,6 +172,14 @@ catkin_package(
 
 add_executable(plan_test src/my_planner/plan_test.cpp)
 target_link_libraries(plan_test
+  My_Planner
+  ${catkin_LIBRARIES}
+  ${GTSAM_LIBRARIES}
+  ${OpenCV_LIBRARIES}
+)
+
+add_executable(get_depth src/my_planner/GetDepth.cpp)
+target_link_libraries(get_depth
   My_Planner
   ${catkin_LIBRARIES}
   ${GTSAM_LIBRARIES}

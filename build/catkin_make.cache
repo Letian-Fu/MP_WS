@@ -1,0 +1,2 @@
+camera_calibration:cr5_description:cr5_moveit_config:environment_perception:gp_planner
+-DCATKIN_DEVEL_PREFIX=/home/roboert/MP_WS/devel -DCMAKE_INSTALL_PREFIX=/home/roboert/MP_WS/install -G Unix Makefiles

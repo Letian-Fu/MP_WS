@@ -27,7 +27,7 @@ def move_obstacle():
     set_state = rospy.ServiceProxy('/gazebo/set_model_state', SetModelState)
     # 障碍物的名称
     model_name = 'moving_sphere'  # 替换为你的障碍物模型名称
-    rate = rospy.Rate(15)  # 控制循环的频率
+    rate = rospy.Rate(20)  # 控制循环的频率
     # 创建发布者
     pub = rospy.Publisher('/obstacle_info', Float64MultiArray, queue_size=10)
     # 创建MoveIt PlanningSceneInterface对象
@@ -48,7 +48,7 @@ def move_obstacle():
     floor_pose = Pose()
     floor_pose.position.x = 0.0
     floor_pose.position.y = 0.0
-    floor_pose.position.z = -0.15 - 0.05  # 长方体中心在-0.15，高度0.1，所以底部在-0.2
+    floor_pose.position.z = -0.08  # 长方体中心在-0.15，高度0.1，所以底部在-0.2
     floor_pose.orientation.w = 1.0
 
     floor.primitives.append(primitive)
@@ -57,8 +57,6 @@ def move_obstacle():
 
     # # 应用碰撞对象到规划场景
     planning_scene_interface.add_object(floor)
-
-
     obs_size = 0.08
 
     # 运动参数
@@ -76,8 +74,8 @@ def move_obstacle():
         frequency = 0.5  # 往复频率
     elif mode == 'vertical':
         # 上下往复运动参数
-        amplitude_z = 0.3  # z方向往复距离的一半
-        frequency_z = 0.05  # 往复频率
+        amplitude_z = 0.2  # z方向往复距离的一半
+        frequency_z = 0.1  # 往复频率
     elif mode == 'horizontal':
         # 水平往复运动参数
         amplitude_x = 1.5  # x方向往复距离的一半
@@ -91,7 +89,7 @@ def move_obstacle():
         angular_speed = 0.5  # 角速度
 
     t = 0.0
-    initial_height = 0.45
+    initial_height = 0.6
     while not rospy.is_shutdown():
         t += 0.05  # 增加时间步长，以便观察运动
 
@@ -115,9 +113,9 @@ def move_obstacle():
         elif mode == 'vertical':
             # 上下往复运动
             x = 0.0
-            y = -0.5
+            y = -0.55
             z = initial_height + amplitude_z * math.sin(2 * math.pi * frequency_z * t)
-            linear_speed = amplitude_z * 2 * math.pi * frequency_z * math.cos(2 * math.pi * frequency_z * t)
+            linear_speed = abs(amplitude_z * 2 * math.pi * frequency_z * math.cos(2 * math.pi * frequency_z * t))
             direction = normalize_vector(np.array([0.0, 0.0, 2 * math.pi * frequency_z * math.cos(2 * math.pi * frequency_z * t)]))
             # z = initial_height
             # linear_speed = 0
@@ -183,7 +181,9 @@ def move_obstacle():
 
         # 发布障碍物的位置和大小信息
         obstacle_info = Float64MultiArray()
-        obstacle_info.data = [x, y, z, obs_size+0.05, linear_speed, direction[0], direction[1],direction[2]]
+        obstacle_info.data = [x, y, z, obs_size, linear_speed, direction[0], direction[1],direction[2]]
+        print(f"Linear Speed: {linear_speed:.2f}, Direction: {direction}")
+        print(f"x: {x:.2f}, y: {y:.2f}, z: {z:.2f}, obs_size: {obs_size:.2f}")
         pub.publish(obstacle_info)
 
         # 控制循环频率

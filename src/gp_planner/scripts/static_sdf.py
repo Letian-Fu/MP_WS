@@ -70,9 +70,9 @@ if __name__ == "__main__":
     map = np.zeros((rows, cols, z))
     #
     origin = np.asarray([origin_x, origin_y, origin_z])
-    map = add_obstacle([10, 20, 16], [3, 3, 3], map)
+    # map = add_obstacle([10, 20, 16], [3, 3, 3], map)
     # floor
-    # map = add_obstacle([20, 20, 4], [30, 30, 3], map)
+    map = add_obstacle([20, 20, 4], [30, 30, 3], map)
 
     # Compute the signed distance field
     sdf = signedDistanceField3D(map, cell_size)

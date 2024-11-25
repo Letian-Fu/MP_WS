@@ -30,7 +30,7 @@ gtsam::Values Optimizer(const ArmModel& arm, const SDF& sdf,
                         const gtsam::Vector& start_conf, const gtsam::Vector& end_conf,
                         const gtsam::Vector& start_vel, const gtsam::Vector& end_vel,
                         const gtsam::Values& init_values,
-                        const OptimizerSetting& setting){
+                        const OptimizerSetting& setting, const gtsam::Vector& goal){
     const double delta_t = setting.total_time / static_cast<double>(setting.total_step);
     const double inter_dt = delta_t / static_cast<double>(setting.obs_check_inter + 1);
     //build graph
@@ -45,6 +45,9 @@ gtsam::Values Optimizer(const ArmModel& arm, const SDF& sdf,
         } else if(i == setting.total_step){
             graph.add(PriorFactorConf(pose_key,end_conf,setting.conf_prior_model));
             graph.add(PriorFactorVel(vel_key,end_vel,setting.vel_prior_model));
+            
+            graph.add(PriorFactorConf(pose_key,goal,setting.conf_prior_model));
+            graph.add(PriorFactorVel(vel_key,gtsam::Vector::Zero(6),setting.vel_prior_model));
         }
         // Limits for joints and velocity
         if(setting.flag_pos_limit){

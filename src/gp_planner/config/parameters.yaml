@@ -25,13 +25,13 @@ global_planner:
 
 settings:
   sdf_file: sdf/obs_test_one_box.bin
-  frequency: 5
-  ref_inter_num: 3
-  total_time: 2.0
+  frequency: 2
+  ref_inter_num: 4
+  total_time: 1.5
   total_step: 10
   obs_check_inter: 5
   control_inter: 5
-  cost_sigma: 0.04
+  cost_sigma: 0.02
   epsilon: 0.1
   fix_pose_sigma: 0.0001
   fix_vel_sigma: 0.0001
@@ -46,3 +46,16 @@ settings:
   vel_limit_sigma: 0.0001
   goal_tolerance: 0.05
   decay_factor: 0.5
+  map_update_frenquency: 5
+
+sdf:
+  static_file: /home/roboert/MP_WS/src/gp_planner/sdf_data/sdf_data_static_py.txt
+  dynamic_file: /home/roboert/MP_WS/src/gp_planner/sdf_data/sdf_data_dynamic_py.txt
+  origin_x: -1
+  origin_y: -1
+  origin_z: -0.35
+  cell_size: 0.05
+  rows: 40
+  cols: 40
+  z: 30
+

@@ -37,12 +37,16 @@ public:
     int control_inter_, ref_inter_num_;
     double goal_tolerance_;
     double decay_factor_;   //衰减因子
+    double max_vel_,traj_total_time_;
+    bool ref_flag_;
+    int count_;
     // esdf相关
     gp_planner::SDF sdf_;
     std::vector<gtsam::Matrix> static_data_;
     std::vector<gtsam::Matrix> dynamic_data_;
     std::vector<gtsam::Matrix> map_;
     std::vector<gtsam::Matrix> prob_map_;
+    std::string static_file_,dynamic_file_;
     // 优化器参数
     gp_planner::OptimizerSetting opt_setting_;
     // 规划结果
@@ -77,9 +81,11 @@ public:
     void DynamicCallback(const std_msgs::Float64MultiArray::ConstPtr& msg);
     void LocalPlanningCallback(const ros::TimerEvent&);
     void readSDFFile(const ros::TimerEvent&);
-    void publishTrajectory();
+    void publishTrajectory(int exec_step,bool pub_vel);
     void publishLocalPath();
     void publishGlobalPath();
+    void generateCombinations(std::vector<int>& current, int index, std::vector<std::vector<int>>& combinations);
+    std::vector<VectorXd> generateTraj(const VectorXd& cur_pos);
 
     // 找到全局路径中距离当前位置最近的点
     int findClosestPoint(const vector<VectorXd>& globalPath);

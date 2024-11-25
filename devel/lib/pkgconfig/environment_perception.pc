@@ -1,0 +1,8 @@
+prefix=/home/roboert/MP_WS/devel
+
+Name: environment_perception
+Description: Description of environment_perception
+Version: 0.0.0
+Cflags: 
+Libs: -L${prefix}/lib 
+Requires: 
