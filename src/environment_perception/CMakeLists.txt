@@ -15,11 +15,14 @@ find_package(catkin REQUIRED COMPONENTS
   std_msgs
   pcl_conversions
   rosconsole
+  tf2_eigen
+  tf2_ros
   grid_map_core
   grid_map_ros
   grid_map_msgs
   octomap_msgs
   octomap_ros
+  geometry_msgs
 )
 
 # 查找 OctoMap

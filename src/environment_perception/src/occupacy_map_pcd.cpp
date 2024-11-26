@@ -4,78 +4,69 @@
 #include <pcl/point_types.h>
 #include <octomap/octomap.h>
 #include <octomap/OcTree.h>
-#include <octomap_msgs/Octomap.h>
-#include <octomap_msgs/conversions.h>
-#include <sensor_msgs/PointCloud2.h>
 #include <iostream>
 
 int main(int argc, char** argv) {
-    // 初始化 ROS 节点
-    ros::init(argc, argv, "pointcloud_to_octomap");
-    ros::NodeHandle nh;
-
-    // 发布 OctoMap
-    ros::Publisher octomap_pub = nh.advertise<octomap_msgs::Octomap>("octomap", 1, true);
 
     // 参数配置
-    std::string input_pcd_file;
-    nh.param<std::string>("input_pcd_file", input_pcd_file, "/home/roboert/MP_WS/src/environment_perception/clustered_cloud.pcd");
+    // std::string ground_pcd_file = "/home/roboert/MP_WS/src/environment_perception/pcd/ground_cloud.pcd";
+    std::string clustered_pcd_file = "/home/roboert/MP_WS/src/environment_perception/pcd/clustered_cloud.pcd";
 
-    double resolution;
-    nh.param<double>("resolution", resolution, 0.1);
+    double resolution = 0.02;  // OctoMap 分辨率
+    // std::string output_file = "/home/roboert/MP_WS/src/environment_perception/octomap.bt";
+    std::string output_file = "/home/roboert/MP_WS/src/environment_perception/octomap_without_ground.bt";
 
-    std::string output_file;
-    nh.param<std::string>("output_file", output_file, "/home/roboert/MP_WS/src/environment_perception/octomap.bt");
+    // // 加载地面点云
+    // pcl::PointCloud<pcl::PointXYZ>::Ptr ground_cloud(new pcl::PointCloud<pcl::PointXYZ>());
+    // if (pcl::io::loadPCDFile<pcl::PointXYZ>(ground_pcd_file, *ground_cloud) == -1) {
+    //     std::cerr << "无法加载地面点云文件: " << ground_pcd_file << std::endl;
+    //     return -1;
+    // }
 
-    const std::string frame_id = "camera_link";  // 坐标系
+    // if (ground_cloud->points.empty()) {
+    //     std::cerr << "地面点云为空，无法生成 OctoMap！" << std::endl;
+    //     return -1;
+    // }
 
-    // 加载点云文件
-    pcl::PointCloud<pcl::PointXYZ>::Ptr cloud(new pcl::PointCloud<pcl::PointXYZ>());
-    if (pcl::io::loadPCDFile<pcl::PointXYZ>(input_pcd_file, *cloud) == -1) {
-        std::cerr << "无法加载点云文件: " << input_pcd_file << std::endl;
+    // std::cout << "地面点云加载成功，点的数量: " << ground_cloud->points.size() << std::endl;
+
+    // 加载聚类点云
+    pcl::PointCloud<pcl::PointXYZ>::Ptr clustered_cloud(new pcl::PointCloud<pcl::PointXYZ>());
+    if (pcl::io::loadPCDFile<pcl::PointXYZ>(clustered_pcd_file, *clustered_cloud) == -1) {
+        std::cerr << "无法加载聚类点云文件: " << clustered_pcd_file << std::endl;
         return -1;
     }
 
-    if (cloud->points.empty()) {
-        std::cerr << "点云为空，无法生成 OctoMap！" << std::endl;
+    if (clustered_cloud->points.empty()) {
+        std::cerr << "聚类点云为空，无法生成 OctoMap！" << std::endl;
         return -1;
     }
 
-    std::cout << "点云加载成功，点的数量: " << cloud->points.size() << std::endl;
+    std::cout << "聚类点云加载成功，点的数量: " << clustered_cloud->points.size() << std::endl;
 
     // 创建 OctoMap
     octomap::OcTree tree(resolution);
-    for (const auto& point : cloud->points) {
-        tree.updateNode(octomap::point3d(point.x, point.y, point.z), true);
+
+    // // 添加地面点云到 OctoMap
+    // std::cout << "开始添加地面点云到 OctoMap..." << std::endl;
+    // for (const auto& point : ground_cloud->points) {
+    //     tree.updateNode(octomap::point3d(point.x, point.y, point.z), true);  // 插入地面点
+    // }
+
+    // 添加聚类点云到 OctoMap
+    std::cout << "开始添加聚类点云到 OctoMap..." << std::endl;
+    for (const auto& point : clustered_cloud->points) {
+        tree.updateNode(octomap::point3d(point.x, point.y, point.z), true);  // 插入聚类点
     }
-    tree.updateInnerOccupancy();  // 更新 OctoMap 的内部节点
+
+    // 更新 OctoMap 的内部节点
+    tree.updateInnerOccupancy();
 
     // 保存 OctoMap 到文件
     if (tree.writeBinary(output_file)) {
         std::cout << "OctoMap 已保存到文件: " << output_file << std::endl;
     } else {
         std::cerr << "无法保存 OctoMap" << std::endl;
-    }
-
-    // 发布 OctoMap
-    ros::Rate rate(0.2);  // 发布频率 0.2 Hz
-    while (ros::ok()) {
-        octomap_msgs::Octomap octomap_msg;
-        // 确保正确转换为二进制地图消息
-        if (!octomap_msgs::binaryMapToMsg(tree, octomap_msg)) {
-            std::cerr << "无法将 OctoMap 转换为 ROS 消息格式" << std::endl;
-            break;  // 如果转换失败，退出循环
-        }
-
-        // 设置消息头
-        octomap_msg.header.frame_id = frame_id;
-        octomap_msg.header.stamp = ros::Time::now();
-
-        // 发布消息
-        octomap_pub.publish(octomap_msg);
-        std::cout << "已发布 OctoMap" << std::endl;
-
-        rate.sleep();
     }
 
     return 0;

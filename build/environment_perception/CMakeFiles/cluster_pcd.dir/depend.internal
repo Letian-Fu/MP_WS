@@ -397,6 +397,8 @@ environment_perception/CMakeFiles/cluster_pcd.dir/src/cluster_pcd.cpp.o
  /usr/include/pcl-1.10/pcl/search/organized.h
  /usr/include/pcl-1.10/pcl/search/pcl_search.h
  /usr/include/pcl-1.10/pcl/search/search.h
+ /usr/include/pcl-1.10/pcl/segmentation/extract_clusters.h
+ /usr/include/pcl-1.10/pcl/segmentation/impl/extract_clusters.hpp
  /usr/include/pcl-1.10/pcl/segmentation/impl/sac_segmentation.hpp
  /usr/include/pcl-1.10/pcl/segmentation/sac_segmentation.h
  /usr/include/pcl-1.10/pcl/surface/boost.h

@@ -69,26 +69,26 @@ void pointCloudCallback(const sensor_msgs::PointCloud2ConstPtr& cloud_msg) {
     savePointCloudToFile(cloud, original_filename);
 
     // **步骤 1：范围滤波**
-    pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_filtered(new pcl::PointCloud<pcl::PointXYZ>());
+    pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_range_filtered(new pcl::PointCloud<pcl::PointXYZ>());
     pcl::PassThrough<pcl::PointXYZ> pass;
     pass.setInputCloud(cloud);                 // 对原始点云进行范围过滤
     pass.setFilterFieldName("z");              // 仅对 z 维度进行过滤
-    pass.setFilterLimits(0.5, 2.0);            // 保留 z 在 0.5 到 2.0 米之间的点
+    pass.setFilterLimits(0.3, 2.5);            // 保留 z 在 0.5 到 2.0 米之间的点
     pass.setFilterLimitsNegative(false);       // 设为 true 则保留范围以外的点
-    pass.filter(*cloud_filtered);
+    pass.filter(*cloud_range_filtered);
 
-    std::cout << "范围滤波后点云点数: " << cloud_filtered->points.size() << std::endl;
+    std::cout << "范围滤波后点云点数: " << cloud_range_filtered->points.size() << std::endl;
 
     // 发布范围滤波后的点云
     sensor_msgs::PointCloud2 output_filtered;
-    pcl::toROSMsg(*cloud_filtered, output_filtered);
+    pcl::toROSMsg(*cloud_range_filtered, output_filtered);
     output_filtered.header = cloud_msg->header;
     pub_range_filtered.publish(output_filtered);
 
     // **步骤 2：体素滤波**
     pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_voxel_filtered(new pcl::PointCloud<pcl::PointXYZ>());
     pcl::VoxelGrid<pcl::PointXYZ> voxel_filter;
-    voxel_filter.setInputCloud(cloud_filtered);  // 对范围滤波后的点云进行体素滤波
+    voxel_filter.setInputCloud(cloud_range_filtered);  // 对范围滤波后的点云进行体素滤波
     voxel_filter.setLeafSize(0.05f, 0.05f, 0.05f);     // 5cm 的体素大小
     voxel_filter.filter(*cloud_voxel_filtered);
 
@@ -104,6 +104,7 @@ void pointCloudCallback(const sensor_msgs::PointCloud2ConstPtr& cloud_msg) {
     pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_gaussian_filtered(new pcl::PointCloud<pcl::PointXYZ>());
     pcl::MovingLeastSquares<pcl::PointXYZ, pcl::PointXYZ> mls;
     mls.setInputCloud(cloud_voxel_filtered);  // 对体素滤波后的点云进行高斯平滑
+    // mls.setInputCloud(cloud_range_filtered);  // 对体素滤波后的点云进行高斯平滑
     mls.setSearchRadius(0.1);                 // 设置高斯核的搜索半径
     mls.setPolynomialOrder(2);                // 设置多项式阶数
     mls.setUpsamplingMethod(pcl::MovingLeastSquares<pcl::PointXYZ, pcl::PointXYZ>::NONE);  // 不插值
@@ -127,7 +128,7 @@ void pointCloudCallback(const sensor_msgs::PointCloud2ConstPtr& cloud_msg) {
     seg.setOptimizeCoefficients(true);       // 优化模型系数
     seg.setModelType(pcl::SACMODEL_PLANE);   // 设置模型类型为平面
     seg.setMethodType(pcl::SAC_RANSAC);      // 使用 RANSAC 算法
-    seg.setDistanceThreshold(0.05);          // 平面距离阈值（单位：米）
+    seg.setDistanceThreshold(0.1);          // 平面距离阈值（单位：米）
     seg.setInputCloud(cloud_gaussian_filtered);
     seg.segment(*ground_inliers, *coefficients);
 
@@ -138,7 +139,7 @@ void pointCloudCallback(const sensor_msgs::PointCloud2ConstPtr& cloud_msg) {
 
         // 提取地面点云
         pcl::ExtractIndices<pcl::PointXYZ> extract;
-        extract.setInputCloud(cloud_voxel_filtered);
+        extract.setInputCloud(cloud_gaussian_filtered);
         extract.setIndices(ground_inliers);
         extract.setNegative(false); // 提取地面点
         extract.filter(*cloud_ground);
@@ -147,6 +148,10 @@ void pointCloudCallback(const sensor_msgs::PointCloud2ConstPtr& cloud_msg) {
         extract.setNegative(true); // 提取非地面点
         extract.filter(*cloud_non_ground);
     }
+
+    std::cout << "总点数: " << cloud_gaussian_filtered->points.size() << std::endl;
+    std::cout << "地面点数: " << cloud_ground->points.size() << std::endl;
+    std::cout << "非地面点数: " << cloud_non_ground->points.size() << std::endl;
 
     // 发布地面点云
     sensor_msgs::PointCloud2 output_ground;
@@ -170,13 +175,13 @@ void pointCloudCallback(const sensor_msgs::PointCloud2ConstPtr& cloud_msg) {
     std::vector<pcl::PointIndices> cluster_indices;
 
     // **步骤 4：欧氏距离聚类（对非地面点云）**
-    // pcl::EuclideanClusterExtraction<pcl::PointXYZ> ec;
-    // ec.setClusterTolerance(0.1); // 聚类半径（单位：米）
-    // ec.setMinClusterSize(50);    // 每个聚类的最小点数
-    // ec.setMaxClusterSize(10000); // 每个聚类的最大点数
-    // ec.setSearchMethod(tree);
-    // ec.setInputCloud(cloud_voxel_filtered);
-    // ec.extract(cluster_indices); // 提取聚类结果
+    pcl::EuclideanClusterExtraction<pcl::PointXYZ> ec;
+    ec.setClusterTolerance(0.1); // 聚类半径（单位：米）
+    ec.setMinClusterSize(50);    // 每个聚类的最小点数
+    ec.setMaxClusterSize(10000); // 每个聚类的最大点数
+    ec.setSearchMethod(tree);
+    ec.setInputCloud(cloud_non_ground);
+    ec.extract(cluster_indices); // 提取聚类结果
 
     // std::cout << "欧式 聚类后，检测到 " << cluster_indices.size() << " 个簇。" << std::endl;
 
@@ -188,14 +193,14 @@ void pointCloudCallback(const sensor_msgs::PointCloud2ConstPtr& cloud_msg) {
     // dbscan.setMaxClusterSize(10000); // 设置簇的最大点数
     // dbscan.extract(cluster_indices);
 
-    DBSCANKdtreeCluster<pcl::PointXYZ> ec;
-    ec.setCorePointMinPts(20);
-    ec.setClusterTolerance(0.1);
-    ec.setMinClusterSize(50);
-    ec.setMaxClusterSize(10000);
-    ec.setSearchMethod(tree);
-    ec.setInputCloud(cloud_non_ground);
-    ec.extract(cluster_indices);
+    // DBSCANKdtreeCluster<pcl::PointXYZ> ec;
+    // ec.setCorePointMinPts(20);
+    // ec.setClusterTolerance(0.1);
+    // ec.setMinClusterSize(50);
+    // ec.setMaxClusterSize(10000);
+    // ec.setSearchMethod(tree);
+    // ec.setInputCloud(cloud_non_ground);
+    // ec.extract(cluster_indices);
 
     if (cluster_indices.empty()) {
         std::cerr << "DBSCAN 聚类后无聚类结果！" << std::endl;
@@ -217,9 +222,9 @@ void pointCloudCallback(const sensor_msgs::PointCloud2ConstPtr& cloud_msg) {
 
         for (const auto& index : indices.indices) {
             pcl::PointXYZRGB point;
-            point.x = cloud_voxel_filtered->points[index].x;
-            point.y = cloud_voxel_filtered->points[index].y;
-            point.z = cloud_voxel_filtered->points[index].z;
+            point.x = cloud_non_ground->points[index].x;
+            point.y = cloud_non_ground->points[index].y;
+            point.z = cloud_non_ground->points[index].z;
             point.r = r;
             point.g = g;
             point.b = b;
@@ -269,6 +274,7 @@ int main(int argc, char** argv) {
 
     // 订阅相机发布的点云话题
     ros::Subscriber sub = nh.subscribe("/camera/depth/color/points", 10, pointCloudCallback);
+    // ros::Subscriber sub = nh.subscribe("/camera/depth_registered/points", 10, pointCloudCallback);
 
     std::cout << "点云处理节点已启动，等待点云数据..." << std::endl;
     ros::spin();

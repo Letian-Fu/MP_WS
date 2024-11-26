@@ -7,6 +7,9 @@
 #include <octomap_msgs/Octomap.h>
 #include <octomap_msgs/conversions.h>
 #include <sensor_msgs/PointCloud2.h>
+#include <tf2_ros/transform_listener.h>
+#include <tf2_sensor_msgs/tf2_sensor_msgs.h>
+#include <geometry_msgs/TransformStamped.h>
 #include <iostream>
 
 class PointCloudToOctomap {
@@ -20,7 +23,7 @@ public:
 
         // 订阅点云消息
         pointcloud_sub_ = nh_.subscribe("/clustered_points", 1, &PointCloudToOctomap::pointCloudCallback, this);
-
+        tf_listener_ptr_ = new tf2_ros::TransformListener(tf_buffer_);
         std::cout << "节点初始化完成，等待点云数据..." << std::endl;
     }
 
@@ -28,14 +31,33 @@ private:
     ros::NodeHandle nh_;                          // ROS 节点句柄
     ros::Subscriber pointcloud_sub_;              // 点云订阅者
     ros::Publisher octomap_pub_;                  // OctoMap 发布者
+    tf2_ros::Buffer tf_buffer_;                   // TF2 缓存
+    tf2_ros::TransformListener *tf_listener_ptr_ = nullptr;      // TF2 监听器
+    
     double resolution_;                           // OctoMap 分辨率
 
     void pointCloudCallback(const sensor_msgs::PointCloud2::ConstPtr& cloud_msg) {
         // 获取点云的 frame_id
         std::string frame_id = cloud_msg->header.frame_id;
-
         // 转换点云消息为 PCL 格式
         pcl::PointCloud<pcl::PointXYZ>::Ptr cloud(new pcl::PointCloud<pcl::PointXYZ>());
+
+        // 转换点云到 base_link 坐标系
+        sensor_msgs::PointCloud2 cloud_transformed;
+        // try {
+        //     // 查找从点云原始坐标系到 base_link 的变换
+        //     geometry_msgs::TransformStamped transform_stamped = tf_buffer_.lookupTransform(
+        //         "world", frame_id, cloud_msg->header.stamp, ros::Duration(0.1));
+
+        //     // 使用 TF2 转换点云
+        //     tf2::doTransform(*cloud_msg, cloud_transformed, transform_stamped);
+        // } catch (tf2::TransformException& ex) {
+        //     ROS_ERROR("TF2 Transform Exception: %s", ex.what());
+        //     return;
+        // }
+    //    pcl::fromROSMsg(cloud_transformed, *cloud);
+        
+ 
         pcl::fromROSMsg(*cloud_msg, *cloud);
 
         if (cloud->points.empty()) {
@@ -61,6 +83,7 @@ private:
 
         // 设置消息头
         octomap_msg.header.frame_id = frame_id;  // 使用点云的 frame_id
+        // octomap_msg.header.frame_id = "world";  // 设置为世界坐标系 base_link
         octomap_msg.header.stamp = ros::Time::now();
 
         // 发布 OctoMap

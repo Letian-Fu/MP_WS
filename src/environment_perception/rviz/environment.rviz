@@ -7,6 +7,8 @@ Panels:
         - /Global Options1
         - /Status1
         - /OccupancyGrid1
+        - /gaussian_clouds1
+        - /non_ground_clouds1
       Splitter Ratio: 0.5
     Tree Height: 481
   - Class: rviz/Selection
@@ -65,14 +67,14 @@ Visualization Manager:
       Unreliable: false
       Value: true
     - Class: octomap_rviz_plugin/OccupancyGrid
-      Enabled: true
+      Enabled: false
       Max. Height Display: 3.4028234663852886e+38
       Max. Octree Depth: 16
       Min. Height Display: -3.4028234663852886e+38
       Name: OccupancyGrid
       Octomap Topic: /occupacy_map/octomap
       Queue Size: 5
-      Value: true
+      Value: false
       Voxel Alpha: 1
       Voxel Coloring: Z-Axis
       Voxel Rendering: Occupied Voxels
@@ -144,7 +146,7 @@ Visualization Manager:
       Color: 32; 74; 135
       Color Transformer: FlatColor
       Decay Time: 0
-      Enabled: false
+      Enabled: true
       Invert Rainbow: false
       Max Color: 255; 255; 255
       Min Color: 0; 0; 0
@@ -159,7 +161,7 @@ Visualization Manager:
       Unreliable: false
       Use Fixed Frame: true
       Use rainbow: true
-      Value: false
+      Value: true
     - Alpha: 1
       Autocompute Intensity Bounds: true
       Autocompute Value Bounds:
@@ -200,7 +202,7 @@ Visualization Manager:
       Color: 138; 226; 52
       Color Transformer: FlatColor
       Decay Time: 0
-      Enabled: false
+      Enabled: true
       Invert Rainbow: false
       Max Color: 255; 255; 255
       Min Color: 0; 0; 0
@@ -211,11 +213,11 @@ Visualization Manager:
       Size (Pixels): 3
       Size (m): 0.009999999776482582
       Style: Flat Squares
-      Topic: /range_filtered_points
+      Topic: /non_ground_points
       Unreliable: false
       Use Fixed Frame: true
       Use rainbow: true
-      Value: false
+      Value: true
     - Alpha: 1
       Autocompute Intensity Bounds: true
       Autocompute Value Bounds:
@@ -228,7 +230,7 @@ Visualization Manager:
       Color: 255; 255; 255
       Color Transformer: RGB8
       Decay Time: 0
-      Enabled: true
+      Enabled: false
       Invert Rainbow: false
       Max Color: 255; 255; 255
       Min Color: 0; 0; 0
@@ -243,7 +245,7 @@ Visualization Manager:
       Unreliable: false
       Use Fixed Frame: true
       Use rainbow: true
-      Value: true
+      Value: false
   Enabled: true
   Global Options:
     Background Color: 48; 48; 48
@@ -272,7 +274,7 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/Orbit
-      Distance: 3.6921863555908203
+      Distance: 3.4338955879211426
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
@@ -288,9 +290,9 @@ Visualization Manager:
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Pitch: 0.1252025067806244
+      Pitch: 0.360202431678772
       Target Frame: <Fixed Frame>
-      Yaw: 3.9985575675964355
+      Yaw: 3.913562774658203
     Saved: ~
 Window Geometry:
   Displays:
