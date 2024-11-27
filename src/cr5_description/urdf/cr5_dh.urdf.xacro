@@ -205,7 +205,6 @@
       <plugin name="contact_plugin" filename="libContactPlugin.so"/>
     </sensor>
   </link>
-  </link>
 
   <joint name="joint4" type="revolute">
     <origin xyz="-0.357 0 0.141" rpy="0 0 -1.5708" />
@@ -252,7 +251,6 @@
       <plugin name="contact_plugin" filename="libContactPlugin.so"/>
     </sensor>
   </link>
-  </link>
 
   <joint name="joint5" type="revolute">
     <origin xyz="0 -0.116 0" rpy="1.5708 0 0" />
@@ -298,7 +296,6 @@
       </contact>
       <plugin name="contact_plugin" filename="libContactPlugin.so"/>
     </sensor>
-  </link>
   </link>
 
   <joint name="joint6" type="revolute">
