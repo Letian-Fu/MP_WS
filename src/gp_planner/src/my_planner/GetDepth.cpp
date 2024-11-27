@@ -179,13 +179,13 @@ void callback(const gp_planner::BoundingBoxArray::ConstPtr &bounding_boxes_msg, 
             "world", sphere_center_cam.header.frame_id, cloud_msg->header.stamp, ros::Duration(0.1));
         tf2::doTransform(sphere_center_cam, sphere_center_world, transform_stamped);
 
-        ROS_INFO("Sphere center in world frame: (%f, %f, %f)", 
-                sphere_center_world.point.x,
-                sphere_center_world.point.y,
-                sphere_center_world.point.z);
+        std::cout<<"Sphere center in world frame: ( "<< 
+                sphere_center_world.point.x<<","<<
+                sphere_center_world.point.y<<","<<
+                sphere_center_world.point.z<<")"<<std::endl;
 
     } catch (tf2::TransformException &ex) {
-        ROS_ERROR("TF2 Transform Exception: %s", ex.what());
+        std::cerr <<"TF2 Transform Exception: "<< ex.what()<<std::endl;
         return;
     }
 

@@ -63,7 +63,7 @@ class DynamicSDF:
         field = map_dist - inv_map_dist
         # metric
         field = field * cell_size
-        field = field * prob_map
+        # field = field * prob_map
         field = np.maximum(field, 0).astype(float)
         return field
 

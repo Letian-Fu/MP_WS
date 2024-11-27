@@ -7,7 +7,11 @@
 #include <chrono>
 #include <iomanip> // for std::put_time
 
-MyPlanner::MyPlanner(ros::NodeHandle& nh):nh_(nh),client_("/arm_controller/follow_joint_trajectory", true){
+MyPlanner::MyPlanner(ros::NodeHandle& nh):
+nh_(nh),
+real_robot_client_("/cr5_robot/joint_controller/follow_joint_trajectory", true),
+gazebo_client_("/arm_controller/follow_joint_trajectory", true)
+{
     move_group_ = new Move_Group("arm");
     planning_scene_ = new Scene();
     robot_model_loader_ = new Robot_Model_Loader("robot_description");
@@ -174,10 +178,29 @@ MyPlanner::MyPlanner(ros::NodeHandle& nh):nh_(nh),client_("/arm_controller/follo
     mutex_ = std::make_shared<std::mutex>();  // 创建互斥锁
     map_timer_ = nh_.createTimer(ros::Duration(1/map_update_frenquency), &MyPlanner::readSDFFile, this);  // 创建定时器
 
+    // std::cout<<"Waiting for Gazebo action server..."<<std::endl;
+    // gazebo_client_.waitForServer();
+    // std::cout<<"Gazebo action server connected."<<std::endl;
+    ROS_INFO("Waiting for Gazebo action server...");
+    gazebo_client_.waitForServer();
+    ROS_INFO("Gazebo action server connected.");
+
+    real_robot_ = false;
+    nh.getParam("real_robot", real_robot_);
+    if(real_robot_){
+        ROS_INFO("Waiting for Real Robot action server...");
+        real_robot_client_.waitForServer();
+        ROS_INFO("Real Robot action server connected.");
+    }
+
     is_plan_success_ = false;
     is_global_success_ = false;
     is_local_success_ = false;
     ref_flag_ = false;
+
+    path_length_ = 0;
+    plan_time_cost_ = 0;
+    plan_times_ = 0;
 }
 
 gtsam::Values MyPlanner::InitWithRef(const std::vector<Eigen::VectorXd>& ref_path, int total_step){
@@ -221,7 +244,6 @@ vector<VectorXd> MyPlanner::generateTraj(const VectorXd& cur_pos){
     std::vector<int> combination(dof_, 0);
     std::vector<std::vector<int>> all_combinations;
     generateCombinations(combination, 0, all_combinations);
-    cout<<all_combinations.size()<<endl;
     for(const auto& comb : all_combinations){
         vector<VectorXd> traj(numPoints);
         for(int j=0;j<numPoints;j++){
@@ -254,7 +276,7 @@ vector<VectorXd> MyPlanner::generateTraj(const VectorXd& cur_pos){
                         temp_values.at<gtsam::Vector>(gtsam::Symbol('x',m)),gtsam::Vector::Zero(6),nullptr,nullptr,nullptr,nullptr)).sum();
         }
         // 比较，优先coll_cost最低（最低为0），在coll_cost一样的基础上比较goal_cost,选goal_cost最小的那个为best_traj
-        if (coll_cost <= 0.2 && ((coll_cost <= 0.2 && gp_cost < bestScore_gp)|| (coll_cost <= 0.2 && gp_cost == bestScore_gp && goal_cost<bestScore_goal))) {
+        if (coll_cost <= 0.5 && ((coll_cost <= 0.5 && gp_cost < bestScore_gp)|| (coll_cost <= 0.5 && gp_cost == bestScore_gp && goal_cost<bestScore_goal))) {
             bestScore_obs = coll_cost;
             bestScore_goal = goal_cost;
             bestScore_gp = gp_cost;
@@ -404,6 +426,8 @@ void MyPlanner::LocalPlanningCallback(const ros::TimerEvent&){
     is_local_success_ = false;
     auto start = std::chrono::high_resolution_clock::now();
     if(is_global_success_ && calculateDistance(arm_pos_, end_conf_)> goal_tolerance_){
+        plan_times_ ++;
+
         vector<VectorXd> local_ref_path = getLocalRefPath();
         gtsam::Vector start_conf = ConvertToGtsamVector(arm_pos_);
         gtsam::Vector end_conf = ConvertToGtsamVector(local_ref_path[local_ref_path.size()-1]);
@@ -420,7 +444,6 @@ void MyPlanner::LocalPlanningCallback(const ros::TimerEvent&){
         start_vel_ = (end_conf - start_conf) / total_time;
         end_vel_ = (end_conf - start_conf) / total_time;
         opt_setting_.set_total_time(total_time);
-        cout<<"Start Optimization"<<endl;
         gtsam::Values opt_values = gp_planner::Optimizer(robot_,sdf_,start_conf,end_conf,
                                                         ConvertToGtsamVector(start_vel_),ConvertToGtsamVector(end_vel_),
                                                         init_values,opt_setting_,
@@ -429,8 +452,10 @@ void MyPlanner::LocalPlanningCallback(const ros::TimerEvent&){
         auto stop = std::chrono::high_resolution_clock::now();
         // 计算持续时间
         auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(stop - start);
+        plan_time_cost_ += static_cast<double>(duration.count());
         // 输出花费的时间
-        std::cout << "Local planning took " << duration.count() << " ms" << std::endl;
+        // std::cout << "Local planning took " << duration.count() << " ms" << std::endl;
+        ROS_INFO("Local planning took %.2f ms", static_cast<double>(duration.count()));
         exec_values_ = gp_planner::interpolateTraj(opt_values, opt_setting_.Qc_model, delta_t_, control_inter_);
         // double init_coll_cost = gp_planner::CollisionCost(robot_, sdf_, init_values, opt_setting_);
         double opt_coll_cost = gp_planner::CollisionCost(robot_, sdf_, opt_values, opt_setting_);
@@ -438,8 +463,10 @@ void MyPlanner::LocalPlanningCallback(const ros::TimerEvent&){
             is_local_success_ = true;
             // ref_flag_ = true;
         }
-        else    {
-            cout<<"plan error: "<<opt_coll_cost<<endl;
+        else {
+            // cout<<"plan error: "<<opt_coll_cost<<endl;
+            ROS_INFO("Plan error: %f", opt_coll_cost);
+            auto start_2 = std::chrono::high_resolution_clock::now();
             local_results_ = generateTraj(arm_pos_);
             if(local_results_.size()==5){
                 nav_msgs::Path path;
@@ -480,10 +507,15 @@ void MyPlanner::LocalPlanningCallback(const ros::TimerEvent&){
                     }
                     traj_point.time_from_start = ros::Duration(i * delta_t_);
                 }
-                // 输出带有时间戳的信息
-                std::cout << "Publish Traj at " << ss.str() << std::endl;
-                client_.sendGoal(goal);
-                client_.waitForResult();
+                if (gazebo_client_.getState().isDone()){
+                    gazebo_client_.sendGoal(goal);
+                }
+                // gazebo_client_.waitForResult(ros::Duration(1.0));
+                // 停止计时
+                auto stop_2 = std::chrono::high_resolution_clock::now();
+                // 计算持续时间
+                auto duration_2 = std::chrono::duration_cast<std::chrono::milliseconds>(stop - start);
+                plan_time_cost_ += static_cast<double>(duration_2.count());
             }
             else{
                 count_++;
@@ -505,17 +537,17 @@ void MyPlanner::LocalPlanningCallback(const ros::TimerEvent&){
     else if(is_global_success_ && calculateDistance(arm_pos_, end_conf_)<= goal_tolerance_){
         is_local_success_ = true;
         is_global_success_ = false;
-        cout<<endl<<"************* Plan Finished ***************"<<endl<<endl;
+        ROS_INFO("Plan Finished...");
     }
     is_plan_success_ = is_global_success_ && is_local_success_;
-    auto stop2 = std::chrono::high_resolution_clock::now();
-    // 计算持续时间
-    auto duration2 = std::chrono::duration_cast<std::chrono::milliseconds>(stop2 - start);
-    // 输出花费的时间
-    std::cout << "Replanning took " << duration2.count() << " ms" << std::endl;
+    // auto stop2 = std::chrono::high_resolution_clock::now();
+    // // 计算持续时间
+    // auto duration2 = std::chrono::duration_cast<std::chrono::milliseconds>(stop2 - start);
+    // // 输出花费的时间
+    // std::cout << "Replanning took " << duration2.count() << " ms" << std::endl;
     if(is_plan_success_){
         if(calculateDistance(arm_pos_, end_conf_)<= goal_tolerance_){
-            cout<<endl<<"************* Plan Finished ***************"<<endl<<endl;
+            ROS_INFO("Plan Finished...");
         }
         publishLocalPath();
         exec_step_ = opt_setting_.total_step + control_inter_ * (opt_setting_.total_step - 1);
@@ -587,7 +619,7 @@ void MyPlanner::publishGlobalPath(){
         path.poses.push_back(pose_stamped);
     }
     global_path_pub_.publish(path);
-    cout<<"*****Global Plan Finished******"<<endl;
+    ROS_INFO("Global Plan Finished.");
 }
 
 void MyPlanner::publishTrajectory(int exec_step, bool pub_vel){
@@ -596,6 +628,7 @@ void MyPlanner::publishTrajectory(int exec_step, bool pub_vel){
     // 将ROS时间转换为字符串
     std::stringstream ss;
     ss << std::fixed << now.toSec(); // 将时间转换为秒
+    double length = 0;
     
     control_msgs::FollowJointTrajectoryGoal goal;
     goal.trajectory.joint_names = {"joint1", "joint2", "joint3", "joint4", "joint5", "joint6"};
@@ -609,12 +642,24 @@ void MyPlanner::publishTrajectory(int exec_step, bool pub_vel){
             if(pub_vel) traj_point.velocities[j] = local_results_[i](j+dof_);
         }
         traj_point.time_from_start = ros::Duration(i * delta_t_ / control_inter_);
+        if(i>=1){
+            VectorXd p1(6),p2(6);
+            for(int j=0;j<dof_;j++){
+                p1(j) = local_results_[i](j);
+                p2(j) = local_results_[i-1](j);
+            }
+            length+=(p1-p2).norm();
+        }
     }
+    path_length_ += length;
     // 输出带有时间戳的信息
-    std::cout << "Publish Traj at " << ss.str() << std::endl;
-    client_.sendGoal(goal);
-    client_.waitForResult();
+    ROS_INFO_STREAM("Publish Traj at " << ss.str());
+    gazebo_client_.sendGoal(goal);
+    gazebo_client_.waitForResult(ros::Duration(1.0));
+
 }
+
+
 
 void MyPlanner::DynamicCallback(const std_msgs::Float64MultiArray::ConstPtr& msg){
     if(msg->data[0]==3){

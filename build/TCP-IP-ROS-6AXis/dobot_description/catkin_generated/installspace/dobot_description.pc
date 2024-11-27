@@ -1,0 +1,8 @@
+prefix=/home/roboert/MP_WS/install
+
+Name: dobot_description
+Description: Description of dobot_description
+Version: 1.0.0
+Cflags: 
+Libs: -L${prefix}/lib 
+Requires: 

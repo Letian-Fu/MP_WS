@@ -950,10 +950,40 @@ costmap_2d_DIR:PATH=/opt/ros/noetic/share/costmap_2d/cmake
 cpp_common_DIR:PATH=/opt/ros/noetic/share/cpp_common/cmake
 
 //Value Computed by CMake
+cr10_moveit_BINARY_DIR:STATIC=/home/roboert/MP_WS/build/TCP-IP-ROS-6AXis/cr10_moveit
+
+//Value Computed by CMake
+cr10_moveit_SOURCE_DIR:STATIC=/home/roboert/MP_WS/src/TCP-IP-ROS-6AXis/cr10_moveit
+
+//Value Computed by CMake
+cr12_moveit_BINARY_DIR:STATIC=/home/roboert/MP_WS/build/TCP-IP-ROS-6AXis/cr12_moveit
+
+//Value Computed by CMake
+cr12_moveit_SOURCE_DIR:STATIC=/home/roboert/MP_WS/src/TCP-IP-ROS-6AXis/cr12_moveit
+
+//Value Computed by CMake
+cr16_moveit_BINARY_DIR:STATIC=/home/roboert/MP_WS/build/TCP-IP-ROS-6AXis/cr16_moveit
+
+//Value Computed by CMake
+cr16_moveit_SOURCE_DIR:STATIC=/home/roboert/MP_WS/src/TCP-IP-ROS-6AXis/cr16_moveit
+
+//Value Computed by CMake
+cr3_moveit_BINARY_DIR:STATIC=/home/roboert/MP_WS/build/TCP-IP-ROS-6AXis/cr3_moveit
+
+//Value Computed by CMake
+cr3_moveit_SOURCE_DIR:STATIC=/home/roboert/MP_WS/src/TCP-IP-ROS-6AXis/cr3_moveit
+
+//Value Computed by CMake
 cr5_description_BINARY_DIR:STATIC=/home/roboert/MP_WS/build/cr5_description
 
 //Value Computed by CMake
 cr5_description_SOURCE_DIR:STATIC=/home/roboert/MP_WS/src/cr5_description
+
+//Value Computed by CMake
+cr5_moveit_BINARY_DIR:STATIC=/home/roboert/MP_WS/build/TCP-IP-ROS-6AXis/cr5_moveit
+
+//Value Computed by CMake
+cr5_moveit_SOURCE_DIR:STATIC=/home/roboert/MP_WS/src/TCP-IP-ROS-6AXis/cr5_moveit
 
 //Value Computed by CMake
 cr5_moveit_config_BINARY_DIR:STATIC=/home/roboert/MP_WS/build/cr5_moveit_config
@@ -961,8 +991,56 @@ cr5_moveit_config_BINARY_DIR:STATIC=/home/roboert/MP_WS/build/cr5_moveit_config
 //Value Computed by CMake
 cr5_moveit_config_SOURCE_DIR:STATIC=/home/roboert/MP_WS/src/cr5_moveit_config
 
+//Value Computed by CMake
+cr5robot_BINARY_DIR:STATIC=/home/roboert/MP_WS/build/TCP-IP-ROS-6AXis/cr5robot
+
+//Value Computed by CMake
+cr5robot_SOURCE_DIR:STATIC=/home/roboert/MP_WS/src/TCP-IP-ROS-6AXis/cr5robot
+
+//Value Computed by CMake
+cr7_moveit_BINARY_DIR:STATIC=/home/roboert/MP_WS/build/TCP-IP-ROS-6AXis/cr7_moveit
+
+//Value Computed by CMake
+cr7_moveit_SOURCE_DIR:STATIC=/home/roboert/MP_WS/src/TCP-IP-ROS-6AXis/cr7_moveit
+
 //The directory containing a CMake configuration file for cv_bridge.
 cv_bridge_DIR:PATH=/opt/ros/noetic/share/cv_bridge/cmake
+
+//Value Computed by CMake
+dobot_bringup_BINARY_DIR:STATIC=/home/roboert/MP_WS/build/TCP-IP-ROS-6AXis/dobot_bringup
+
+//The directory containing a CMake configuration file for dobot_bringup.
+dobot_bringup_DIR:PATH=/home/roboert/MP_WS/devel/share/dobot_bringup/cmake
+
+//Value Computed by CMake
+dobot_bringup_SOURCE_DIR:STATIC=/home/roboert/MP_WS/src/TCP-IP-ROS-6AXis/dobot_bringup
+
+//Value Computed by CMake
+dobot_description_BINARY_DIR:STATIC=/home/roboert/MP_WS/build/TCP-IP-ROS-6AXis/dobot_description
+
+//Value Computed by CMake
+dobot_description_SOURCE_DIR:STATIC=/home/roboert/MP_WS/src/TCP-IP-ROS-6AXis/dobot_description
+
+//Value Computed by CMake
+dobot_gazebo_BINARY_DIR:STATIC=/home/roboert/MP_WS/build/TCP-IP-ROS-6AXis/dobot_gazebo
+
+//Value Computed by CMake
+dobot_gazebo_SOURCE_DIR:STATIC=/home/roboert/MP_WS/src/TCP-IP-ROS-6AXis/dobot_gazebo
+
+//Value Computed by CMake
+dobot_moveit_BINARY_DIR:STATIC=/home/roboert/MP_WS/build/TCP-IP-ROS-6AXis/dobot_moveit
+
+//Value Computed by CMake
+dobot_moveit_SOURCE_DIR:STATIC=/home/roboert/MP_WS/src/TCP-IP-ROS-6AXis/dobot_moveit
+
+//Value Computed by CMake
+dobot_v4_bringup_BINARY_DIR:STATIC=/home/roboert/MP_WS/build/TCP-IP-ROS-6AXis/dobot_v4_bringup
+
+//The directory containing a CMake configuration file for dobot_v4_bringup.
+dobot_v4_bringup_DIR:PATH=/home/roboert/MP_WS/devel/share/dobot_v4_bringup/cmake
+
+//Value Computed by CMake
+dobot_v4_bringup_SOURCE_DIR:STATIC=/home/roboert/MP_WS/src/TCP-IP-ROS-6AXis/dobot_v4_bringup
 
 //The directory containing a CMake configuration file for dynamic_reconfigure.
 dynamic_reconfigure_DIR:PATH=/opt/ros/noetic/share/dynamic_reconfigure/cmake
@@ -1241,6 +1319,12 @@ lib:FILEPATH=/opt/ros/noetic/lib/libtopic_tools.so
 //The directory containing a CMake configuration file for map_msgs.
 map_msgs_DIR:PATH=/opt/ros/noetic/share/map_msgs/cmake
 
+//Value Computed by CMake
+me6_moveit_BINARY_DIR:STATIC=/home/roboert/MP_WS/build/TCP-IP-ROS-6AXis/me6_moveit
+
+//Value Computed by CMake
+me6_moveit_SOURCE_DIR:STATIC=/home/roboert/MP_WS/src/TCP-IP-ROS-6AXis/me6_moveit
+
 //The directory containing a CMake configuration file for message_filters.
 message_filters_DIR:PATH=/opt/ros/noetic/share/message_filters/cmake
 
@@ -1285,6 +1369,18 @@ nodelet_DIR:PATH=/opt/ros/noetic/share/nodelet/cmake
 
 //The directory containing a CMake configuration file for nodelet_topic_tools.
 nodelet_topic_tools_DIR:PATH=/opt/ros/noetic/share/nodelet_topic_tools/cmake
+
+//Value Computed by CMake
+nova2_moveit_BINARY_DIR:STATIC=/home/roboert/MP_WS/build/TCP-IP-ROS-6AXis/nova2_moveit
+
+//Value Computed by CMake
+nova2_moveit_SOURCE_DIR:STATIC=/home/roboert/MP_WS/src/TCP-IP-ROS-6AXis/nova2_moveit
+
+//Value Computed by CMake
+nova5_moveit_BINARY_DIR:STATIC=/home/roboert/MP_WS/build/TCP-IP-ROS-6AXis/nova5_moveit
+
+//Value Computed by CMake
+nova5_moveit_SOURCE_DIR:STATIC=/home/roboert/MP_WS/src/TCP-IP-ROS-6AXis/nova5_moveit
 
 //The directory containing a CMake configuration file for object_recognition_msgs.
 object_recognition_msgs_DIR:PATH=/opt/ros/noetic/share/object_recognition_msgs/cmake
@@ -1358,6 +1454,18 @@ roscpp_serialization_DIR:PATH=/opt/ros/noetic/share/roscpp_serialization/cmake
 //The directory containing a CMake configuration file for roscpp_traits.
 roscpp_traits_DIR:PATH=/opt/ros/noetic/share/roscpp_traits/cmake
 
+//Value Computed by CMake
+rosdemo_v3_BINARY_DIR:STATIC=/home/roboert/MP_WS/build/TCP-IP-ROS-6AXis/rosdemo_v3
+
+//Value Computed by CMake
+rosdemo_v3_SOURCE_DIR:STATIC=/home/roboert/MP_WS/src/TCP-IP-ROS-6AXis/rosdemo_v3
+
+//Value Computed by CMake
+rosdemo_v4_BINARY_DIR:STATIC=/home/roboert/MP_WS/build/TCP-IP-ROS-6AXis/rosdemo_v4
+
+//Value Computed by CMake
+rosdemo_v4_SOURCE_DIR:STATIC=/home/roboert/MP_WS/src/TCP-IP-ROS-6AXis/rosdemo_v4
+
 //The directory containing a CMake configuration file for rosgraph.
 rosgraph_DIR:PATH=/opt/ros/noetic/share/rosgraph/cmake
 
@@ -1384,6 +1492,15 @@ rostime_DIR:PATH=/opt/ros/noetic/share/rostime/cmake
 
 //The directory containing a CMake configuration file for rviz.
 rviz_DIR:PATH=/opt/ros/noetic/share/rviz/cmake
+
+//Value Computed by CMake
+rviz_dobot_control_BINARY_DIR:STATIC=/home/roboert/MP_WS/build/TCP-IP-ROS-6AXis/rviz_dobot_control
+
+//Dependencies for the target
+rviz_dobot_control_LIB_DEPENDS:STATIC=general;Qt5::Widgets;general;/opt/ros/noetic/lib/librviz.so;general;/usr/lib/x86_64-linux-gnu/libOgreOverlay.so;general;/usr/lib/x86_64-linux-gnu/libOgreMain.so;general;/usr/lib/x86_64-linux-gnu/libOpenGL.so;general;/usr/lib/x86_64-linux-gnu/libGLX.so;general;/usr/lib/x86_64-linux-gnu/libGLU.so;general;/opt/ros/noetic/lib/libimage_transport.so;general;/opt/ros/noetic/lib/libinteractive_markers.so;general;/opt/ros/noetic/lib/liblaser_geometry.so;general;/opt/ros/noetic/lib/libtf.so;general;/opt/ros/noetic/lib/libresource_retriever.so;general;/opt/ros/noetic/lib/libtf2_ros.so;general;/opt/ros/noetic/lib/libactionlib.so;general;/opt/ros/noetic/lib/libmessage_filters.so;general;/opt/ros/noetic/lib/libtf2.so;general;/opt/ros/noetic/lib/liburdf.so;general;/usr/lib/x86_64-linux-gnu/liburdfdom_sensor.so;general;/usr/lib/x86_64-linux-gnu/liburdfdom_model_state.so;general;/usr/lib/x86_64-linux-gnu/liburdfdom_model.so;general;/usr/lib/x86_64-linux-gnu/liburdfdom_world.so;general;/usr/lib/x86_64-linux-gnu/libtinyxml.so;general;/opt/ros/noetic/lib/libclass_loader.so;general;/usr/lib/x86_64-linux-gnu/libPocoFoundation.so;general;/usr/lib/x86_64-linux-gnu/libdl.so;general;/opt/ros/noetic/lib/libroslib.so;general;/opt/ros/noetic/lib/librospack.so;general;/usr/lib/x86_64-linux-gnu/libpython3.8.so;general;/usr/lib/x86_64-linux-gnu/libboost_program_options.so.1.71.0;general;/usr/lib/x86_64-linux-gnu/libtinyxml2.so;general;/opt/ros/noetic/lib/librosconsole_bridge.so;general;/opt/ros/noetic/lib/libroscpp.so;general;/usr/lib/x86_64-linux-gnu/libpthread.so;general;/usr/lib/x86_64-linux-gnu/libboost_chrono.so.1.71.0;general;/usr/lib/x86_64-linux-gnu/libboost_filesystem.so.1.71.0;general;/opt/ros/noetic/lib/librosconsole.so;general;/opt/ros/noetic/lib/librosconsole_log4cxx.so;general;/opt/ros/noetic/lib/librosconsole_backend_interface.so;general;/usr/lib/x86_64-linux-gnu/liblog4cxx.so;general;/usr/lib/x86_64-linux-gnu/libboost_regex.so.1.71.0;general;/opt/ros/noetic/lib/libxmlrpcpp.so;general;/opt/ros/noetic/lib/libroscpp_serialization.so;general;/opt/ros/noetic/lib/librostime.so;general;/usr/lib/x86_64-linux-gnu/libboost_date_time.so.1.71.0;general;/opt/ros/noetic/lib/libcpp_common.so;general;/usr/lib/x86_64-linux-gnu/libboost_system.so.1.71.0;general;/usr/lib/x86_64-linux-gnu/libboost_thread.so.1.71.0;general;/usr/lib/x86_64-linux-gnu/libconsole_bridge.so.0.4;
+
+//Value Computed by CMake
+rviz_dobot_control_SOURCE_DIR:STATIC=/home/roboert/MP_WS/src/TCP-IP-ROS-6AXis/rviz_dobot_control
 
 //The directory containing a CMake configuration file for rviz_visual_tools.
 rviz_visual_tools_DIR:PATH=/opt/ros/noetic/share/rviz_visual_tools/cmake
@@ -1638,7 +1755,7 @@ CMAKE_MODULE_LINKER_FLAGS_RELWITHDEBINFO-ADVANCED:INTERNAL=1
 //ADVANCED property for variable: CMAKE_NM
 CMAKE_NM-ADVANCED:INTERNAL=1
 //number of local generators
-CMAKE_NUMBER_OF_MAKEFILES:INTERNAL=9
+CMAKE_NUMBER_OF_MAKEFILES:INTERNAL=27
 //ADVANCED property for variable: CMAKE_OBJCOPY
 CMAKE_OBJCOPY-ADVANCED:INTERNAL=1
 //ADVANCED property for variable: CMAKE_OBJDUMP

@@ -2,7 +2,7 @@
 #define MYPLANNER_PLANNER_H
 
 #pragma once
-
+#include <cstddef>
 #include "global_planner/rrtplanner.h" 
 #include "local_planner/Optimizer.h"
 #include <gtsam/base/Matrix.h>
@@ -68,9 +68,16 @@ public:
     VectorXd obs_info_;
     // 控制器相关
     ros::Publisher local_path_pub_, global_path_pub_;
-    actionlib::SimpleActionClient<control_msgs::FollowJointTrajectoryAction> client_;
+    actionlib::SimpleActionClient<control_msgs::FollowJointTrajectoryAction> gazebo_client_;
+    actionlib::SimpleActionClient<control_msgs::FollowJointTrajectoryAction> real_robot_client_;
+    bool real_robot_;
     std::shared_ptr<std::mutex> mutex_;  // 互斥锁
     ros::Timer map_timer_;  // 定时器
+
+    // 测试相关
+    double path_length_;
+    double plan_time_cost_;
+    int plan_times_;
 
 public:
     MyPlanner(ros::NodeHandle& nh);

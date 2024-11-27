@@ -112,8 +112,8 @@ def move_obstacle():
                                                    amplitude_y * 2 * math.pi * frequency * math.cos(2 * math.pi * frequency * t), 0.0]))
         elif mode == 'vertical':
             # 上下往复运动
-            x = 0.0
-            y = -0.55
+            x = -0.55
+            y = 0
             z = initial_height + amplitude_z * math.sin(2 * math.pi * frequency_z * t)
             linear_speed = abs(amplitude_z * 2 * math.pi * frequency_z * math.cos(2 * math.pi * frequency_z * t))
             direction = normalize_vector(np.array([0.0, 0.0, 2 * math.pi * frequency_z * math.cos(2 * math.pi * frequency_z * t)]))

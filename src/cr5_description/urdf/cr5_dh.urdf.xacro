@@ -58,6 +58,14 @@
         <mesh filename="package://cr5_description/meshes/Link1.STL" />
       </geometry>
     </collision>
+    <!-- 添加Contact Sensor -->
+    <sensor name="Link1_contact_sensor" type="contact">
+      <update_rate>30</update_rate>
+      <contact>
+        <collision>Link1::collision</collision>
+      </contact>
+      <plugin name="contact_plugin" filename="libContactPlugin.so"/>
+    </sensor>
   </link>
 
   <joint name="joint1" type="revolute">
@@ -95,6 +103,15 @@
         <mesh filename="package://cr5_description/meshes/Link2.STL" />
       </geometry>
     </collision>
+
+    <!-- 添加Contact Sensor -->
+    <sensor name="Link2contact_sensor" type="contact">
+      <update_rate>30</update_rate>
+      <contact>
+        <collision>Link2::collision</collision>
+      </contact>
+      <plugin name="contact_plugin" filename="libContactPlugin.so"/>
+    </sensor>
   </link>
 
   <joint name="joint2" type="revolute">
@@ -132,6 +149,15 @@
         <mesh filename="package://cr5_description/meshes/Link3.STL" />
       </geometry>
     </collision>
+
+    <!-- 添加Contact Sensor -->
+    <sensor name="Link3_contact_sensor" type="contact">
+      <update_rate>30</update_rate>
+      <contact>
+        <collision>Link3::collision</collision>
+      </contact>
+      <plugin name="contact_plugin" filename="libContactPlugin.so"/>
+    </sensor>
   </link>
 
   <joint name="joint3" type="revolute">
@@ -169,6 +195,16 @@
         <mesh filename="package://cr5_description/meshes/Link4.STL" />
       </geometry>
     </collision>
+
+    <!-- 添加Contact Sensor -->
+    <sensor name="Link4_contact_sensor" type="contact">
+      <update_rate>30</update_rate>
+      <contact>
+        <collision>Link4::collision</collision>
+      </contact>
+      <plugin name="contact_plugin" filename="libContactPlugin.so"/>
+    </sensor>
+  </link>
   </link>
 
   <joint name="joint4" type="revolute">
@@ -206,6 +242,16 @@
         <mesh filename="package://cr5_description/meshes/Link5.STL" />
       </geometry>
     </collision>
+
+    <!-- 添加Contact Sensor -->
+    <sensor name="Link5_contact_sensor" type="contact">
+      <update_rate>30</update_rate>
+      <contact>
+        <collision>Link5::collision</collision>
+      </contact>
+      <plugin name="contact_plugin" filename="libContactPlugin.so"/>
+    </sensor>
+  </link>
   </link>
 
   <joint name="joint5" type="revolute">
@@ -243,6 +289,16 @@
         <mesh filename="package://cr5_description/meshes/Link6.STL" />
       </geometry>
     </collision>
+
+    <!-- 添加Contact Sensor -->
+    <sensor name="Link6_contact_sensor" type="contact">
+      <update_rate>30</update_rate>
+      <contact>
+        <collision>Link6::collision</collision>
+      </contact>
+      <plugin name="contact_plugin" filename="libContactPlugin.so"/>
+    </sensor>
+  </link>
   </link>
 
   <joint name="joint6" type="revolute">

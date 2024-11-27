@@ -1,0 +1,8 @@
+prefix=/home/roboert/MP_WS/install
+
+Name: rosdemo_v3
+Description: Description of rosdemo_v3
+Version: 1.0.0
+Cflags: -I${prefix}/include
+Libs: -L${prefix}/lib 
+Requires: roscpp std_msgs

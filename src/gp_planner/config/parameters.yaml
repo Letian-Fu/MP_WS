@@ -1,3 +1,4 @@
+real_robot: false
 robot:
   DOF: 6
   arm_base: {orientation: [0, 0, 0, 1], position: [0, 0, 0]}

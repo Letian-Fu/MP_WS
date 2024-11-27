@@ -28,7 +28,7 @@ public:
         for (const auto& path : image_paths) {
             image = cv::imread(path);
             if (image.empty()) {
-                ROS_WARN("Could not open or find the image: %s", path.c_str());
+                std::cout<<"Could not open or find the image: "<< path.c_str()<<std::endl;
                 continue;
             }
             cv::cvtColor(image, gray, cv::COLOR_BGR2GRAY);
@@ -41,12 +41,13 @@ public:
                 imgpoints.push_back(corners);
                 cv::drawChessboardCorners(image, chessboard_size_, corners, found);
                 std::string output_image_path = "/home/roboert/MP_WS/src/camera_calibration/images/calibrate/image_" + std::to_string(i) + "_corners.png";
+                // std::string output_image_path = "/home/roboert/MP_WS/src/camera_calibration/images/calibrate_static/image_" + std::to_string(i) + "_corners.png";
                 cv::imwrite(output_image_path, image);  // 保存图片
                 std::cout << "保存图片: " << output_image_path << std::endl;
                 cv::imshow("Chessboard Corners", image);
                 cv::waitKey(500); // 显示500ms
             } else {
-                ROS_WARN("Chessboard corners not found in image: %s", path.c_str());
+                std::cout<<"Chessboard corners not found in image: "<< path.c_str()<<std::endl;
             }
             i++;
         }
@@ -69,10 +70,11 @@ public:
 
         // 保存标定结果
         cv::FileStorage fs("/home/roboert/MP_WS/src/camera_calibration/camera_calibration.yaml", cv::FileStorage::WRITE);
+        // cv::FileStorage fs("/home/roboert/MP_WS/src/camera_calibration/camera_calibration_static.yaml", cv::FileStorage::WRITE);
         fs << "camera_matrix" << camera_matrix;
         fs << "distortion_coefficients" << dist_coeffs;
         fs.release();
-        ROS_INFO("Calibration completed and saved to camera_calibration.yaml.");
+        std::cout<<"Calibration completed and saved to camera_calibration.yaml."<<std::endl;
 
         // 计算重投影误差
         calculateReprojectionError(objpoints, imgpoints, rvecs, tvecs, camera_matrix, dist_coeffs);
@@ -121,8 +123,21 @@ int main(int argc, char** argv) {
         "/home/roboert/MP_WS/src/camera_calibration/images/calibrate/calib_3_Color.png",
         "/home/roboert/MP_WS/src/camera_calibration/images/calibrate/calib_4_Color.png",
         "/home/roboert/MP_WS/src/camera_calibration/images/calibrate/calib_5_Color.png",
-        "/home/roboert/MP_WS/src/camera_calibration/images/calibrate/calib_6_Color.png"
+        "/home/roboert/MP_WS/src/camera_calibration/images/calibrate/calib_6_Color.png",
+        "/home/roboert/MP_WS/src/camera_calibration/images/calibrate/calib_7_Color.png",
+        "/home/roboert/MP_WS/src/camera_calibration/images/calibrate/calib_8_Color.png"
     };
+
+    // // 定义图像路径（静态）
+    // std::vector<std::string> image_paths = {
+    //     "/home/roboert/MP_WS/src/camera_calibration/images/calibrate_static/calib_1_Color.png",
+    //     "/home/roboert/MP_WS/src/camera_calibration/images/calibrate_static/calib_2_Color.png",
+    //     "/home/roboert/MP_WS/src/camera_calibration/images/calibrate_static/calib_3_Color.png",
+    //     "/home/roboert/MP_WS/src/camera_calibration/images/calibrate_static/calib_4_Color.png",
+    //     "/home/roboert/MP_WS/src/camera_calibration/images/calibrate_static/calib_5_Color.png",
+    //     "/home/roboert/MP_WS/src/camera_calibration/images/calibrate_static/calib_6_Color.png",
+    //     "/home/roboert/MP_WS/src/camera_calibration/images/calibrate_static/calib_7_Color.png"
+    // };
 
     calibrator.calibrate(image_paths);
 

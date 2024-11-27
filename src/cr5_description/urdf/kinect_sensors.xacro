@@ -2,10 +2,10 @@
 <robot name="sensor_kinect" xmlns:xacro="http://ros.org/wiki/xacro">
   <xacro:property name="cam_px" value="-1.3" />
   <xacro:property name="cam_pz" value="0.7" />
-  <xacro:property name="cam_py" value="-1" />
+  <xacro:property name="cam_py" value="0.8" />
 	<xacro:property name="cam_or" value="0" />
 	<xacro:property name="cam_op" value="0" />
-	<xacro:property name="cam_oy" value="0.78" />
+	<xacro:property name="cam_oy" value="-0.78" />
   <xacro:property name="kinect_cam_py" value="-0.0125"/>
   <xacro:property name="M_PI" value="3.14" />
   <!-- Parameterised in part by the values in turtlebot_properties.urdf.xacro -->

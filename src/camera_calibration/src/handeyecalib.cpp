@@ -56,14 +56,16 @@ std::vector<Eigen::Matrix4d> readPosesFromFile(const std::string& filename) {
         std::istringstream iss(line);
         char comma;
         if (iss >> x >> comma >> y >> comma >> z >> comma >> roll >> comma >> pitch >> comma >> yaw) {
-            poses.push_back(rpyToMatrix(x, y, z, roll, pitch, yaw));
+            poses.push_back(rpyToMatrix(x, y, z, roll, pitch, yaw).inverse());
         }
     }
     file.close();
     return poses;
 }
 
-// 检测指定的Aruco标定板（Marker ID为1）并计算相机位姿
+/**
+ * @brief 检测Aruco标定板并计算相机到标定板的位姿
+ */
 std::vector<Eigen::Matrix4d> detectArucoMarkers(const std::string& folder, int num_images, const cv::Ptr<cv::aruco::Dictionary>& dictionary, const cv::Mat& camera_matrix, const cv::Mat& dist_coeffs, float marker_size) {
     std::vector<Eigen::Matrix4d> camera_poses;
 
@@ -89,11 +91,8 @@ std::vector<Eigen::Matrix4d> detectArucoMarkers(const std::string& folder, int n
         cv::aruco::drawDetectedMarkers(image, marker_corners, marker_ids);
 
         // 查找Marker ID = 1
-        // 查找Marker ID = 1
         bool found = false;
         for (int j = 0; j < marker_ids.size(); ++j) {
-            std::cout << "Marker ID: " << marker_ids[j] << std::endl;
-
             if (marker_ids[j] == 1) {
                 // 检查检测到的角点是否为空
                 if (marker_corners[j].empty()) {
@@ -239,7 +238,42 @@ void saveCalibrationResults(const cv::Mat& R_handeye, const cv::Mat& T_handeye, 
     fs.release();  // 关闭文件
 }
 
-// 执行手眼标定
+/**
+ * @brief 计算 T_camera2base
+ */
+Eigen::Matrix4d calculateCameraBaseTransform(const std::vector<Eigen::Matrix4d>& robot_poses, const std::vector<Eigen::Matrix4d>& camera_poses, const Eigen::Matrix4d& T_board2gripper) {
+    int num_poses = robot_poses.size();
+    Eigen::Matrix4d T_camera2base = Eigen::Matrix4d::Identity();
+
+    Eigen::MatrixXd A(6 * num_poses, 6);
+    Eigen::VectorXd b(6 * num_poses);
+
+    for (int i = 0; i < num_poses; ++i) {
+        Eigen::Matrix4d T_camera2board = camera_poses[i];
+        Eigen::Matrix4d T_gripper2base = robot_poses[i];
+
+        Eigen::Matrix4d T = T_camera2board * T_board2gripper * T_gripper2base;
+
+        Eigen::Matrix3d R = T.block<3, 3>(0, 0);
+        Eigen::Vector3d t = T.block<3, 1>(0, 3);
+
+        Eigen::AngleAxisd angle_axis(R);
+        A.block<3, 3>(6 * i, 0) = Eigen::Matrix3d::Identity();
+        A.block<3, 3>(6 * i, 3) = Eigen::Matrix3d::Zero();
+        b.segment<3>(6 * i) = angle_axis.axis() * angle_axis.angle();
+        b.segment<3>(6 * i + 3) = t;
+    }
+
+    Eigen::VectorXd x = A.colPivHouseholderQr().solve(b);
+    T_camera2base.block<3, 3>(0, 0) = Eigen::AngleAxisd(x.head<3>().norm(), x.head<3>().normalized()).toRotationMatrix();
+    T_camera2base.block<3, 1>(0, 3) = x.tail<3>();
+
+    return T_camera2base;
+}
+
+/**
+ * @brief 使用 OpenCV 进行眼在手外标定
+ */
 void performHandEyeCalibration(const std::vector<Eigen::Matrix4d>& robot_poses,
                                const std::vector<Eigen::Matrix4d>& camera_poses,
                                cv::Mat& R_handeye,cv::Mat& T_handeye,
@@ -281,6 +315,8 @@ void performHandEyeCalibration(const std::vector<Eigen::Matrix4d>& robot_poses,
 
     // 定义标定方法，通常使用 Tsai 方法
     cv::HandEyeCalibrationMethod method = cv::CALIB_HAND_EYE_TSAI;
+    // cv::HandEyeCalibrationMethod method = cv::CALIB_HAND_EYE_PARK;
+    // cv::HandEyeCalibrationMethod method = cv::CALIB_HAND_EYE_HORAUD;
 
     // 执行手眼标定
     cv::calibrateHandEye(R_gripper2base, T_gripper2base,
@@ -300,21 +336,37 @@ void performHandEyeCalibration(const std::vector<Eigen::Matrix4d>& robot_poses,
 }
 
 int main() {
-    std::string image_folder = "/home/roboert/MP_WS/src/camera_calibration/images/handeye";
-    std::string pose_file = image_folder + "/pose.txt";
-    int num_images = 10;
+    int num_images = 12;
     float marker_size = 0.08; // Aruco标记尺寸，单位米
-
+    // 文件位置
+    std::string image_folder = "/home/roboert/MP_WS/src/camera_calibration/images/handeye";
     // 相机内参
     cv::Mat camera_matrix = (cv::Mat_<double>(3, 3) << 
-        1329.390848067253, 0, 955.6659619447905,
-        0, 1328.783888724376, 579.702502266785,
+        1387.147582412012, 0, 983.0388501589848,
+        0, 1389.85726307035, 545.6639051347638,
         0, 0, 1);
-
     // 畸变系数
     cv::Mat dist_coeffs = (cv::Mat_<double>(1, 5) << 
-        0.1382685429942082, -0.1952215931821368, 0.007095175790574298, -0.002257258892116025, -0.02426428955782208);
+        0.1383, -0.1952, 0.0071, -0.0023, -0.0243);
+    std::string output_file = "/home/roboert/MP_WS/src/camera_calibration/handeye_calibration_result.yaml";  // 输出YAML文件路径
 
+
+    // // 静态
+    // std::string image_folder = "/home/roboert/MP_WS/src/camera_calibration/images/handeye_static";
+    // // 相机内参（静态相机）
+    // cv::Mat camera_matrix = (cv::Mat_<double>(3, 3) << 
+    //     1431.887264340267, 0, 944.9438031397087,
+    //     0, 1429.191083865094, 571.7928322419529,
+    //     0, 0, 1);
+
+    // // 畸变系数
+    // cv::Mat dist_coeffs = (cv::Mat_<double>(1, 5) << 
+    //     0.1426333922301199, -0.3187808961022385, 0.003342213940796568, -0.001646661120649034, 0.084733950865754);
+    // std::string output_file = "/home/roboert/MP_WS/src/camera_calibration/handeye_calibration_result_static.yaml";  // 输出YAML文件路径
+
+
+
+    std::string pose_file = image_folder + "/pose.txt";
     // Aruco字典
     auto dictionary = cv::aruco::getPredefinedDictionary(cv::aruco::DICT_5X5_50);
     // 读取位姿数据
@@ -322,11 +374,13 @@ int main() {
     // 检测Aruco标定板
     auto camera_poses = detectArucoMarkers(image_folder, num_images, dictionary, camera_matrix, dist_coeffs, marker_size);
 
+    for (int i = 0; i < robot_poses.size(); ++i) {
+        std::cout << "Robot Pose (Base to Gripper) " << i << ":\n" << robot_poses[i] << std::endl;
+        std::cout << "Camera Pose (Camera to Board) " << i << ":\n" << camera_poses[i] << std::endl;
+    }
     if (robot_poses.size() == camera_poses.size()) {
         cv::Mat R_handeye, T_handeye;
         // 从performHandEyeCalibration函数中获取R_handeye和T_handeye
-        std::string output_file = "/home/roboert/MP_WS/src/camera_calibration/handeye_calibration_result.yaml";  // 输出YAML文件路径
-
         performHandEyeCalibration(robot_poses, camera_poses,R_handeye,T_handeye,output_file);
     } else {
         std::cerr << "位姿数量与图片数量不匹配，无法进行标定。" << std::endl;
