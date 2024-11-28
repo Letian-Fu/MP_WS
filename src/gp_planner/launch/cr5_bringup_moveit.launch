@@ -21,7 +21,7 @@
     <arg name="moveit_controller_manager" value="ros_control" />
   </include>
 
-  <rosparam command="load" file="$(find gp_planner)/config/parameters.yaml" />
+  <!-- <rosparam command="load" file="$(find gp_planner)/config/parameters.yaml" /> -->
   <!-- <node name="moving_sphere" pkg="gp_planner" type="moving_sphere.py" output="screen" /> -->
   <!-- <node name="static_sdf" pkg="gp_planner" type="static_sdf.py" output="screen" /> -->
   <!-- <node name="dynamic_sdf" pkg="gp_planner" type="dynamic_sdf.py" output="screen" /> -->

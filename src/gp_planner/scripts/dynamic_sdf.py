@@ -15,12 +15,17 @@ class DynamicSDF:
         self.z = 30
         self.origin = np.array([-1.0, -1.0, -0.35])
         self.cell_size = 0.05
+        # self.cols = 100
+        # self.rows = 100
+        # self.z = 60
+        # self.origin = np.array([-1.0, -1.0, -0.2])
+        # self.cell_size = 0.02
         self.map = np.zeros((self.rows, self.cols, self.z))
         self.sdf = np.zeros((self.rows, self.cols, self.z))
         self.prob_map = np.ones((self.rows, self.cols, self.z))
         self.epsilon = 0.05
-        self.total_time = 1
-        self.total_steps = 5
+        self.total_time = 1.5
+        self.total_steps = 10
         self.opt_setting_ = type('opt_setting', (object,), {'epsilon': self.epsilon})()
         self.update_flag = False
 
@@ -30,13 +35,9 @@ class DynamicSDF:
         self.is_rading_sub_ = rospy.Subscriber("/is_reading", Float64MultiArray, self.readingCallback)
         self.is_reading = 0
         self.pub = rospy.Publisher('/map_updated', Float64MultiArray, queue_size=10)
-        self.lock = threading.Lock()  # 创建互斥锁
         self.timer = rospy.Timer(rospy.Duration(0.2), self.updateSDF)  # 创建定时器
 
     def updateSDF(self, event):
-        # with self.lock:  # 使用互斥锁
-            # if self.is_reading == 0:
-                # self.is_reading = 1
         # 模拟更新SDF
         if self.update_flag == True:
             output_file = "/home/roboert/MP_WS/src/gp_planner/sdf_data/sdf_data_dynamic_py.txt"
@@ -63,7 +64,7 @@ class DynamicSDF:
         field = map_dist - inv_map_dist
         # metric
         field = field * cell_size
-        # field = field * prob_map
+        field = field * prob_map
         field = np.maximum(field, 0).astype(float)
         return field
 
@@ -121,7 +122,6 @@ class DynamicSDF:
                 continue
             # 计算障碍物的移动距离
             # distance_moved = velocity * time_step
-            distance_moved = size * (1-step/total_steps) 
             probability = 1.0 - step / total_steps
             start_row = max(0, current_position[0] - half_size_row - 1)
             end_row = min(map.shape[0], current_position[0] + half_size_row)
@@ -180,11 +180,12 @@ class DynamicSDF:
             position = [grid_r, grid_c, grid_z]
             direction = [direction_y, direction_x, direction_z]
             velocity = linear_speed / self.cell_size
-            size = 2 * obs_size / self.cell_size + 2
+            size = 2 * obs_size / self.cell_size + self.epsilon / self.cell_size
             self.map = np.zeros((self.rows, self.cols, self.z))
             self.sdf = np.zeros((self.rows, self.cols, self.z))
             self.prob_map = np.ones((self.rows, self.cols, self.z))
             self.add_obstacle([20, 20, 5], [30, 30, 3], self.map)
+            # self.add_obstacle([50, 50, 8], [80, 80, 3], self.map)
             if velocity != 0:
                 # 调用add_dynamic_obstacle函数
                 self.add_dynamic_obstacle(position, size, velocity, direction, self.total_time, self.total_steps,self.map, self.prob_map)
@@ -215,11 +216,12 @@ class DynamicSDF:
             position = [grid_r, grid_c, grid_z]
             direction = [direction_y, direction_x, direction_z]
             velocity = linear_speed / self.cell_size
-            size = 2 * obs_size / self.cell_size
+            size = 2 * obs_size / self.cell_size + 2
             self.map = np.zeros((self.rows, self.cols, self.z))
             self.sdf = np.zeros((self.rows, self.cols, self.z))
             self.prob_map = np.ones((self.rows, self.cols, self.z))
             self.add_obstacle([20, 20, 5], [30, 30, 3], self.map)
+            # self.add_obstacle([50, 50, 8], [80, 80, 3], self.map)
             if velocity != 0:
                 # 调用add_dynamic_obstacle函数
                 self.add_dynamic_obstacle(position, size, velocity, direction, self.total_time, self.total_steps,self.map, self.prob_map)

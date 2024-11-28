@@ -52,12 +52,12 @@ gazebo_client_("/arm_controller/follow_joint_trajectory", true)
     dh_theta_<<0.0,-M_PI_2,0.0,-M_PI_2,0.0,0.0;
     
     vector<gp_planner::BodySphere> body_spheres;
-    VectorXd xs(14),zs(14),ys(14),rs(14);
-    vector<size_t> js={0,0,1,1,1,1,1,1,2,2,2,3,4,5};
-    xs<<0,0,0,0.105,0.210,0.315,0.420,0,0.11,0.22,0,0,0,0;
-    ys<<-0.1,0,0,0,0,0,0,0,0,0,0,0,0,0;
-    zs<<0,0,0.1,0.1,0.1,0.1,0.1,0,0,0,0,0,0,0;
-    rs<<0.08,0.08,0.06,0.06,0.06,0.06,0.06,0.08,0.06,0.06,0.08,0.07,0.06,0.06;
+    VectorXd xs(16),zs(16),ys(16),rs(16);
+    vector<size_t> js={0,0,1,1,1,1,1,1,2,2,2,3,4,5,5,5};
+    xs<<0,0,0,0.105,0.210,0.315,0.420,0,0.11,0.22,0,0,0,0,0,0;
+    ys<<-0.1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0;
+    zs<<0,0,0.1,0.1,0.1,0.1,0.1,0,0,0,0,0,0,0,0.1,0.2;
+    rs<<0.08,0.08,0.06,0.06,0.06,0.06,0.06,0.08,0.06,0.06,0.08,0.07,0.06,0.06,0.06,0.06;
     for(int i=0;i<xs.size();i++){
         body_spheres.push_back(gp_planner::BodySphere(js[i],rs[i],gtsam::Point3(xs[i],ys[i],zs[i])));
     }
@@ -175,7 +175,6 @@ gazebo_client_("/arm_controller/follow_joint_trajectory", true)
     read_pub_ = nh.advertise<std_msgs::Float64MultiArray>("/is_reading",10);
     double map_update_frenquency;
     nh.getParam("settings/map_update_frenquency", map_update_frenquency);
-    mutex_ = std::make_shared<std::mutex>();  // 创建互斥锁
     map_timer_ = nh_.createTimer(ros::Duration(1/map_update_frenquency), &MyPlanner::readSDFFile, this);  // 创建定时器
 
     // std::cout<<"Waiting for Gazebo action server..."<<std::endl;
@@ -201,6 +200,8 @@ gazebo_client_("/arm_controller/follow_joint_trajectory", true)
     path_length_ = 0;
     plan_time_cost_ = 0;
     plan_times_ = 0;
+    end_path_length_ = 0;
+    planner_type_ = "gp";
 }
 
 gtsam::Values MyPlanner::InitWithRef(const std::vector<Eigen::VectorXd>& ref_path, int total_step){
@@ -276,7 +277,7 @@ vector<VectorXd> MyPlanner::generateTraj(const VectorXd& cur_pos){
                         temp_values.at<gtsam::Vector>(gtsam::Symbol('x',m)),gtsam::Vector::Zero(6),nullptr,nullptr,nullptr,nullptr)).sum();
         }
         // 比较，优先coll_cost最低（最低为0），在coll_cost一样的基础上比较goal_cost,选goal_cost最小的那个为best_traj
-        if (coll_cost <= 0.5 && ((coll_cost <= 0.5 && gp_cost < bestScore_gp)|| (coll_cost <= 0.5 && gp_cost == bestScore_gp && goal_cost<bestScore_goal))) {
+        if (coll_cost <= 1.0 && ((coll_cost <= 1.0 && gp_cost < bestScore_gp)|| (coll_cost <= 1.0 && gp_cost == bestScore_gp && goal_cost<bestScore_goal))) {
             bestScore_obs = coll_cost;
             bestScore_goal = goal_cost;
             bestScore_gp = gp_cost;
@@ -427,111 +428,112 @@ void MyPlanner::LocalPlanningCallback(const ros::TimerEvent&){
     auto start = std::chrono::high_resolution_clock::now();
     if(is_global_success_ && calculateDistance(arm_pos_, end_conf_)> goal_tolerance_){
         plan_times_ ++;
-
-        vector<VectorXd> local_ref_path = getLocalRefPath();
-        gtsam::Vector start_conf = ConvertToGtsamVector(arm_pos_);
-        gtsam::Vector end_conf = ConvertToGtsamVector(local_ref_path[local_ref_path.size()-1]);
-        // end_conf = ConvertToGtsamVector(end_conf_);
-        gtsam::Values init_values;
-        if(calculateDistance(arm_pos_,local_ref_path[0])>0.2 || !ref_flag_){
-            init_values = gp_planner::initArmTrajStraightLine(ConvertToGtsamVector(arm_pos_), end_conf, opt_setting_.total_step);
-        }
-        else{
-            init_values = InitWithRef(local_ref_path, opt_setting_.total_step);
-        }
-        double total_time =  traj_total_time_*calculateDistance(start_conf,end_conf) / max_vel_ ;
-        total_time = opt_setting_.total_time;
-        start_vel_ = (end_conf - start_conf) / total_time;
-        end_vel_ = (end_conf - start_conf) / total_time;
-        opt_setting_.set_total_time(total_time);
-        gtsam::Values opt_values = gp_planner::Optimizer(robot_,sdf_,start_conf,end_conf,
-                                                        ConvertToGtsamVector(start_vel_),ConvertToGtsamVector(end_vel_),
-                                                        init_values,opt_setting_,
-                                                        ConvertToGtsamVector(end_conf_));
-        // 停止计时
-        auto stop = std::chrono::high_resolution_clock::now();
-        // 计算持续时间
-        auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(stop - start);
-        plan_time_cost_ += static_cast<double>(duration.count());
-        // 输出花费的时间
-        // std::cout << "Local planning took " << duration.count() << " ms" << std::endl;
-        ROS_INFO("Local planning took %.2f ms", static_cast<double>(duration.count()));
-        exec_values_ = gp_planner::interpolateTraj(opt_values, opt_setting_.Qc_model, delta_t_, control_inter_);
-        // double init_coll_cost = gp_planner::CollisionCost(robot_, sdf_, init_values, opt_setting_);
-        double opt_coll_cost = gp_planner::CollisionCost(robot_, sdf_, opt_values, opt_setting_);
-        if(opt_coll_cost< 0.5)    {
-            is_local_success_ = true;
-            // ref_flag_ = true;
-        }
-        else {
-            // cout<<"plan error: "<<opt_coll_cost<<endl;
-            ROS_INFO("Plan error: %f", opt_coll_cost);
-            auto start_2 = std::chrono::high_resolution_clock::now();
-            local_results_ = generateTraj(arm_pos_);
-            if(local_results_.size()==5){
-                nav_msgs::Path path;
-                path.header.stamp = ros::Time::now();
-                path.header.frame_id="world";
-                path.poses.clear();
-                for(size_t i=0;i<local_results_.size();i++){
-                    VectorXd theta(6);
-                    theta<<local_results_[i](0),local_results_[i](1),local_results_[i](2),local_results_[i](3),local_results_[i](4),local_results_[i](5);
-                    MatrixXd endT = rrt_planner::transformMatrix_DH(dh_alpha_,dh_a_,dh_d_,dh_theta_,theta);
-                    VectorXd endPose(3);
-                    endPose<<endT(0,3),endT(1,3),endT(2,3);
-                    geometry_msgs::PoseStamped pose_stamped;
-                    pose_stamped.header = path.header;
-                    pose_stamped.pose.position.x = endPose(0);
-                    pose_stamped.pose.position.y = endPose(1);
-                    pose_stamped.pose.position.z = endPose(2);
-                    pose_stamped.pose.orientation.w = 1.0; // 假设没有旋转
-                    path.poses.push_back(pose_stamped);
-                }
-                local_path_pub_.publish(path);
-                // 获取当前ROS时间
-                ros::Time now = ros::Time::now();
-                // 将ROS时间转换为字符串
-                std::stringstream ss;
-                ss << std::fixed << now.toSec(); // 将时间转换为秒
-                
-                control_msgs::FollowJointTrajectoryGoal goal;
-                goal.trajectory.joint_names = {"joint1", "joint2", "joint3", "joint4", "joint5", "joint6"};
-                goal.trajectory.points.resize(5);
-                for (int i = 0; i < 5; i++) {
-                    trajectory_msgs::JointTrajectoryPoint& traj_point = goal.trajectory.points[i];
-                    traj_point.positions.resize(dof_);
-                    traj_point.velocities.resize(dof_);
-                    for(int j=0;j<dof_;j++){
-                        traj_point.positions[j] = local_results_[i](j);
-                        traj_point.velocities[j] = local_results_[i](j+dof_);
-                    }
-                    traj_point.time_from_start = ros::Duration(i * delta_t_);
-                }
-                if (gazebo_client_.getState().isDone()){
-                    gazebo_client_.sendGoal(goal);
-                }
-                // gazebo_client_.waitForResult(ros::Duration(1.0));
+        if(planner_type_ == "gp"){
+            vector<VectorXd> local_ref_path = getLocalRefPath();
+            gtsam::Vector start_conf = ConvertToGtsamVector(arm_pos_);
+            gtsam::Vector end_conf = ConvertToGtsamVector(local_ref_path[local_ref_path.size()-1]);
+            // end_conf = ConvertToGtsamVector(end_conf_);
+            gtsam::Values init_values;
+            if(calculateDistance(arm_pos_,local_ref_path[0])>0.2 || !ref_flag_){
+                init_values = gp_planner::initArmTrajStraightLine(ConvertToGtsamVector(arm_pos_), end_conf, opt_setting_.total_step);
+            }
+            else{
+                init_values = InitWithRef(local_ref_path, opt_setting_.total_step);
+            }
+            double total_time =  traj_total_time_*calculateDistance(start_conf,end_conf) / max_vel_ ;
+            total_time = opt_setting_.total_time;
+            start_vel_ = (end_conf - start_conf) / total_time;
+            end_vel_ = (end_conf - start_conf) / total_time;
+            opt_setting_.set_total_time(total_time);
+            gtsam::Values opt_values = gp_planner::Optimizer(robot_,sdf_,start_conf,end_conf,
+                                                            ConvertToGtsamVector(start_vel_),ConvertToGtsamVector(end_vel_),
+                                                            init_values,opt_setting_,
+                                                            ConvertToGtsamVector(end_conf_));
+            // 停止计时
+            auto stop = std::chrono::high_resolution_clock::now();
+            // 计算持续时间
+            auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(stop - start);
+            plan_time_cost_ += static_cast<double>(duration.count());
+            // 输出花费的时间
+            // std::cout << "Local planning took " << duration.count() << " ms" << std::endl;
+            ROS_INFO("Local planning took %.2f ms", static_cast<double>(duration.count()));
+            exec_values_ = gp_planner::interpolateTraj(opt_values, opt_setting_.Qc_model, delta_t_, control_inter_);
+            // double init_coll_cost = gp_planner::CollisionCost(robot_, sdf_, init_values, opt_setting_);
+            double opt_coll_cost = gp_planner::CollisionCost(robot_, sdf_, opt_values, opt_setting_);
+            if(opt_coll_cost< 1.0)    {
+                is_local_success_ = true;
+                // ref_flag_ = true;
+            }
+            else {
+                // cout<<"plan error: "<<opt_coll_cost<<endl;
+                // ROS_INFO("Plan error: %f", opt_coll_cost);
+                auto start_2 = std::chrono::high_resolution_clock::now();
+                local_results_ = generateTraj(arm_pos_);
                 // 停止计时
                 auto stop_2 = std::chrono::high_resolution_clock::now();
                 // 计算持续时间
                 auto duration_2 = std::chrono::duration_cast<std::chrono::milliseconds>(stop - start);
                 plan_time_cost_ += static_cast<double>(duration_2.count());
-            }
-            else{
-                count_++;
-                if(count_ > 10){
-                    planning_scene_monitor::PlanningSceneMonitorPtr monitor_ptr_udef = std::make_shared<planning_scene_monitor::PlanningSceneMonitor>("robot_description");
-                    monitor_ptr_udef->requestPlanningSceneState("get_planning_scene");
-                    planning_scene_monitor::LockedPlanningSceneRW ps(monitor_ptr_udef);
-                    ps->getCurrentStateNonConst().update();
-                    planning_scene::PlanningScenePtr col_scene = ps->diff();
-                    col_scene->decoupleParent();
-                    is_global_success_ = rrt_planner_.RRT_Plan(col_scene,arm_pos_,end_conf_,global_results_);
-                    if(is_global_success_)  publishGlobalPath();
-                    count_ = 0;
+                if(local_results_.size()==5){
+                    nav_msgs::Path path;
+                    path.header.stamp = ros::Time::now();
+                    path.header.frame_id="world";
+                    path.poses.clear();
+                    for(size_t i=0;i<local_results_.size();i++){
+                        VectorXd theta(6);
+                        theta<<local_results_[i](0),local_results_[i](1),local_results_[i](2),local_results_[i](3),local_results_[i](4),local_results_[i](5);
+                        MatrixXd endT = rrt_planner::transformMatrix_DH(dh_alpha_,dh_a_,dh_d_,dh_theta_,theta);
+                        VectorXd endPose(3);
+                        endPose<<endT(0,3),endT(1,3),endT(2,3);
+                        geometry_msgs::PoseStamped pose_stamped;
+                        pose_stamped.header = path.header;
+                        pose_stamped.pose.position.x = endPose(0);
+                        pose_stamped.pose.position.y = endPose(1);
+                        pose_stamped.pose.position.z = endPose(2);
+                        pose_stamped.pose.orientation.w = 1.0; // 假设没有旋转
+                        path.poses.push_back(pose_stamped);
+                    }
+                    local_path_pub_.publish(path);
+                    // 获取当前ROS时间
+                    ros::Time now = ros::Time::now();
+                    // 将ROS时间转换为字符串
+                    std::stringstream ss;
+                    ss << std::fixed << now.toSec(); // 将时间转换为秒
+                    control_msgs::FollowJointTrajectoryGoal goal;
+                    goal.trajectory.joint_names = {"joint1", "joint2", "joint3", "joint4", "joint5", "joint6"};
+                    goal.trajectory.points.resize(5);
+                    for (int i = 0; i < 5; i++) {
+                        trajectory_msgs::JointTrajectoryPoint& traj_point = goal.trajectory.points[i];
+                        traj_point.positions.resize(dof_);
+                        traj_point.velocities.resize(dof_);
+                        for(int j=0;j<dof_;j++){
+                            if(i==0)    traj_point.positions[j] = arm_pos_(j);
+                            else    traj_point.positions[j] = local_results_[i](j);
+                            traj_point.velocities[j] = local_results_[i](j+dof_);
+                        }
+                        traj_point.time_from_start = ros::Duration(i * delta_t_);
+                    }
+                    gazebo_client_.sendGoal(goal,
+                        boost::bind(&MyPlanner::doneCb, this, _1, _2),       // 目标完成时的回调
+                        boost::bind(&MyPlanner::activeCb, this),            // 目标激活时的回调
+                        boost::bind(&MyPlanner::feedbackCb, this, _1));     // 接收到反馈的回调
                 }
+                else{
+                    count_++;
+                    if(count_ > 100){
+                        planning_scene_monitor::PlanningSceneMonitorPtr monitor_ptr_udef = std::make_shared<planning_scene_monitor::PlanningSceneMonitor>("robot_description");
+                        monitor_ptr_udef->requestPlanningSceneState("get_planning_scene");
+                        planning_scene_monitor::LockedPlanningSceneRW ps(monitor_ptr_udef);
+                        ps->getCurrentStateNonConst().update();
+                        planning_scene::PlanningScenePtr col_scene = ps->diff();
+                        col_scene->decoupleParent();
+                        is_global_success_ = rrt_planner_.RRT_Plan(col_scene,arm_pos_,end_conf_,global_results_);
+                        if(is_global_success_)  publishGlobalPath();
+                        count_ = 0;
+                    }
+                }
+                // ref_flag_ = false;
             }
-            // ref_flag_ = false;
         }
     }
     else if(is_global_success_ && calculateDistance(arm_pos_, end_conf_)<= goal_tolerance_){
@@ -552,16 +554,20 @@ void MyPlanner::LocalPlanningCallback(const ros::TimerEvent&){
         publishLocalPath();
         exec_step_ = opt_setting_.total_step + control_inter_ * (opt_setting_.total_step - 1);
         local_results_.resize(exec_step_);
-        for(size_t i = 0;i<exec_step_;i++){
-            gtsam::Vector pos_temp = exec_values_.at<gtsam::Vector>(gtsam::Symbol('x',i));
-            gtsam::Vector vel_temp = exec_values_.at<gtsam::Vector>(gtsam::Symbol('v',i));
-            local_results_[i].resize(dof_* 2);
-            for(size_t j=0;j<dof_;j++){
-                local_results_[i](j) = pos_temp(j);
-                local_results_[i](j+dof_) = vel_temp(j);
+        if(planner_type_=="gp"){
+            for(size_t i = 0;i<exec_step_;i++){
+                gtsam::Vector pos_temp = exec_values_.at<gtsam::Vector>(gtsam::Symbol('x',i));
+                gtsam::Vector vel_temp = exec_values_.at<gtsam::Vector>(gtsam::Symbol('v',i));
+                local_results_[i].resize(dof_* 2);
+                for(size_t j=0;j<dof_;j++){
+                    local_results_[i](j) = pos_temp(j);
+                    local_results_[i](j+dof_) = vel_temp(j);
+                }
             }
         }
-        publishTrajectory(static_cast<int>(0.3 * exec_step_),true);
+        ROS_ASSERT(arm_pos_.size() == dof_);
+        ROS_ASSERT(local_results_[i].size() >= 2 * dof_);
+        publishTrajectory(static_cast<int>(1.0 * exec_step_),true);
     }
 
 }
@@ -573,15 +579,19 @@ void MyPlanner::publishLocalPath(){
     path.poses.clear();
     exec_step_ = opt_setting_.total_step + control_inter_ * (opt_setting_.total_step - 1);
     local_results_.resize(exec_step_);
-    for(size_t i = 0;i<exec_step_;i++){
-        gtsam::Vector pos_temp = exec_values_.at<gtsam::Vector>(gtsam::Symbol('x',i));
-        gtsam::Vector vel_temp = exec_values_.at<gtsam::Vector>(gtsam::Symbol('v',i));
-        local_results_[i].resize(dof_* 2);
-        for(size_t j=0;j<dof_;j++){
-            local_results_[i](j) = pos_temp(j);
-            local_results_[i](j+dof_) = vel_temp(j);
+    if(planner_type_ == "gp"){
+        for(size_t i = 0;i<exec_step_;i++){
+            gtsam::Vector pos_temp = exec_values_.at<gtsam::Vector>(gtsam::Symbol('x',i));
+            gtsam::Vector vel_temp = exec_values_.at<gtsam::Vector>(gtsam::Symbol('v',i));
+            local_results_[i].resize(dof_* 2);
+            for(size_t j=0;j<dof_;j++){
+                local_results_[i](j) = pos_temp(j);
+                local_results_[i](j+dof_) = vel_temp(j);
+            }
         }
     }
+    double end_length = 0;
+    VectorXd lastPose(3);
     for(size_t i=0;i<exec_step_;i++){
         VectorXd theta(6);
         theta<<local_results_[i](0),local_results_[i](1),local_results_[i](2),local_results_[i](3),local_results_[i](4),local_results_[i](5);
@@ -595,7 +605,10 @@ void MyPlanner::publishLocalPath(){
         pose_stamped.pose.position.z = endPose(2);
         pose_stamped.pose.orientation.w = 1.0; // 假设没有旋转
         path.poses.push_back(pose_stamped);
+        if(i>=1)    end_length+=(endPose-lastPose).norm();
+        lastPose = endPose;
     }
+    end_path_length_ += end_length;
     local_path_pub_.publish(path);
 }
 
@@ -619,7 +632,7 @@ void MyPlanner::publishGlobalPath(){
         path.poses.push_back(pose_stamped);
     }
     global_path_pub_.publish(path);
-    ROS_INFO("Global Plan Finished.");
+    // ROS_INFO("Global Plan Finished.");
 }
 
 void MyPlanner::publishTrajectory(int exec_step, bool pub_vel){
@@ -629,16 +642,17 @@ void MyPlanner::publishTrajectory(int exec_step, bool pub_vel){
     std::stringstream ss;
     ss << std::fixed << now.toSec(); // 将时间转换为秒
     double length = 0;
-    
     control_msgs::FollowJointTrajectoryGoal goal;
     goal.trajectory.joint_names = {"joint1", "joint2", "joint3", "joint4", "joint5", "joint6"};
     goal.trajectory.points.resize(exec_step);
     for (int i = 0; i < exec_step; i++) {
         trajectory_msgs::JointTrajectoryPoint& traj_point = goal.trajectory.points[i];
         traj_point.positions.resize(dof_);
+
         if(pub_vel) traj_point.velocities.resize(dof_);
         for(int j=0;j<dof_;j++){
-            traj_point.positions[j] = local_results_[i](j);
+            if(i==0)    traj_point.positions[j] = arm_pos_(j);
+            else traj_point.positions[j] = local_results_[i](j);
             if(pub_vel) traj_point.velocities[j] = local_results_[i](j+dof_);
         }
         traj_point.time_from_start = ros::Duration(i * delta_t_ / control_inter_);
@@ -651,15 +665,52 @@ void MyPlanner::publishTrajectory(int exec_step, bool pub_vel){
             length+=(p1-p2).norm();
         }
     }
+    // ROS_INFO("Sending trajectory with %lu points", goal.trajectory.points.size());
+    // ROS_INFO("Joint names:");
+    // for (const auto& name : goal.trajectory.joint_names) {
+    //     ROS_INFO(" - %s", name.c_str());
+    // }
+    // for (size_t i = 0; i < goal.trajectory.points.size(); ++i) {
+    //     const auto& point = goal.trajectory.points[i];
+    //     ROS_INFO("Point %lu positions size: %lu", i, point.positions.size());
+    //     ROS_INFO("Point %lu velocities size: %lu", i, point.velocities.size());
+    // }
+    // for (size_t i = 0; i < goal.trajectory.points.size(); ++i) {
+    //     const auto& point = goal.trajectory.points[i];
+    //     ROS_INFO("Point %lu:", i);
+    //     for (size_t j = 0; j < point.positions.size(); ++j) {
+    //         ROS_INFO("  Joint %lu position: %f", j, point.positions[j]);
+    //         if (pub_vel) ROS_INFO("  Joint %lu velocity: %f", j, point.velocities[j]);
+    //     }
+    //     ROS_INFO("  Time from start: %f", point.time_from_start.toSec());
+    // }
     path_length_ += length;
     // 输出带有时间戳的信息
-    ROS_INFO_STREAM("Publish Traj at " << ss.str());
-    gazebo_client_.sendGoal(goal);
-    gazebo_client_.waitForResult(ros::Duration(1.0));
+    // ROS_INFO_STREAM("Publish Traj at " << ss.str());
+    // gazebo_client_.sendGoal(goal);
+    // gazebo_client_.waitForResult(ros::Duration(1.0));
+    gazebo_client_.sendGoal(goal,
+                     boost::bind(&MyPlanner::doneCb, this, _1, _2),       // 目标完成时的回调
+                     boost::bind(&MyPlanner::activeCb, this),            // 目标激活时的回调
+                     boost::bind(&MyPlanner::feedbackCb, this, _1));     // 接收到反馈的回调
 
 }
 
-
+void MyPlanner::doneCb(const actionlib::SimpleClientGoalState& state, const control_msgs::FollowJointTrajectoryResultConstPtr& result){
+    ROS_INFO("Trajectory execution finished with state: %s", state.toString().c_str());
+    if (result) {
+        ROS_INFO("Trajectory result error code: %d", result->error_code);
+    }
+}
+void MyPlanner::activeCb(){
+    // ROS_INFO("Trajectory goal is now active.");
+}
+void MyPlanner::feedbackCb(const control_msgs::FollowJointTrajectoryFeedbackConstPtr& feedback){
+    // ROS_INFO("Received feedback:");
+    // for (size_t i = 0; i < feedback->actual.positions.size(); ++i) {
+    //     ROS_INFO("Joint %ld: %f", i, feedback->actual.positions[i]);
+    // }
+}
 
 void MyPlanner::DynamicCallback(const std_msgs::Float64MultiArray::ConstPtr& msg){
     if(msg->data[0]==3){
@@ -671,7 +722,6 @@ void MyPlanner::DynamicCallback(const std_msgs::Float64MultiArray::ConstPtr& msg
 }
 
 void MyPlanner::readSDFFile(const ros::TimerEvent&) {
-    // std::lock_guard<std::mutex> lock(*mutex_);  // 使用互斥锁
     std_msgs::Float64MultiArray read_msg;
     read_msg.data.push_back(1);
     read_pub_.publish(read_msg);

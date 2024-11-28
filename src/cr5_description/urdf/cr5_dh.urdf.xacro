@@ -510,4 +510,13 @@
     </plugin>
   </gazebo>
 
+  <gazebo>
+    <plugin name="contact_sensor_plugin" filename="libgazebo_ros_contact.so">
+      <robotNamespace>/gazebo</robotNamespace>
+      <alwaysOn>true</alwaysOn>
+      <updateRate>50.0</updateRate>
+      <contactTopicName>contact</contactTopicName>
+    </plugin>
+  </gazebo>
+
 </robot>

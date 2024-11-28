@@ -3,6 +3,7 @@
 
 #pragma once
 #include <cstddef>
+#include <cstring>
 #include "global_planner/rrtplanner.h" 
 #include "local_planner/Optimizer.h"
 #include <gtsam/base/Matrix.h>
@@ -75,9 +76,12 @@ public:
     ros::Timer map_timer_;  // 定时器
 
     // 测试相关
-    double path_length_;
+    double path_length_,end_path_length_;
     double plan_time_cost_;
     int plan_times_;
+    std::string planner_type_;
+    ros::Time last_update_time_;
+
 
 public:
     MyPlanner(ros::NodeHandle& nh);
@@ -92,6 +96,10 @@ public:
     void publishLocalPath();
     void publishGlobalPath();
     void generateCombinations(std::vector<int>& current, int index, std::vector<std::vector<int>>& combinations);
+    void doneCb(const actionlib::SimpleClientGoalState& state, const control_msgs::FollowJointTrajectoryResultConstPtr& result);
+    void activeCb();
+    void feedbackCb(const control_msgs::FollowJointTrajectoryFeedbackConstPtr& feedback);
+
     std::vector<VectorXd> generateTraj(const VectorXd& cur_pos);
 
     // 找到全局路径中距离当前位置最近的点

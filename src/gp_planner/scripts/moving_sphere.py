@@ -27,7 +27,7 @@ def move_obstacle():
     set_state = rospy.ServiceProxy('/gazebo/set_model_state', SetModelState)
     # 障碍物的名称
     model_name = 'moving_sphere'  # 替换为你的障碍物模型名称
-    rate = rospy.Rate(20)  # 控制循环的频率
+    rate = rospy.Rate(30)  # 控制循环的频率
     # 创建发布者
     pub = rospy.Publisher('/obstacle_info', Float64MultiArray, queue_size=10)
     # 创建MoveIt PlanningSceneInterface对象
@@ -61,88 +61,41 @@ def move_obstacle():
 
     # 运动参数
     mode = 'vertical'  # 'helical', 'linear', 'vertical', 'horizontal', or 'combined'
-    if mode == 'helical':
-        # 螺旋运动参数
-        radius = 1.0  # 圆的半径
-        height_amplitude = 0.75  # 上下往复运动的振幅
-        height_frequency = 0.5  # 上下往复运动的频率
-        angular_speed = 0.5  # 角速度
-    elif mode == 'linear':
-        # 水平往复运动参数
-        amplitude_x = 1.5  # x方向往复距离的一半
-        amplitude_y = 1.5  # y方向往复距离的一半
-        frequency = 0.5  # 往复频率
-    elif mode == 'vertical':
+    if mode == 'vertical':
         # 上下往复运动参数
-        amplitude_z = 0.2  # z方向往复距离的一半
-        frequency_z = 0.1  # 往复频率
+        start = np.array([-0.55, 0.0, 0.3])  # 垂直方向起点
+        end = np.array([-0.55, 0.0, 0.9])    # 垂直方向终点
+        linear_speed = 0.05  # 匀速运动的速度 (m/s)
     elif mode == 'horizontal':
         # 水平往复运动参数
-        amplitude_x = 1.5  # x方向往复距离的一半
-        amplitude_y = 1.5  # y方向往复距离的一半
-        frequency = 0.5  # 往复频率
-    elif mode == 'combined':
-        # 组合运动参数
-        radius = 1.0  # 圆周运动半径
-        height_amplitude = 0.75  # 上下往复运动的振幅
-        height_frequency = 0.5  # 上下往复运动的频率
-        angular_speed = 0.5  # 角速度
+        start = np.array([-1.0, 0.0, 0.5])  # 水平方向起点
+        end = np.array([1.0, 0.0, 0.5])    # 水平方向终点
+        linear_speed = 0.2  # 匀速运动的速度 (m/s)
+    # 计算运动方向和周期
+    direction = (end - start) / np.linalg.norm(end - start)  # 单位方向向量
+    position = start.copy()  # 障碍物的初始位置
+    moving_forward = True  # 初始状态为“向终点移动”
+    rospy.loginfo("Obstacle will move back and forth between start and end.")
 
-    t = 0.0
-    initial_height = 0.6
     while not rospy.is_shutdown():
-        t += 0.05  # 增加时间步长，以便观察运动
-
-        if mode == 'helical':
-            # 螺旋运动
-            theta = angular_speed * t
-            x = radius * math.cos(theta)
-            y = radius * math.sin(theta)
-            z = initial_height+height_amplitude * math.sin(2 * math.pi * height_frequency * t)
-            linear_speed = np.sqrt((radius * angular_speed) ** 2 + (height_amplitude * 2 * math.pi * height_frequency * math.cos(2 * math.pi * height_frequency * t)) ** 2)
-            direction = normalize_vector(np.array([-math.sin(theta), math.cos(theta), 2 * math.pi * height_frequency * math.cos(2 * math.pi * height_frequency * t)]))
-        elif mode == 'linear':
-            # 水平往复运动
-            x = amplitude_x * math.sin(2 * math.pi * frequency * t)
-            y = amplitude_y * math.sin(2 * math.pi * frequency * t)
-            z = initial_height
-            linear_speed = np.sqrt((amplitude_x * 2 * math.pi * frequency * math.cos(2 * math.pi * frequency * t)) ** 2 +
-                                   (amplitude_y * 2 * math.pi * frequency * math.cos(2 * math.pi * frequency * t)) ** 2)
-            direction = normalize_vector(np.array([amplitude_x * 2 * math.pi * frequency * math.cos(2 * math.pi * frequency * t),
-                                                   amplitude_y * 2 * math.pi * frequency * math.cos(2 * math.pi * frequency * t), 0.0]))
-        elif mode == 'vertical':
-            # 上下往复运动
-            x = -0.55
-            y = 0
-            z = initial_height + amplitude_z * math.sin(2 * math.pi * frequency_z * t)
-            linear_speed = abs(amplitude_z * 2 * math.pi * frequency_z * math.cos(2 * math.pi * frequency_z * t))
-            direction = normalize_vector(np.array([0.0, 0.0, 2 * math.pi * frequency_z * math.cos(2 * math.pi * frequency_z * t)]))
-            # z = initial_height
-            # linear_speed = 0
-            # direction = np.array([0.0, 0.0, 0])
-        elif mode == 'horizontal':
-            # 水平往复运动
-            x = amplitude_x * math.sin(2 * math.pi * frequency * t)
-            y = amplitude_y * math.sin(2 * math.pi * frequency * t)
-            z = 0.0
-            linear_speed = np.sqrt((amplitude_x * 2 * math.pi * frequency * math.cos(2 * math.pi * frequency * t)) ** 2 +
-                                   (amplitude_y * 2 * math.pi * frequency * math.cos(2 * math.pi * frequency * t)) ** 2)
-            direction = normalize_vector(np.array([amplitude_x * 2 * math.pi * frequency * math.cos(2 * math.pi * frequency * t),
-                                                   amplitude_y * 2 * math.pi * frequency * math.cos(2 * math.pi * frequency * t), 0.0]))
-        elif mode == 'combined':
-            # 组合运动：圆周运动 + 上下往复运动
-            theta = angular_speed * t
-            x = radius * math.cos(theta)
-            y = radius * math.sin(theta)
-            z = initial_height+height_amplitude * math.sin(2 * math.pi * height_frequency * t)
-            linear_speed = np.sqrt((radius * angular_speed) ** 2 + (height_amplitude * 2 * math.pi * height_frequency * math.cos(2 * math.pi * height_frequency * t)) ** 2)
-            direction = normalize_vector(np.array([-math.sin(theta), math.cos(theta), 2 * math.pi * height_frequency * math.cos(2 * math.pi * height_frequency * t)]))
-
-        # 限制位置在指定范围内
-        x = np.clip(x, -1.5, 1.5)
-        y = np.clip(y, -1.5, 1.5)
-        z = np.clip(z, 0, 1.5)
-
+        if moving_forward:
+            # 向终点移动
+            position += direction * linear_speed / 30  # 每帧移动一点
+            # 检查是否到达终点
+            if np.linalg.norm(position - end) < 1e-3:  # 允许一个小误差
+                position = end.copy()  # 确保位置精确为终点
+                direction = -direction  # 反转方向
+                moving_forward = False  # 切换为返回阶段
+        else:
+            # 返回起点
+            position += direction * linear_speed / 30  # 每帧移动一点
+            # 检查是否到达起点
+            if np.linalg.norm(position - start) < 1e-3:  # 允许一个小误差
+                position = start.copy()  # 确保位置精确为起点
+                direction = -direction  # 反转方向
+                moving_forward = True  # 切换为前进阶段
+        # 位置解包
+        x, y, z = position
         # 设置障碍物的位姿
         model_pose = Pose()
         model_pose.position.x = x
@@ -185,11 +138,12 @@ def move_obstacle():
         print(f"Linear Speed: {linear_speed:.2f}, Direction: {direction}")
         print(f"x: {x:.2f}, y: {y:.2f}, z: {z:.2f}, obs_size: {obs_size:.2f}")
         pub.publish(obstacle_info)
-
+        rospy.logdebug(f"Obstacle position: x={position[0]:.2f}, y={position[1]:.2f}, z={position[2]:.2f}")
         # 控制循环频率
         rate.sleep()
 
 if __name__ == '__main__':
+
     try:
         move_obstacle()
     except rospy.ROSInterruptException:

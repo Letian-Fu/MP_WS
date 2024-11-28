@@ -1,25 +1,22 @@
 #include "my_planner/MyPlanner.h"
 #include <moveit/move_group_interface/move_group_interface.h>
 #include <gazebo_msgs/ContactsState.h>
+#include <thread>       // std::this_thread::sleep_for
 
 
 bool is_collision = false;
 
-void contactCallback(const gazebo_msgs::ContactsState::ConstPtr& msg) {
-    for (const auto& state : msg->states) {
-        std::string link_name = "ball";  // 球的 link 名称
-        
-        // 检查碰撞事件中是否涉及球和机械臂的 link
-        if ((state.collision1_name.find(link_name) != std::string::npos) ||
-            (state.collision2_name.find(link_name) != std::string::npos)) {
-            ROS_INFO("Collision detected!");
-            is_collision = true;
-
-            // 打印碰撞的物体名称
-            ROS_INFO("Collision between: %s and %s",
-                     state.collision1_name.c_str(),
-                     state.collision2_name.c_str());
+void bumperCallback(const gazebo_msgs::ContactsState::ConstPtr& msg) {
+    if (!msg->states.empty()) {
+        ROS_INFO("Collision detected!");
+        is_collision = true;
+        for (const auto& contact : msg->states) {
+            ROS_INFO("Contact between [%s] and [%s]",
+                     contact.collision1_name.c_str(),
+                     contact.collision2_name.c_str());
         }
+    } else {
+        // ROS_INFO("No collision detected.");
     }
 }
 
@@ -38,16 +35,21 @@ int main(int argc, char **argv)
     bool moving_to_a = true;  // 当前目标是点 A 或点 B
 
     // 实验控制变量
-    int max_iterations = 10;  // 最大往复次数（比如 10 次往返）
+    int max_iterations = 4;  // 最大往复次数（比如 10 次往返）
     int iteration = 0;
     bool is_reached = true;
     std::vector<VectorXd> results(max_iterations);
     for(int i=0;i<max_iterations;i++){
-        results[i].resize(4);//success,collision,time,path_length,
+        results[i].resize(6);//success,collision,totla_time,opt_time,path_length(rad),path_length(m),
+        results[i].setZero();
     }
 
-    ros::Subscriber sub = n.subscribe("/gazebo/default/physics/contacts", 10, contactCallback);
-
+    ros::Subscriber sub = n.subscribe("/bumper_states", 1000, bumperCallback);
+    my_planner.planner_type_ = "gp";
+    auto start = std::chrono::high_resolution_clock::now();
+    auto stop = std::chrono::high_resolution_clock::now();
+    // 计算持续时间
+    auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(stop - start);
     while(ros::ok() && iteration < max_iterations){
         if(is_reached){
             VectorXd target = moving_to_a ? target_a : target_b;
@@ -64,22 +66,34 @@ int main(int argc, char **argv)
                 my_planner.publishGlobalPath();
                 is_reached = false;
             }
+            start = std::chrono::high_resolution_clock::now();
         }
         if(my_planner.is_global_success_ && my_planner.calculateDistance(my_planner.arm_pos_, my_planner.end_conf_)< my_planner.goal_tolerance_){
              // 切换目标点
             moving_to_a = !moving_to_a;
+            stop = std::chrono::high_resolution_clock::now();
+            duration = std::chrono::duration_cast<std::chrono::milliseconds>(stop - start);
             results[iteration](0) = true;
-            results[iteration](2) = my_planner.plan_time_cost_/static_cast<double>(my_planner.plan_times_);
-            results[iteration](3) = my_planner.path_length_;
+            results[iteration](2) = static_cast<double>(duration.count());
+            results[iteration](3) = my_planner.plan_time_cost_/static_cast<double>(my_planner.plan_times_);
+            results[iteration](4) = my_planner.path_length_;
+            results[iteration](5) = my_planner.end_path_length_;
+            my_planner.plan_time_cost_ = 0;
+            my_planner.plan_times_=0;
+            my_planner.path_length_=0;
+            my_planner.end_path_length_ = 0;
+            // 增加迭代次数
             // 增加迭代次数
             iteration++;
             my_planner.is_global_success_ = false;
             my_planner.is_local_success_ = false;
             my_planner.is_plan_success_ = false;
             is_reached = true;
+            // 延时 1 秒
+            std::this_thread::sleep_for(std::chrono::seconds(1));
         }
         if(is_collision){
-            results[iteration](1) = true;
+            results[iteration](1) = 1;
             is_collision = false;
         }
         // 等待下一个循环
@@ -89,11 +103,13 @@ int main(int argc, char **argv)
     std::cout << std::setw(12) << "Iteration"
               << std::setw(12) << "Success"
               << std::setw(12) << "Collision"
-              << std::setw(12) << "Time"
-              << std::setw(12) << "Path_Length" << std::endl;
+              << std::setw(12) << "Total Time"
+              << std::setw(12) << "Opt Time"
+              << std::setw(12) << "Path_Length(rad)"
+              << std::setw(12) << "Path_Length(m)" << std::endl;
 
     // 打印分隔线
-    std::cout << std::string(12 * 5, '-') << std::endl;
+    std::cout << std::string(12 * 7, '-') << std::endl;
 
     // 打印结果数据
     for (int i = 0; i < results.size(); i++) {
