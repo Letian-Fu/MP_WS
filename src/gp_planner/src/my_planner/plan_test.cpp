@@ -1,7 +1,15 @@
 #include "my_planner/MyPlanner.h"
-#include <moveit/move_group_interface/move_group_interface.h>
+#include <ros/ros.h>
+#include <moveit/planning_scene_monitor/planning_scene_monitor.h>
 #include <gazebo_msgs/ContactsState.h>
-#include <thread>       // std::this_thread::sleep_for
+#include <tf2_ros/transform_listener.h>
+#include <geometry_msgs/TransformStamped.h>
+#include <Eigen/Dense>
+#include <vector>
+#include <chrono>
+#include <cmath>
+#include <thread>  // std::this_thread::sleep_for
+
 
 
 bool is_collision = false;
@@ -25,7 +33,9 @@ int main(int argc, char **argv)
     ros::init (argc, argv, "plan_test");
     ros::NodeHandle n;
     MyPlanner my_planner(n);
-    // ros::spin();
+    // TF2 Buffer 和 Listener，用于记录末端执行器的位置信息
+    tf2_ros::Buffer tf_buffer;
+    tf2_ros::TransformListener tf_listener(tf_buffer);
     // 定义目标点（关节角度）
     VectorXd target_a(6),target_b(6);
     target_a << 0.656,1.433,-0.866,-0.566,-2.115,0;  // 点 A
@@ -38,19 +48,57 @@ int main(int argc, char **argv)
     int max_iterations = 4;  // 最大往复次数（比如 10 次往返）
     int iteration = 0;
     bool is_reached = true;
-    std::vector<VectorXd> results(max_iterations);
-    for(int i=0;i<max_iterations;i++){
-        results[i].resize(6);//success,collision,totla_time,opt_time,path_length(rad),path_length(m),
-        results[i].setZero();
-    }
+    std::vector<VectorXd> results(max_iterations, VectorXd::Zero(6));
 
     ros::Subscriber sub = n.subscribe("/bumper_states", 1000, bumperCallback);
+    // 开始多线程处理回调
+    ros::AsyncSpinner spinner(2); // 使用 2 个线程处理回调
+    spinner.start();
+
     my_planner.planner_type_ = "gp";
     auto start = std::chrono::high_resolution_clock::now();
     auto stop = std::chrono::high_resolution_clock::now();
     // 计算持续时间
     auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(stop - start);
+    VectorXd current_joints(6), last_joints(6);
+    current_joints.setZero();
+    last_joints.setZero();
+    // 记录末端路径
+    Vector3d current_end_effector_positions,last_end_effector_positions;
+    current_end_effector_positions.setZero();
+    last_end_effector_positions.setZero();
+    double joints_change = 0;
+    double path_length = 0;
     while(ros::ok() && iteration < max_iterations){
+        current_joints = my_planner.arm_pos_;
+        if(last_joints.norm()!=0){
+            double diff_norm = (current_joints - last_joints).norm();
+            if (std::isfinite(diff_norm)) { // 检查是否为有限值
+                // ROS_WARN("Joints change calculation resulted in inf or NaN.");
+                joints_change += diff_norm;
+            }
+        }
+        last_joints = current_joints;
+
+        try {
+            geometry_msgs::TransformStamped transform_stamped =
+                tf_buffer.lookupTransform("base_link", "Link6", ros::Time(0), ros::Duration(0.5));
+            Eigen::Vector3d position(transform_stamped.transform.translation.x,
+                                        transform_stamped.transform.translation.y,
+                                        transform_stamped.transform.translation.z);
+            current_end_effector_positions=position;
+        } catch (tf2::TransformException& ex) {
+            ROS_WARN("TF2 Exception: %s", ex.what());
+        }
+        if(last_end_effector_positions.norm()!=0){
+            double diff_norm = (current_end_effector_positions - last_end_effector_positions).norm();
+            if (std::isfinite(diff_norm)) { // 检查是否为有限值
+                // ROS_WARN("Joints change calculation resulted in inf or NaN.");
+                path_length += diff_norm;
+            }
+        }
+        last_end_effector_positions = current_end_effector_positions;
+
         if(is_reached){
             VectorXd target = moving_to_a ? target_a : target_b;
             planning_scene_monitor::PlanningSceneMonitorPtr monitor_ptr_udef = std::make_shared<planning_scene_monitor::PlanningSceneMonitor>("robot_description");
@@ -76,12 +124,16 @@ int main(int argc, char **argv)
             results[iteration](0) = true;
             results[iteration](2) = static_cast<double>(duration.count());
             results[iteration](3) = my_planner.plan_time_cost_/static_cast<double>(my_planner.plan_times_);
-            results[iteration](4) = my_planner.path_length_;
-            results[iteration](5) = my_planner.end_path_length_;
+            // results[iteration](4) = my_planner.path_length_;
+            // results[iteration](5) = my_planner.end_path_length_;
+            results[iteration](4) = joints_change;
+            results[iteration](5) = path_length;
             my_planner.plan_time_cost_ = 0;
             my_planner.plan_times_=0;
             my_planner.path_length_=0;
             my_planner.end_path_length_ = 0;
+            joints_change = 0;
+            path_length=0;
             // 增加迭代次数
             // 增加迭代次数
             iteration++;
@@ -89,33 +141,31 @@ int main(int argc, char **argv)
             my_planner.is_local_success_ = false;
             my_planner.is_plan_success_ = false;
             is_reached = true;
-            // 延时 1 秒
-            std::this_thread::sleep_for(std::chrono::seconds(1));
+            // 延时 300 毫秒
+            std::this_thread::sleep_for(std::chrono::milliseconds(300));
         }
         if(is_collision){
             results[iteration](1) = 1;
             is_collision = false;
         }
-        // 等待下一个循环
-        ros::spinOnce();
+        // // 等待下一个循环
+        // ros::spinOnce();
     }
-    // 打印标题行
+    // 打印结果
     std::cout << std::setw(12) << "Iteration"
               << std::setw(12) << "Success"
               << std::setw(12) << "Collision"
               << std::setw(12) << "Total Time"
               << std::setw(12) << "Opt Time"
-              << std::setw(12) << "Path_Length(rad)"
-              << std::setw(12) << "Path_Length(m)" << std::endl;
+              << std::setw(12) << "Joints Change(rad)"
+              << std::setw(12) << "Path Length(m)" << std::endl;
 
-    // 打印分隔线
     std::cout << std::string(12 * 7, '-') << std::endl;
 
-    // 打印结果数据
     for (int i = 0; i < results.size(); i++) {
-        std::cout << std::setw(12) << i + 1; // Iteration number
+        std::cout << std::setw(12) << i + 1;
         for (int j = 0; j < results[i].size(); j++) {
-            std::cout << std::setw(12) << results[i][j]; // Values for each column
+            std::cout << std::setw(12) << results[i][j];
         }
         std::cout << std::endl;
     }

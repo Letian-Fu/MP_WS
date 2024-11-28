@@ -15,15 +15,15 @@ class DynamicSDF:
         self.z = 30
         self.origin = np.array([-1.0, -1.0, -0.35])
         self.cell_size = 0.05
-        # self.cols = 100
-        # self.rows = 100
+        # self.cols = 80
+        # self.rows = 80
         # self.z = 60
-        # self.origin = np.array([-1.0, -1.0, -0.2])
-        # self.cell_size = 0.02
+        # self.origin = np.array([-1.0, -1.0, -0.35])
+        # self.cell_size = 0.025
         self.map = np.zeros((self.rows, self.cols, self.z))
         self.sdf = np.zeros((self.rows, self.cols, self.z))
         self.prob_map = np.ones((self.rows, self.cols, self.z))
-        self.epsilon = 0.05
+        self.epsilon = 0.1
         self.total_time = 1.5
         self.total_steps = 10
         self.opt_setting_ = type('opt_setting', (object,), {'epsilon': self.epsilon})()
@@ -108,12 +108,18 @@ class DynamicSDF:
         half_size_z = int(np.floor((size - 1) / 2))
         time_step = total_time/total_steps
         for step in range(total_steps):
+            epsilon = self.epsilon * (1 - step/total_steps)
             # 计算障碍物的未来位置
             current_position = [
                 int(round(position[0] + velocity * direction[0] * step * time_step)),
                 int(round(position[1] + velocity * direction[1] * step * time_step)),
                 int(round(position[2] + velocity * direction[2] * step * time_step))
             ]
+            # current_position = [
+            #     int(round(position[0] + velocity * direction[0] * step * time_step + epsilon / self.cell_size)),
+            #     int(round(position[1] + velocity * direction[1] * step * time_step + epsilon / self.cell_size)),
+            #     int(round(position[2] + velocity * direction[2] * step * time_step + epsilon / self.cell_size))
+            # ]
             # 检查当前点是否超出边界
             if (current_position[0] < 0 or current_position[0] >= map.shape[0] or
                 current_position[1] < 0 or current_position[1] >= map.shape[1] or
@@ -122,7 +128,7 @@ class DynamicSDF:
                 continue
             # 计算障碍物的移动距离
             # distance_moved = velocity * time_step
-            probability = 1.0 - step / total_steps
+            probability = 1.0 - (0.35 * step / total_steps)
             start_row = max(0, current_position[0] - half_size_row - 1)
             end_row = min(map.shape[0], current_position[0] + half_size_row)
 
@@ -138,23 +144,34 @@ class DynamicSDF:
             fill_size_z = end_z - start_z
             map[start_row:end_row, start_col:end_col, start_z:end_z] = np.ones((fill_size_row, fill_size_col, fill_size_z))
             prob_map[start_row:end_row, start_col:end_col, start_z:end_z] = probability * np.ones((fill_size_row, fill_size_col, fill_size_z))
-            # if distance_moved != 0:
-            #     # 遍历障碍物的每个单元格，并在地图上设置为障碍物或衰减值
-            #     for i in range(current_position[0] - half_size_row, current_position[0] + half_size_row + 1):
-            #         for j in range(current_position[1] - half_size_col, current_position[1] + half_size_col + 1):
-            #             for k in range(current_position[2] - half_size_z, current_position[2] + half_size_z + 1):
-            #                 if 0 <= i < map.shape[0] and 0 <= j < map.shape[1] and 0 <= k < map.shape[2]:
-            #                     distance_to_future = np.sqrt((i - current_position[0]) ** 2 +
-            #                                                 (j - current_position[1]) ** 2 +
-            #                                                 (k - current_position[2]) ** 2)
-            #                     decayed_distance = 1.0 - distance_to_future / distance_moved
-            #                     probability = 1.0 - step / total_steps
-            #                     probability = max(0.0, min(1.0, probability))
-            #                     prob_map[i, j, k] = probability
-            #                     if decayed_distance > 0:
-            #                         map[i, j, k] = 1.0  # 障碍物位置
-            #                     else:
-            #                         map[i, j, k] = max(0.0, map[i, j, k] - 0.1 )  # 衰减值
+
+    def add_dynamic_obstacle_static(self,position, size, velocity, direction, total_time, total_steps, map, prob_map):
+        # 计算障碍物的半径
+        half_size_row = int(np.floor((size - 1) / 2))
+        half_size_col = int(np.floor((size - 1) / 2))
+        half_size_z = int(np.floor((size - 1) / 2))
+        # 计算障碍物的未来位置
+        current_position = [
+            int(round(position[0])),
+            int(round(position[1])),
+            int(round(position[2]))
+        ]
+        # 计算障碍物的移动距离
+        # distance_moved = velocity * time_step
+        start_row = max(0, current_position[0] - half_size_row - 1)
+        end_row = min(map.shape[0], current_position[0] + half_size_row)
+
+        start_col = max(0, current_position[1] - half_size_col - 1)
+        end_col = min(map.shape[1], current_position[1] + half_size_col)
+
+        start_z = max(0, current_position[2] - half_size_z - 1)
+        end_z = min(map.shape[2], current_position[2] + half_size_z)
+
+        # 动态计算填充值大小
+        fill_size_row = end_row - start_row
+        fill_size_col = end_col - start_col
+        fill_size_z = end_z - start_z
+        map[start_row:end_row, start_col:end_col, start_z:end_z] = np.ones((fill_size_row, fill_size_col, fill_size_z))
 
     def readingCallback(self, msg):
         if msg.data[0] == 1:
@@ -180,15 +197,16 @@ class DynamicSDF:
             position = [grid_r, grid_c, grid_z]
             direction = [direction_y, direction_x, direction_z]
             velocity = linear_speed / self.cell_size
-            size = 2 * obs_size / self.cell_size + self.epsilon / self.cell_size
+            size = 2 * obs_size / self.cell_size
             self.map = np.zeros((self.rows, self.cols, self.z))
             self.sdf = np.zeros((self.rows, self.cols, self.z))
             self.prob_map = np.ones((self.rows, self.cols, self.z))
             self.add_obstacle([20, 20, 5], [30, 30, 3], self.map)
-            # self.add_obstacle([50, 50, 8], [80, 80, 3], self.map)
+            # self.add_obstacle([40, 40, 9], [60, 60, 5], self.map)
             if velocity != 0:
                 # 调用add_dynamic_obstacle函数
                 self.add_dynamic_obstacle(position, size, velocity, direction, self.total_time, self.total_steps,self.map, self.prob_map)
+                # self.add_dynamic_obstacle_static(position, size, velocity, direction, self.total_time, self.total_steps,self.map, self.prob_map)
                 self.sdf = self.signedDistanceField3D(self.map, self.cell_size,self.prob_map)
                 self.update_flag = True
             else :

@@ -57,7 +57,7 @@ gazebo_client_("/arm_controller/follow_joint_trajectory", true)
     xs<<0,0,0,0.105,0.210,0.315,0.420,0,0.11,0.22,0,0,0,0,0,0;
     ys<<-0.1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0;
     zs<<0,0,0.1,0.1,0.1,0.1,0.1,0,0,0,0,0,0,0,0.1,0.2;
-    rs<<0.08,0.08,0.06,0.06,0.06,0.06,0.06,0.08,0.06,0.06,0.08,0.07,0.06,0.06,0.06,0.06;
+    rs<<0.08,0.08,0.10,0.10,0.10,0.10,0.10,0.10,0.10,0.10,0.10,0.10,0.10,0.10,0.07,0.07;
     for(int i=0;i<xs.size();i++){
         body_spheres.push_back(gp_planner::BodySphere(js[i],rs[i],gtsam::Point3(xs[i],ys[i],zs[i])));
     }
@@ -250,15 +250,15 @@ vector<VectorXd> MyPlanner::generateTraj(const VectorXd& cur_pos){
         for(int j=0;j<numPoints;j++){
             traj[j].resize(2*dof_);
             for(int k=0;k<dof_;k++){
-                if(combination[k]==0){
+                if(comb[k]==0){
                     traj[j](k) = cur_pos[k] + 0;
                     traj[j](k+dof_) = 0;
                 }
-                else if(combination[k]==1){
+                else if(comb[k]==1){
                     traj[j](k) = cur_pos[k] + 0.01*(j+1);
                     traj[j](k+dof_) = 0.01/0.2;
                 }
-                else if(combination[k]==2){
+                else if(comb[k]==2){
                     traj[j](k) = cur_pos[k] - 0.01*(j+1);
                     traj[j](k+dof_) = -0.01/0.2;
                 }
@@ -425,6 +425,7 @@ void MyPlanner::GlobalPlanCallback(const moveit_msgs::MoveGroupActionGoal::Const
 void MyPlanner::LocalPlanningCallback(const ros::TimerEvent&){
     is_plan_success_ = false;
     is_local_success_ = false;
+    local_results_.clear();
     auto start = std::chrono::high_resolution_clock::now();
     if(is_global_success_ && calculateDistance(arm_pos_, end_conf_)> goal_tolerance_){
         plan_times_ ++;
@@ -459,16 +460,18 @@ void MyPlanner::LocalPlanningCallback(const ros::TimerEvent&){
             ROS_INFO("Local planning took %.2f ms", static_cast<double>(duration.count()));
             exec_values_ = gp_planner::interpolateTraj(opt_values, opt_setting_.Qc_model, delta_t_, control_inter_);
             // double init_coll_cost = gp_planner::CollisionCost(robot_, sdf_, init_values, opt_setting_);
-            double opt_coll_cost = gp_planner::CollisionCost(robot_, sdf_, opt_values, opt_setting_);
-            if(opt_coll_cost< 1.0)    {
+            double opt_coll_cost = gp_planner::CollisionCost(robot_, sdf_, opt_values, opt_setting_)/(opt_setting_.total_step*opt_setting_.obs_check_inter-opt_setting_.total_step);
+            if(opt_coll_cost< 0.5)    {
                 is_local_success_ = true;
                 // ref_flag_ = true;
             }
             else {
                 // cout<<"plan error: "<<opt_coll_cost<<endl;
-                // ROS_INFO("Plan error: %f", opt_coll_cost);
+                ROS_INFO("Plan error: %f", opt_coll_cost);
                 auto start_2 = std::chrono::high_resolution_clock::now();
                 local_results_ = generateTraj(arm_pos_);
+                local_results_.clear();
+                is_local_success_ = false;
                 // 停止计时
                 auto stop_2 = std::chrono::high_resolution_clock::now();
                 // 计算持续时间
@@ -501,17 +504,21 @@ void MyPlanner::LocalPlanningCallback(const ros::TimerEvent&){
                     ss << std::fixed << now.toSec(); // 将时间转换为秒
                     control_msgs::FollowJointTrajectoryGoal goal;
                     goal.trajectory.joint_names = {"joint1", "joint2", "joint3", "joint4", "joint5", "joint6"};
-                    goal.trajectory.points.resize(5);
+                    goal.trajectory.points.resize(6);
+                    goal.trajectory.points[0].positions.resize(dof_);
+                    for(int j=0;j<dof_;j++){
+                        goal.trajectory.points[0].positions[j] = arm_pos_(j);
+                    }
+                    goal.trajectory.points[0].time_from_start = ros::Duration(0);
                     for (int i = 0; i < 5; i++) {
-                        trajectory_msgs::JointTrajectoryPoint& traj_point = goal.trajectory.points[i];
+                        trajectory_msgs::JointTrajectoryPoint& traj_point = goal.trajectory.points[i+1];
                         traj_point.positions.resize(dof_);
                         traj_point.velocities.resize(dof_);
                         for(int j=0;j<dof_;j++){
-                            if(i==0)    traj_point.positions[j] = arm_pos_(j);
-                            else    traj_point.positions[j] = local_results_[i](j);
+                            traj_point.positions[j] = local_results_[i](j);
                             traj_point.velocities[j] = local_results_[i](j+dof_);
                         }
-                        traj_point.time_from_start = ros::Duration(i * delta_t_);
+                        traj_point.time_from_start = ros::Duration((i+1) * delta_t_);
                     }
                     gazebo_client_.sendGoal(goal,
                         boost::bind(&MyPlanner::doneCb, this, _1, _2),       // 目标完成时的回调
@@ -542,11 +549,6 @@ void MyPlanner::LocalPlanningCallback(const ros::TimerEvent&){
         ROS_INFO("Plan Finished...");
     }
     is_plan_success_ = is_global_success_ && is_local_success_;
-    // auto stop2 = std::chrono::high_resolution_clock::now();
-    // // 计算持续时间
-    // auto duration2 = std::chrono::duration_cast<std::chrono::milliseconds>(stop2 - start);
-    // // 输出花费的时间
-    // std::cout << "Replanning took " << duration2.count() << " ms" << std::endl;
     if(is_plan_success_){
         if(calculateDistance(arm_pos_, end_conf_)<= goal_tolerance_){
             ROS_INFO("Plan Finished...");
@@ -567,7 +569,7 @@ void MyPlanner::LocalPlanningCallback(const ros::TimerEvent&){
         }
         ROS_ASSERT(arm_pos_.size() == dof_);
         ROS_ASSERT(local_results_[i].size() >= 2 * dof_);
-        publishTrajectory(static_cast<int>(1.0 * exec_step_),true);
+        publishTrajectory(static_cast<int>(0.5 * exec_step_),true);
     }
 
 }
@@ -644,18 +646,22 @@ void MyPlanner::publishTrajectory(int exec_step, bool pub_vel){
     double length = 0;
     control_msgs::FollowJointTrajectoryGoal goal;
     goal.trajectory.joint_names = {"joint1", "joint2", "joint3", "joint4", "joint5", "joint6"};
-    goal.trajectory.points.resize(exec_step);
+    goal.trajectory.points.resize(exec_step+1);
+    goal.trajectory.points[0].positions.resize(dof_);
+    for(int j=0;j<dof_;j++){
+        goal.trajectory.points[0].positions[j] = arm_pos_(j);
+    }
+    goal.trajectory.points[0].time_from_start = ros::Duration(0);
     for (int i = 0; i < exec_step; i++) {
-        trajectory_msgs::JointTrajectoryPoint& traj_point = goal.trajectory.points[i];
+        trajectory_msgs::JointTrajectoryPoint& traj_point = goal.trajectory.points[i+1];
         traj_point.positions.resize(dof_);
 
         if(pub_vel) traj_point.velocities.resize(dof_);
         for(int j=0;j<dof_;j++){
-            if(i==0)    traj_point.positions[j] = arm_pos_(j);
-            else traj_point.positions[j] = local_results_[i](j);
+            traj_point.positions[j] = local_results_[i](j);
             if(pub_vel) traj_point.velocities[j] = local_results_[i](j+dof_);
         }
-        traj_point.time_from_start = ros::Duration(i * delta_t_ / control_inter_);
+        traj_point.time_from_start = ros::Duration((i+1) * delta_t_ / control_inter_);
         if(i>=1){
             VectorXd p1(6),p2(6);
             for(int j=0;j<dof_;j++){

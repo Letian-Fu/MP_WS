@@ -57,15 +57,15 @@ def move_obstacle():
 
     # # 应用碰撞对象到规划场景
     planning_scene_interface.add_object(floor)
-    obs_size = 0.08
+    obs_size = 0.10
 
     # 运动参数
     mode = 'vertical'  # 'helical', 'linear', 'vertical', 'horizontal', or 'combined'
     if mode == 'vertical':
         # 上下往复运动参数
-        start = np.array([-0.55, 0.0, 0.3])  # 垂直方向起点
-        end = np.array([-0.55, 0.0, 0.9])    # 垂直方向终点
-        linear_speed = 0.05  # 匀速运动的速度 (m/s)
+        start = np.array([-0.6, 0.0, 0.3])  # 垂直方向起点
+        end = np.array([-0.6, 0.0, 0.9])    # 垂直方向终点
+        linear_speed = 0.20  # 匀速运动的速度 (m/s)
     elif mode == 'horizontal':
         # 水平往复运动参数
         start = np.array([-1.0, 0.0, 0.5])  # 水平方向起点
