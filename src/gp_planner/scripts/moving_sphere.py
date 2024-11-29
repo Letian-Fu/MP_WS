@@ -12,6 +12,7 @@ from moveit_msgs.srv import GetPlanningScene, GetPlanningSceneRequest
 from std_msgs.msg import Float64MultiArray
 from std_srvs.srv import Empty
 from geometry_msgs.msg import PoseStamped
+from visualization_msgs.msg import Marker
 
 
 def normalize_vector(v):
@@ -30,6 +31,21 @@ def move_obstacle():
     rate = rospy.Rate(30)  # 控制循环的频率
     # 创建发布者
     pub = rospy.Publisher('/obstacle_info', Float64MultiArray, queue_size=10)
+    pub_mpc = rospy.Publisher('/obstacle_info_mpc', Float64MultiArray, queue_size=10)
+    pub_marker = rospy.Publisher('/obstacle_trajectory', Marker, queue_size=10)
+
+    # 定义Marker消息
+    marker = Marker()
+    marker.header.frame_id = "world"  # 使用 Gazebo 的世界坐标系
+    marker.type = Marker.LINE_STRIP  # 选择轨迹类型为线条
+    marker.action = Marker.ADD
+    marker.scale.x = 0.02  # 线条宽度
+    marker.color.r = 0.0  # 轨迹颜色为红色
+    marker.color.g = 0.0
+    marker.color.b = 1.0
+    marker.color.a = 1.0  # 颜色透明度
+    marker.pose.orientation.w = 1.0  # 轨迹的全局姿态
+    marker.points = []  # 存储轨迹点的数组
     # 创建MoveIt PlanningSceneInterface对象
     planning_scene_interface = PlanningSceneInterface()
 
@@ -65,7 +81,7 @@ def move_obstacle():
         # 上下往复运动参数
         start = np.array([-0.6, 0.0, 0.3])  # 垂直方向起点
         end = np.array([-0.6, 0.0, 0.9])    # 垂直方向终点
-        linear_speed = 0.20  # 匀速运动的速度 (m/s)
+        linear_speed = 0.1  # 匀速运动的速度 (m/s)
     elif mode == 'horizontal':
         # 水平往复运动参数
         start = np.array([-1.0, 0.0, 0.5])  # 水平方向起点
@@ -75,25 +91,39 @@ def move_obstacle():
     direction = (end - start) / np.linalg.norm(end - start)  # 单位方向向量
     position = start.copy()  # 障碍物的初始位置
     moving_forward = True  # 初始状态为“向终点移动”
+    distance = np.linalg.norm(end - start)
+    period = 2*distance / linear_speed
+    delta_t = 1.0 / 30                                      # 时间步长（假设帧率为 30 FPS）
     rospy.loginfo("Obstacle will move back and forth between start and end.")
-
+    t = 0
     while not rospy.is_shutdown():
-        if moving_forward:
-            # 向终点移动
-            position += direction * linear_speed / 30  # 每帧移动一点
-            # 检查是否到达终点
-            if np.linalg.norm(position - end) < 1e-3:  # 允许一个小误差
-                position = end.copy()  # 确保位置精确为终点
-                direction = -direction  # 反转方向
-                moving_forward = False  # 切换为返回阶段
+        # 计算当前时间在周期中的相对位置
+        t = (t + delta_t) % period  # 保证时间在 [0, period) 内循环
+        if t < period / 2:
+            # 前半周期：从起点到终点
+            direction = (end - start) / np.linalg.norm(end - start)  # 起点到终点的单位方向
+            position = start + direction * linear_speed * t
         else:
-            # 返回起点
-            position += direction * linear_speed / 30  # 每帧移动一点
-            # 检查是否到达起点
-            if np.linalg.norm(position - start) < 1e-3:  # 允许一个小误差
-                position = start.copy()  # 确保位置精确为起点
-                direction = -direction  # 反转方向
-                moving_forward = True  # 切换为前进阶段
+            # 后半周期：从终点返回起点
+            t_back = t - period / 2  # 后半周期的相对时间
+            direction = (start - end) / np.linalg.norm(start - end)  # 终点到起点的单位方向
+            position = end + direction * linear_speed * t_back
+        # if moving_forward:
+        #     # 向终点移动
+        #     position += direction * linear_speed / 30  # 每帧移动一点
+        #     # 检查是否到达终点
+        #     if np.linalg.norm(position - end) < 1e-3:  # 允许一个小误差
+        #         position = end.copy()  # 确保位置精确为终点
+        #         direction = -direction  # 反转方向
+        #         moving_forward = False  # 切换为返回阶段
+        # else:
+        #     # 返回起点
+        #     position += direction * linear_speed / 30  # 每帧移动一点
+        #     # 检查是否到达起点
+        #     if np.linalg.norm(position - start) < 1e-3:  # 允许一个小误差
+        #         position = start.copy()  # 确保位置精确为起点
+        #         direction = -direction  # 反转方向
+        #         moving_forward = True  # 切换为前进阶段
         # 位置解包
         x, y, z = position
         # 设置障碍物的位姿
@@ -138,7 +168,23 @@ def move_obstacle():
         print(f"Linear Speed: {linear_speed:.2f}, Direction: {direction}")
         print(f"x: {x:.2f}, y: {y:.2f}, z: {z:.2f}, obs_size: {obs_size:.2f}")
         pub.publish(obstacle_info)
+        pub_mpc.publish(obstacle_info)
         rospy.logdebug(f"Obstacle position: x={position[0]:.2f}, y={position[1]:.2f}, z={position[2]:.2f}")
+
+        # 添加当前位置到轨迹点
+        point = Pose()
+        point.position.x = x
+        point.position.y = y
+        point.position.z = z
+        marker.points.append(point.position)
+
+        # 限制轨迹点的数量（防止内存过大）
+        if len(marker.points) > 1000:  # 保留最近 1000 个点
+            marker.points.pop(0)
+
+        # 发布轨迹
+        marker.header.stamp = rospy.Time.now()
+        pub_marker.publish(marker)
         # 控制循环频率
         rate.sleep()
 

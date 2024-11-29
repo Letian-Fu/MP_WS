@@ -130,6 +130,8 @@ target_link_libraries(My_Planner
   Local_Planner
   ${catkin_LIBRARIES}
   ${OpenCV_LIBRARIES}
+  ipopt
+  ${IPOPT_INCLUDE_DIRS}
 )
 
 catkin_package(

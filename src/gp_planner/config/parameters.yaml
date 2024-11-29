@@ -25,15 +25,16 @@ global_planner:
   MAX_TREE_NUM: 2000
 
 settings:
-  sdf_file: sdf/obs_test_one_box.bin
+  planner_type: gp
   frequency: 5
   ref_inter_num: 3
-  total_time: 2.0
-  total_step: 15
-  obs_check_inter: 5
-  control_inter: 5
-  cost_sigma: 0.02
+  total_time: 1.0
+  total_step: 10
   epsilon: 0.1
+  control_inter: 5
+  obs_check_inter: 5
+  sdf_file: sdf/obs_test_one_box.bin
+  cost_sigma: 0.02
   fix_pose_sigma: 0.0001
   fix_vel_sigma: 0.0001
   Qc: 2.0
@@ -47,7 +48,16 @@ settings:
   vel_limit_sigma: 0.0001
   goal_tolerance: 0.1
   decay_factor: 0.5
-  map_update_frenquency: 15
+  map_update_frenquency: 10
+  # mpc setting
+  # planner_type: mpc
+  # frequency: 30
+  # ref_inter_num: 2
+  # total_time: 0.1
+  # total_step: 5
+  # control_inter: 5
+  # epsilon: 0.10
+  # goal_tolerance: 0.2
 
 sdf:
   static_file: /home/roboert/MP_WS/src/gp_planner/sdf_data/sdf_data_static_py.txt

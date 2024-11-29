@@ -168,7 +168,7 @@ gazebo_client_("/arm_controller/follow_joint_trajectory", true)
     planner_timer_ = nh.createTimer(ros::Duration(1.0 / local_planner_frenquency_), &MyPlanner::LocalPlanningCallback, this);
     arm_state_sub_ = nh.subscribe(arm_state_topic_, 1, &MyPlanner::armStateCallback,this);
     plan_sub_ = nh.subscribe("move_group/goal", 1, &MyPlanner::GlobalPlanCallback,this);
-    // obs_sub_ = nh.subscribe("/obstacle_info", 1, &MyPlanner::obstacleCallback, this);
+    obs_sub_ = nh.subscribe("/obstacle_info_mpc", 10, &MyPlanner::obstacleInfoCallback, this);
     map_sub_ = nh.subscribe("/map_updated", 1, &MyPlanner::DynamicCallback, this);
     local_path_pub_ = nh.advertise<nav_msgs::Path>("local_path",10);
     global_path_pub_ = nh.advertise<nav_msgs::Path>("global_path",10);
@@ -202,6 +202,7 @@ gazebo_client_("/arm_controller/follow_joint_trajectory", true)
     plan_times_ = 0;
     end_path_length_ = 0;
     planner_type_ = "gp";
+    nh.getParam("settings/planner_type", planner_type_);
 }
 
 gtsam::Values MyPlanner::InitWithRef(const std::vector<Eigen::VectorXd>& ref_path, int total_step){
@@ -542,10 +543,56 @@ void MyPlanner::LocalPlanningCallback(const ros::TimerEvent&){
                 // ref_flag_ = false;
             }
         }
+        else if(planner_type_ == "mpc"){
+            auto start = std::chrono::high_resolution_clock::now();
+            vector<VectorXd> local_ref_path = getLocalRefPath();
+            vector<VectorXd> temp;
+            temp = mpcSolve(local_ref_path,arm_pos_,obs_pos_,obs_vel_,obs_direction_);
+            if (temp.empty()) {
+                std::cerr << "Error: temp is empty after MPC solve!" << std::endl;
+                is_local_success_ = false;
+            }
+            else{
+                is_local_success_ = true;
+                // local_results_ = temp;
+                // exec_step_ = local_results_.size();
+                delta_t_ = opt_setting_.total_time / opt_setting_.total_step;
+                exec_step_ = 2;
+                local_results_.resize(exec_step_);
+                local_results_[0]=temp[1];
+                local_results_[1]=temp[2];
+
+                // exec_step_ = opt_setting_.total_step + control_inter_ * (opt_setting_.total_step - 1);
+                // local_results_.resize(exec_step_);
+                // int control_inter = (exec_step_ - opt_setting_.total_step) / (opt_setting_.total_step - 1); // 每两个原始点之间插入点数
+                // int index = 0; // 插值结果的写入索引
+                // for (int i = 0; i < opt_setting_.total_step - 1; ++i) {
+                //     const VectorXd& start = temp[i];       // 当前点
+                //     const VectorXd& end = temp[i + 1];    // 下一个点
+                //     // 原始点直接插入
+                //     local_results_[index++] = start;
+                //     // 在当前点和下一个点之间插值
+                //     for (int j = 1; j <= control_inter; ++j) {
+                //         double alpha = static_cast<double>(j) / (control_inter + 1); // 插值比例
+                //         VectorXd inter = (1 - alpha) * start + alpha * end;         // 线性插值公式
+                //         local_results_[index++] = inter;
+                //     }
+                // }
+                // // 最后一个点直接插入
+                // local_results_[index] = temp.back();
+            }
+            // 停止计时
+            auto stop = std::chrono::high_resolution_clock::now();
+            // 计算持续时间
+            auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(stop - start);
+            plan_time_cost_ += static_cast<double>(duration.count());
+            // 输出花费的时间
+            ROS_INFO("Local planning took %.2f ms", static_cast<double>(duration.count()));
+        }
     }
     else if(is_global_success_ && calculateDistance(arm_pos_, end_conf_)<= goal_tolerance_){
         is_local_success_ = true;
-        is_global_success_ = false;
+        // is_global_success_ = false;
         ROS_INFO("Plan Finished...");
     }
     is_plan_success_ = is_global_success_ && is_local_success_;
@@ -554,9 +601,9 @@ void MyPlanner::LocalPlanningCallback(const ros::TimerEvent&){
             ROS_INFO("Plan Finished...");
         }
         publishLocalPath();
-        exec_step_ = opt_setting_.total_step + control_inter_ * (opt_setting_.total_step - 1);
-        local_results_.resize(exec_step_);
         if(planner_type_=="gp"){
+            exec_step_ = opt_setting_.total_step + control_inter_ * (opt_setting_.total_step - 1);
+            local_results_.resize(exec_step_);
             for(size_t i = 0;i<exec_step_;i++){
                 gtsam::Vector pos_temp = exec_values_.at<gtsam::Vector>(gtsam::Symbol('x',i));
                 gtsam::Vector vel_temp = exec_values_.at<gtsam::Vector>(gtsam::Symbol('v',i));
@@ -566,12 +613,307 @@ void MyPlanner::LocalPlanningCallback(const ros::TimerEvent&){
                     local_results_[i](j+dof_) = vel_temp(j);
                 }
             }
+            ROS_ASSERT(arm_pos_.size() == dof_);
+            ROS_ASSERT(local_results_[i].size() >= 2 * dof_);
+            publishTrajectory(static_cast<int>(0.5 * exec_step_),true);
         }
-        ROS_ASSERT(arm_pos_.size() == dof_);
-        ROS_ASSERT(local_results_[i].size() >= 2 * dof_);
-        publishTrajectory(static_cast<int>(0.5 * exec_step_),true);
+        else if(planner_type_ =="mpc"){
+            ROS_ASSERT(arm_pos_.size() == dof_);
+            ROS_ASSERT(local_results_[0].size() >= 2 * dof_);
+            publishTrajectory(static_cast<int>(exec_step_),true);
+        }
     }
 
+}
+
+// 回调函数，处理障碍物信息
+void MyPlanner::obstacleInfoCallback(const std_msgs::Float64MultiArray::ConstPtr& msg) {
+    // 检查数据长度是否符合预期（8 个元素）
+    if (msg->data.size() != 8) {
+        ROS_WARN("Received obstacle info with unexpected size: %ld", msg->data.size());
+        return;
+    }
+    // 提取障碍物信息
+    double x = msg->data[0];
+    double y = msg->data[1];
+    double z = msg->data[2];
+    double obs_size = msg->data[3];
+    double linear_speed = msg->data[4];
+    double direction_x = msg->data[5];
+    double direction_y = msg->data[6];
+    double direction_z = msg->data[7];
+    obs_pos_<<x,y,z;
+    obs_vel_ = linear_speed;
+    obs_direction_ << direction_x,direction_y,direction_z;
+    // 打印收到的障碍物信息
+    // ROS_INFO("Received Obstacle Info:");
+    // ROS_INFO("Position: (x: %.2f, y: %.2f, z: %.2f)", x, y, z);
+    // ROS_INFO("Size: %.2f", obs_size);
+    // ROS_INFO("Linear Speed: %.2f", linear_speed);
+    // ROS_INFO("Direction: (%.2f, %.2f, %.2f)", direction_x, direction_y, direction_z);
+}
+
+std::vector<VectorXd> MyPlanner::mpcSolve(const vector<VectorXd>& ref_path, const VectorXd& x0, const VectorXd& obs_pos, const double& obs_vel, const VectorXd& obs_direction) {
+    size_t N = opt_setting_.total_step;       // 时间步数
+    double T = opt_setting_.total_time / N;  // 每个时间步的时间间隔
+    double safe_radius = opt_setting_.epsilon;
+    size_t n_states = dof_;                  // 状态维度（仅关节位置）
+    size_t n_controls = dof_;                // 控制输入维度（关节速度）
+    size_t n_vars = N * n_states + (N-1) * n_controls;  // 总优化变量数量
+    size_t n_constraints = 6 + (N-2) * n_controls + N*robot_.nr_body_spheres() + (N - 1) * n_states ;      // 总约束数量(初始状态约束，加速度约束,障碍约束，模型约束)
+    // size_t n_constraints = (N - 1) * n_states + N;      // 总约束数量
+    // size_t n_constraints = (N - 1) * n_states;      // 总约束数量
+
+    // std::cout << "=== Debug Information ===" << std::endl;
+    // std::cout << "N: " << N << ", T: " << T << ", safe_radius: " << safe_radius << std::endl;
+    // std::cout << "n_states: " << n_states << ", n_controls: " << n_controls << std::endl;
+    // std::cout << "n_vars: " << n_vars << ", n_constraints: " << n_constraints << std::endl;
+
+    // IPOPT 变量初始化
+    std::vector<double> vars(n_vars, 0.0); // 优化变量初始值
+    for(size_t i=0;i<dof_;i++)  vars[i] = x0[i];
+
+    // IPOPT 变量上下界
+    std::vector<double> vars_lowerbound(n_vars, -1e19);
+    std::vector<double> vars_upperbound(n_vars, 1e19);
+    for (size_t t = 0; t < N; ++t) {
+        for (size_t i = 0; i < n_states; ++i) {
+            vars_lowerbound[t * n_states + i] = -3.14; // 关节位置下界
+            vars_upperbound[t * n_states + i] = 3.14;  // 关节位置上界
+        }
+    }
+    for (size_t t=0;t<N-1;t++){
+        for(size_t i=0;i<n_controls;i++){
+            size_t control_index = N * n_states + t * n_controls + i;
+            vars_lowerbound[control_index] = -1.5; // 控制输入（关节速度）下界
+            vars_upperbound[control_index] = 1.5;  // 控制输入（关节速度）上界
+        }
+    }
+
+    // IPOPT 约束上下界
+    std::vector<double> constraints_lowerbound(n_constraints, 0.0);
+    std::vector<double> constraints_upperbound(n_constraints, 0.0);
+    // 设置加速度的上下限
+    for(size_t t=0;t<N-2;t++){
+        for(size_t i=0;i<n_controls;i++){
+            size_t idx = 6 + t * n_controls + i;
+            constraints_lowerbound[idx] = -1.0 * T;
+            constraints_upperbound[idx] = 1.0 * T;
+        }
+    }
+    // 设置避障约束的上下限
+    for (size_t t = 6 + (N-2) * n_controls; t < 6 + (N-2) * n_controls + N*robot_.nr_body_spheres(); ++t) {
+        // 避障约束的上界：无穷大
+        constraints_upperbound[t] = 1e19;
+    }
+
+    // 定义 FG_eval（目标函数和约束）
+    class FG_eval {
+    public:
+        typedef CPPAD_TESTVECTOR(CppAD::AD<double>) ADvector;
+        const std::vector<VectorXd>& ref_path;
+        const VectorXd& obs_pos;
+        const double& obs_vel;
+        const VectorXd& obs_direction;
+        const double safe_radius;
+        const size_t n_states;
+        const size_t n_controls;
+        const size_t N;
+        const double T;
+        const VectorXd& cur_state;
+        const VectorXd& goal_pose;
+        ADArm Arm;
+
+        FG_eval(const std::vector<VectorXd>& ref_path_, const VectorXd& obs_pos_, const double& obs_vel_, 
+                const VectorXd& obs_direction_, const double safe_radius_, size_t n_states_, size_t n_controls_, size_t N_, double T_,const VectorXd& cur_,const VectorXd& goal_)
+            : ref_path(ref_path_), obs_pos(obs_pos_), obs_vel(obs_vel_), obs_direction(obs_direction_),
+                safe_radius(safe_radius_), n_states(n_states_), n_controls(n_controls_), N(N_), T(T_),cur_state(cur_),goal_pose(goal_){
+                VectorXd dh_alpha,dh_a,dh_d,dh_theta;
+                dh_alpha.resize(6);
+                dh_a.resize(6);
+                dh_d.resize(6);
+                dh_theta.resize(6);
+                dh_alpha<<M_PI_2,0.0,0.0,M_PI_2,-M_PI_2,0.0;
+                dh_a<<0.0,-0.427,-0.357,0.0,0.0,0.0;
+                dh_d<<0.147,0.0,0.0,0.141,0.116,0.105;
+                dh_theta<<0.0,-M_PI_2,0.0,-M_PI_2,0.0,0.0;
+                
+                vector<ADBodySphere> body_spheres;
+                VectorXd xs(16),zs(16),ys(16),rs(16);
+                vector<size_t> js={0,0,1,1,1,1,1,1,2,2,2,3,4,5,5,5};
+                xs<<0,0,0,0.105,0.210,0.315,0.420,0,0.11,0.22,0,0,0,0,0,0;
+                ys<<-0.1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0;
+                zs<<0,0,0.1,0.1,0.1,0.1,0.1,0,0,0,0,0,0,0,0.1,0.2;
+                rs<<0.08,0.08,0.10,0.10,0.10,0.10,0.10,0.10,0.10,0.10,0.10,0.10,0.10,0.10,0.07,0.07;
+                for(int i=0;i<xs.size();i++){
+                    body_spheres.emplace_back(ADBodySphere(js[i],rs[i],Eigen::Vector3d(xs[i],ys[i],zs[i])));
+                }
+                Eigen::Matrix4d base_pose = Eigen::Matrix4d::Identity();
+                Arm = ADArm(6, dh_a, dh_alpha, dh_d, base_pose, dh_theta,body_spheres);
+            }
+
+        CppAD::AD<double> ADcomputeSignedDistance(
+            const Eigen::Matrix<CppAD::AD<double>, 3, 1>& sphere1_center,
+            const Eigen::Matrix<CppAD::AD<double>, 3, 1>& sphere2_center,
+            CppAD::AD<double> sphere1_radius,
+            CppAD::AD<double> sphere2_radius) {
+            CppAD::AD<double> distance = (sphere1_center - sphere2_center).norm();
+            CppAD::AD<double> signed_distance = distance - (sphere1_radius + sphere2_radius);
+            return signed_distance;
+        }
+
+        void operator()(ADvector& fg, const ADvector& vars) {
+            fg[0] = 0; // 初始化目标函数
+
+            // 目标函数
+            for (size_t t = 0; t < N; ++t) {
+                // 位置误差代价
+                for (size_t i = 0; i < n_states; ++i) {
+                    CppAD::AD<double> pos_error = vars[t * n_states + i] - ref_path[t][i];
+                    fg[0] += CppAD::pow(pos_error, 2);
+                }
+
+                // 控制输入代价
+                for (size_t i = 0; i < n_controls; ++i) {
+                    size_t control_index = N * n_states + t * n_controls + i;
+                    fg[0] += 0.1 * CppAD::pow(vars[control_index], 2);
+                }
+            }
+
+            for(size_t t=0; t<N;t++){
+                for(size_t i=0;i<n_states;i++){
+                    CppAD::AD<double> goal_error = vars[t * n_states + i] - goal_pose[i];
+                    fg[0] += 0.4 * CppAD::pow(goal_error,2);
+                }
+            }
+
+            for(size_t i = 0;i<6;i++){
+                fg[1+i] = vars[i] - cur_state[i];
+            }
+
+            for(size_t t = 1; t < N-1; t++){
+                for(size_t i=0;i<n_controls;i++){
+                    size_t idx = 6 + (t-1) * (N-1) + i;
+                    CppAD::AD<double> cur_v = vars[N * n_states + t * n_controls + i];
+                    CppAD::AD<double> last_v = vars[N * n_states + (t-1) * n_controls + i];
+                    fg[1 + idx] = cur_v - last_v;
+                }
+            }
+            // 动态障碍物位置初始化
+            CppAD::AD<double> obs_x = obs_pos[0];
+            CppAD::AD<double> obs_y = obs_pos[1];
+            CppAD::AD<double> obs_z = obs_pos[2];
+            for(size_t t=0;t<N;t++){
+                // 动态障碍物更新
+                if (t < N - 1) {
+                    obs_x += obs_vel * T * obs_direction[0];
+                    obs_y += obs_vel * T * obs_direction[1];
+                    obs_z += obs_vel * T * obs_direction[2];
+                }
+                std::vector<CppAD::AD<double>> joint_positions(6);
+                for (int i = 0; i < 6; i++) {
+                    joint_positions[i] = vars[t * n_states + i]; // 显式转换为 double
+                }
+                std::vector<Eigen::Matrix<CppAD::AD<double>, 3, 1>> sphere_centers;
+                Arm.sphereCenters(joint_positions, sphere_centers);
+                Eigen::Matrix<CppAD::AD<double>, 3, 1> obstacle_center;
+                obstacle_center << obs_x, obs_y, obs_z;
+                CppAD::AD<double> obstacle_radius = CppAD::AD<double>(0.08);
+                CppAD::AD<double> dist = 1000;
+                // 计算每个碰撞球体到障碍物的距离
+                for (size_t i = 0; i < sphere_centers.size(); i++) {
+                    size_t obstacle_constraint_index = 6 + (N-2) * n_controls + t * Arm.body_spheres_.size() + i;
+                    // std::cout<<obstacle_constraint_index<<std::endl;
+                    CppAD::AD<double> signed_distance = ADcomputeSignedDistance(
+                        sphere_centers[i], obstacle_center, CppAD::AD<double>(Arm.body_spheres_[i].radius), obstacle_radius);
+                    fg[1 + obstacle_constraint_index] = signed_distance - safe_radius;
+                    // CppAD::AD<double> dist = signed_distance - safe_radius;
+                    // if(dist<signed_distance-safe_radius)    dist=signed_distance-safe_radius;
+                    // fg[0] += 0.1 * CppAD::exp(-1.0 * dist);
+                }
+                // fg[0] += 0.1 * CppAD::exp(-1.0*dist);
+                // fg[1+t] = dist;
+            }
+
+            // 动力学约束
+            for (size_t t = 0; t < N - 1; ++t) {
+                for (size_t i = 0; i < n_states; ++i) {
+                    CppAD::AD<double> pos = vars[t * n_states + i];         // 当前关节位置
+                    CppAD::AD<double> vel = vars[N * n_states + t * n_controls + i]; // 当前关节速度
+                    CppAD::AD<double> next_pos = vars[(t + 1) * n_states + i]; // 下一时刻关节位置
+
+                    // 动力学约束：x_{k+1} = x_k + v_k * T
+                    // cout<<1+N * Arm.body_spheres_.size() + t * n_states + i<<std::endl;
+                    size_t idx = 6 + (N-2) * n_controls + N * Arm.body_spheres_.size() + t * n_states + i;
+                    // size_t idx = N + t * n_states + i;
+                    // size_t idx = t * n_states + i;
+                    fg[1 + idx] = next_pos - (pos + vel * T);
+                }
+            }
+        }
+    };
+
+    FG_eval fg_eval(ref_path, obs_pos, obs_vel, obs_direction, safe_radius, n_states, n_controls, N, T, x0, end_conf_);
+
+    // IPOPT 选项
+    std::string options;
+    options += "Integer print_level  0\n";
+    options += "String  sb           yes\n";
+    options += "Sparse  true        forward\n";
+    options += "Sparse  true        reverse\n";
+    // NOTE: Currently the solver has a maximum time limit of 0.5 seconds.
+    options += "Numeric max_cpu_time          0.5\n";
+    options += "Numeric tol           1e-4\n";
+
+    // 调用 IPOPT 求解
+    CppAD::ipopt::solve_result<std::vector<double>> solution;
+    try {
+        CppAD::ipopt::solve<std::vector<double>, FG_eval>(
+            options, vars, vars_lowerbound, vars_upperbound,
+            constraints_lowerbound, constraints_upperbound, fg_eval, solution);
+    } catch (const std::exception& e) {
+        std::cerr << "IPOPT solve failed with exception: " << e.what() << std::endl;
+        throw;
+    }
+    // 提取结果
+    std::vector<VectorXd> trajectory(N-1, VectorXd::Zero(n_states*2));
+    for (size_t t = 0; t < N-1; ++t) {
+        // 提取关节角度（位置）
+        for (size_t i = 0; i < n_states; ++i) {
+            trajectory[t][i] = solution.x[t * n_states + i]; // 前部分是关节角度
+        }
+        // 提取关节速度（控制量）
+        for (size_t i = 0; i < n_controls; ++i) {
+            trajectory[t][n_states + i] = solution.x[N * n_states + t * n_controls + i]; // 后部分是关节速度
+        }
+    }
+    // ROS_INFO("Optimization completed successfully!");
+    // // 打印 arm_pos_（6维向量）
+    // std::ostringstream oss;
+    // oss << "arm_pos_: [";
+    // for (size_t i = 0; i < arm_pos_.size(); ++i) {
+    //     oss << std::fixed << std::setprecision(3) << arm_pos_[i];
+    //     if (i != arm_pos_.size() - 1) {
+    //         oss << ", ";
+    //     }
+    // }
+    // oss << "]";
+    // ROS_INFO_STREAM(oss.str());
+
+    // // 打印 trajectory
+    // for (size_t t = 0; t < trajectory.size(); ++t) {
+    //     std::ostringstream oss;
+    //     oss << "Time step " << t << ": [";
+    //     for (size_t i = 0; i < trajectory[t].size(); ++i) {
+    //         oss << std::fixed << std::setprecision(3) << trajectory[t][i];
+    //         if (i != trajectory[t].size() - 1) {
+    //             oss << ", ";
+    //         }
+    //     }
+    //     oss << "]";
+    //     ROS_INFO_STREAM(oss.str());
+    // }
+    return trajectory;
 }
 
 void MyPlanner::publishLocalPath(){
@@ -579,9 +921,9 @@ void MyPlanner::publishLocalPath(){
     path.header.stamp = ros::Time::now();
     path.header.frame_id="world";
     path.poses.clear();
-    exec_step_ = opt_setting_.total_step + control_inter_ * (opt_setting_.total_step - 1);
-    local_results_.resize(exec_step_);
     if(planner_type_ == "gp"){
+        exec_step_ = opt_setting_.total_step + control_inter_ * (opt_setting_.total_step - 1);
+        local_results_.resize(exec_step_);
         for(size_t i = 0;i<exec_step_;i++){
             gtsam::Vector pos_temp = exec_values_.at<gtsam::Vector>(gtsam::Symbol('x',i));
             gtsam::Vector vel_temp = exec_values_.at<gtsam::Vector>(gtsam::Symbol('v',i));
@@ -591,6 +933,9 @@ void MyPlanner::publishLocalPath(){
                 local_results_[i](j+dof_) = vel_temp(j);
             }
         }
+    }
+    else if(planner_type_=="mpc"){
+        exec_step_ = local_results_.size();
     }
     double end_length = 0;
     VectorXd lastPose(3);
@@ -646,29 +991,61 @@ void MyPlanner::publishTrajectory(int exec_step, bool pub_vel){
     double length = 0;
     control_msgs::FollowJointTrajectoryGoal goal;
     goal.trajectory.joint_names = {"joint1", "joint2", "joint3", "joint4", "joint5", "joint6"};
-    goal.trajectory.points.resize(exec_step+1);
-    goal.trajectory.points[0].positions.resize(dof_);
-    for(int j=0;j<dof_;j++){
-        goal.trajectory.points[0].positions[j] = arm_pos_(j);
-    }
-    goal.trajectory.points[0].time_from_start = ros::Duration(0);
-    for (int i = 0; i < exec_step; i++) {
-        trajectory_msgs::JointTrajectoryPoint& traj_point = goal.trajectory.points[i+1];
-        traj_point.positions.resize(dof_);
-
-        if(pub_vel) traj_point.velocities.resize(dof_);
+    if(planner_type_=="gp"){
+        goal.trajectory.points.resize(exec_step+1);
+        goal.trajectory.points[0].positions.resize(dof_);
+        if(pub_vel) goal.trajectory.points[0].velocities.resize(dof_);
         for(int j=0;j<dof_;j++){
-            traj_point.positions[j] = local_results_[i](j);
-            if(pub_vel) traj_point.velocities[j] = local_results_[i](j+dof_);
+            goal.trajectory.points[0].positions[j] = arm_pos_(j);
+            if(pub_vel) goal.trajectory.points[0].velocities[j] = local_results_[0](j+dof_);
         }
-        traj_point.time_from_start = ros::Duration((i+1) * delta_t_ / control_inter_);
-        if(i>=1){
-            VectorXd p1(6),p2(6);
+        goal.trajectory.points[0].time_from_start = ros::Duration(0);
+        for (int i = 0; i < exec_step; i++) {
+            trajectory_msgs::JointTrajectoryPoint& traj_point = goal.trajectory.points[i+1];
+            traj_point.positions.resize(dof_);
+
+            if(pub_vel) traj_point.velocities.resize(dof_);
             for(int j=0;j<dof_;j++){
-                p1(j) = local_results_[i](j);
-                p2(j) = local_results_[i-1](j);
+                traj_point.positions[j] = local_results_[i](j);
+                if(pub_vel) traj_point.velocities[j] = local_results_[i](j+dof_);
             }
-            length+=(p1-p2).norm();
+            traj_point.time_from_start = ros::Duration((i+1) * delta_t_ / control_inter_);
+            if(i>=1){
+                VectorXd p1(6),p2(6);
+                for(int j=0;j<dof_;j++){
+                    p1(j) = local_results_[i](j);
+                    p2(j) = local_results_[i-1](j);
+                }
+                length+=(p1-p2).norm();
+            }
+        }
+    }
+    else if(planner_type_ == "mpc"){
+        goal.trajectory.points.resize(exec_step+1);
+        goal.trajectory.points[0].positions.resize(dof_);
+        if(pub_vel) goal.trajectory.points[0].velocities.resize(dof_);
+        for(int j=0;j<dof_;j++){
+            goal.trajectory.points[0].positions[j] = arm_pos_(j);
+            goal.trajectory.points[0].velocities[j] = local_results_[0](j+dof_);
+        }
+        goal.trajectory.points[0].time_from_start = ros::Duration(0);
+        for (int i = 0; i < exec_step; i++) {
+            trajectory_msgs::JointTrajectoryPoint& traj_point = goal.trajectory.points[i+1];
+            traj_point.positions.resize(dof_);
+            if(pub_vel) traj_point.velocities.resize(dof_);
+            for(int j=0;j<dof_;j++){
+                traj_point.positions[j] = local_results_[i](j);
+                if(pub_vel) traj_point.velocities[j] = local_results_[i](j+dof_);
+            }
+            traj_point.time_from_start = ros::Duration((i+1) * delta_t_);
+            if(i>=1){
+                VectorXd p1(6),p2(6);
+                for(int j=0;j<dof_;j++){
+                    p1(j) = local_results_[i](j);
+                    p2(j) = local_results_[i-1](j);
+                }
+                length+=(p1-p2).norm();
+            }
         }
     }
     // ROS_INFO("Sending trajectory with %lu points", goal.trajectory.points.size());

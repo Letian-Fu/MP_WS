@@ -8,6 +8,108 @@
 #include "local_planner/Optimizer.h"
 #include <gtsam/base/Matrix.h>
 #include <opencv2/opencv.hpp>
+#define HAVE_CSTDDEF
+#include <coin/IpIpoptApplication.hpp>
+#include <coin/IpSolveStatistics.hpp>
+#undef HAVE_CSTDDEF
+#include <cppad/cppad.hpp>
+#include <cppad/ipopt/solve.hpp>
+
+struct ADBodySphere {
+    size_t link_id;        // 关联的关节索引
+    double radius;         // 球体半径
+    Eigen::Vector3d center; // 球心相对于关节基坐标的偏移
+
+    // 构造函数
+    ADBodySphere(size_t id, double r, const Eigen::Vector3d& c)
+        : link_id(id), radius(r), center(c) {}
+};
+
+// 定义机械臂类
+class ADArm {
+public:
+    size_t dof_;                                    // 机械臂的自由度
+    Eigen::VectorXd a_, alpha_, d_, theta_bias_;    // DH 参数
+    Eigen::Matrix4d base_pose_;                     // 基坐标系的位姿
+    std::vector<ADBodySphere> body_spheres_;          // 碰撞球体
+
+    ADArm(){}
+    // 构造函数
+    ADArm(size_t dof, const Eigen::VectorXd& a, const Eigen::VectorXd& alpha,
+        const Eigen::VectorXd& d, const Eigen::Matrix4d& base_pose,
+        const Eigen::VectorXd& theta_bias,
+        const std::vector<ADBodySphere>& body_spheres)
+        : dof_(dof), a_(a), alpha_(alpha), d_(d), base_pose_(base_pose),
+        theta_bias_(theta_bias), body_spheres_(body_spheres) {}
+
+    // 计算正运动学，返回每个关节的位姿
+    template <typename T>
+    void forwardKinematics(const std::vector<T>& joint_positions,
+                        std::vector<Eigen::Matrix<T, 4, 4>>& link_poses) const {
+        // 初始化
+        link_poses.resize(dof_);
+
+        // 基坐标系
+        Eigen::Matrix<T, 4, 4> current_pose = base_pose_.template cast<T>();
+
+        // 迭代计算每个关节的位姿
+        for (size_t i = 0; i < dof_; i++) {
+            // 将 DH 参数转换为模板类型 T
+            T a = T(a_(i));
+            T alpha = T(alpha_(i));
+            T d = T(d_(i));
+            T theta = joint_positions[i] + T(theta_bias_(i));
+
+            // 计算当前关节的变换矩阵
+            Eigen::Matrix<T, 4, 4> dh_transform = computeDHTransform(a, alpha, d, theta);
+
+            // 更新当前位姿
+            current_pose = current_pose * dh_transform;
+
+            // 保存当前关节的位姿
+            link_poses[i] = current_pose;
+        }
+    }
+
+    // 计算碰撞球体的位置
+    template <typename T>
+    void sphereCenters(const std::vector<T>& joint_positions,
+                    std::vector<Eigen::Matrix<T, 3, 1>>& sphere_centers) const {
+        // 计算每个关节的位姿
+        std::vector<Eigen::Matrix<T, 4, 4>> link_poses;
+        forwardKinematics(joint_positions, link_poses);
+
+        // 计算每个碰撞球体的中心位置
+        sphere_centers.resize(body_spheres_.size());
+        for (size_t i = 0; i < body_spheres_.size(); i++) {
+            const ADBodySphere& sphere = body_spheres_[i];
+            Eigen::Matrix<T, 4, 1> sphere_center_homogeneous;
+            sphere_center_homogeneous << sphere.center.template cast<T>(), T(1.0);
+
+            // 通过正运动学变换得到球心的世界坐标
+            Eigen::Matrix<T, 4, 4> link_pose = link_poses[sphere.link_id];
+            Eigen::Matrix<T, 4, 1> world_sphere_center = link_pose * sphere_center_homogeneous;
+
+            // 提取球心坐标
+            sphere_centers[i] = world_sphere_center.template head<3>();
+        }
+    }
+
+private:
+    // 计算 DH 参数的变换矩阵
+    template <typename T>
+    Eigen::Matrix<T, 4, 4> computeDHTransform(T a, T alpha, T d, T theta) const {
+        Eigen::Matrix<T, 4, 4> transform;
+        transform << CppAD::cos(theta), -CppAD::sin(theta) * CppAD::cos(alpha),
+                    CppAD::sin(theta) * CppAD::sin(alpha), a * CppAD::cos(theta),
+                    CppAD::sin(theta), CppAD::cos(theta) * CppAD::cos(alpha),
+                    -CppAD::cos(theta) * CppAD::sin(alpha), a * CppAD::sin(theta),
+                    T(0), CppAD::sin(alpha), CppAD::cos(alpha), d,
+                    T(0), T(0), T(0), T(1);
+        return transform;
+    }
+};
+
 
 class MyPlanner{
 private:
@@ -67,6 +169,8 @@ public:
     ros::Timer planner_timer_;
     // 动态障碍物参数
     VectorXd obs_info_;
+    Vector3d obs_pos_,obs_direction_;
+    double obs_vel_;
     // 控制器相关
     ros::Publisher local_path_pub_, global_path_pub_;
     actionlib::SimpleActionClient<control_msgs::FollowJointTrajectoryAction> gazebo_client_;
@@ -74,6 +178,7 @@ public:
     bool real_robot_;
     std::shared_ptr<std::mutex> mutex_;  // 互斥锁
     ros::Timer map_timer_;  // 定时器
+    
 
     // 测试相关
     double path_length_,end_path_length_;
@@ -91,6 +196,7 @@ public:
     void GlobalPlanCallback(const moveit_msgs::MoveGroupActionGoal::ConstPtr &msg);
     void DynamicCallback(const std_msgs::Float64MultiArray::ConstPtr& msg);
     void LocalPlanningCallback(const ros::TimerEvent&);
+    void obstacleInfoCallback(const std_msgs::Float64MultiArray::ConstPtr& msg);
     void readSDFFile(const ros::TimerEvent&);
     void publishTrajectory(int exec_step,bool pub_vel);
     void publishLocalPath();
@@ -99,6 +205,7 @@ public:
     void doneCb(const actionlib::SimpleClientGoalState& state, const control_msgs::FollowJointTrajectoryResultConstPtr& result);
     void activeCb();
     void feedbackCb(const control_msgs::FollowJointTrajectoryFeedbackConstPtr& feedback);
+    std::vector<VectorXd> mpcSolve(const vector<VectorXd>& ref_path, const VectorXd& x0, const VectorXd& obs_pos, const double& obs_vel, const VectorXd& obs_direction);
 
     std::vector<VectorXd> generateTraj(const VectorXd& cur_pos);
 

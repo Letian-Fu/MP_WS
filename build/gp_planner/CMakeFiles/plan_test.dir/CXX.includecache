@@ -305,6 +305,14 @@ gtsam/base/Matrix.h
 -
 opencv2/opencv.hpp
 -
+coin/IpIpoptApplication.hpp
+-
+coin/IpSolveStatistics.hpp
+-
+cppad/cppad.hpp
+-
+cppad/ipopt/solve.hpp
+-
 
 /home/roboert/MP_WS/src/gp_planner/src/my_planner/plan_test.cpp
 my_planner/MyPlanner.h

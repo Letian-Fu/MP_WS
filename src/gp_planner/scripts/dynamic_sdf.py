@@ -35,7 +35,7 @@ class DynamicSDF:
         self.is_rading_sub_ = rospy.Subscriber("/is_reading", Float64MultiArray, self.readingCallback)
         self.is_reading = 0
         self.pub = rospy.Publisher('/map_updated', Float64MultiArray, queue_size=10)
-        self.timer = rospy.Timer(rospy.Duration(0.2), self.updateSDF)  # 创建定时器
+        self.timer = rospy.Timer(rospy.Duration(0.1), self.updateSDF)  # 创建定时器
 
     def updateSDF(self, event):
         # 模拟更新SDF
