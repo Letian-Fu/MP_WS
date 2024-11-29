@@ -28,7 +28,7 @@ def move_obstacle():
     set_state = rospy.ServiceProxy('/gazebo/set_model_state', SetModelState)
     # 障碍物的名称
     model_name = 'moving_sphere'  # 替换为你的障碍物模型名称
-    rate_ = 50
+    rate_ = 30
     rate = rospy.Rate(rate_)  # 控制循环的频率
     # 创建发布者
     pub = rospy.Publisher('/obstacle_info', Float64MultiArray, queue_size=10)

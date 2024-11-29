@@ -55,7 +55,7 @@ include TCP-IP-ROS-6AXis/rviz_dobot_control/CMakeFiles/rviz_dobot_control_autoge
 
 TCP-IP-ROS-6AXis/rviz_dobot_control/CMakeFiles/rviz_dobot_control_autogen:
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold --progress-dir=/home/roboert/MP_WS/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Automatic MOC for target rviz_dobot_control"
-	cd /home/roboert/MP_WS/build/TCP-IP-ROS-6AXis/rviz_dobot_control && /usr/bin/cmake -E cmake_autogen /home/roboert/MP_WS/build/TCP-IP-ROS-6AXis/rviz_dobot_control/CMakeFiles/rviz_dobot_control_autogen.dir/AutogenInfo.json Release
+	cd /home/roboert/MP_WS/build/TCP-IP-ROS-6AXis/rviz_dobot_control && /usr/bin/cmake -E cmake_autogen /home/roboert/MP_WS/build/TCP-IP-ROS-6AXis/rviz_dobot_control/CMakeFiles/rviz_dobot_control_autogen.dir/AutogenInfo.json RelWithDebInfo
 
 rviz_dobot_control_autogen: TCP-IP-ROS-6AXis/rviz_dobot_control/CMakeFiles/rviz_dobot_control_autogen
 rviz_dobot_control_autogen: TCP-IP-ROS-6AXis/rviz_dobot_control/CMakeFiles/rviz_dobot_control_autogen.dir/build.make

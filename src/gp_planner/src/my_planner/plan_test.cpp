@@ -16,13 +16,13 @@ bool is_collision = false;
 
 void bumperCallback(const gazebo_msgs::ContactsState::ConstPtr& msg) {
     if (!msg->states.empty()) {
-        ROS_INFO("Collision detected!");
+        // ROS_INFO("Collision detected!");
         is_collision = true;
-        for (const auto& contact : msg->states) {
-            ROS_INFO("Contact between [%s] and [%s]",
-                     contact.collision1_name.c_str(),
-                     contact.collision2_name.c_str());
-        }
+        // for (const auto& contact : msg->states) {
+        //     ROS_INFO("Contact between [%s] and [%s]",
+        //              contact.collision1_name.c_str(),
+        //              contact.collision2_name.c_str());
+        // }
     } else {
         // ROS_INFO("No collision detected.");
     }
@@ -137,13 +137,28 @@ int main(int argc, char **argv)
             path_length=0;
             // 增加迭代次数
             // 增加迭代次数
-            iteration++;
             my_planner.is_global_success_ = false;
             my_planner.is_local_success_ = false;
             my_planner.is_plan_success_ = false;
             is_reached = true;
+            std::cout << std::setw(12) << "Iteration"
+              << std::setw(12) << "Success"
+              << std::setw(12) << "Collision"
+              << std::setw(12) << "Total Time"
+              << std::setw(12) << "Opt Time"
+              << std::setw(12) << "Joints Change(rad)"
+              << std::setw(12) << "Path Length(m)" << std::endl;
+
+            std::cout << std::string(12 * 7, '-') << std::endl;
+            std::cout << std::setw(12) << iteration +1;
+            for (int j = 0; j < results[iteration].size(); j++) {
+                std::cout << std::setw(12) << results[iteration][j];
+            }
+            std::cout << std::endl;
+            iteration++;
+
             // 延时 300 毫秒
-            std::this_thread::sleep_for(std::chrono::milliseconds(300));
+            std::this_thread::sleep_for(std::chrono::milliseconds(500));
         }
         if(is_collision){
             results[iteration](1) = 1;

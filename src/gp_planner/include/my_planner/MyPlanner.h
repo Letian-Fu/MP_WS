@@ -143,6 +143,7 @@ public:
     double max_vel_,traj_total_time_;
     bool ref_flag_;
     int count_;
+    double obs_thresh_;
     // esdf相关
     gp_planner::SDF sdf_;
     std::vector<gtsam::Matrix> static_data_;
@@ -180,6 +181,8 @@ public:
     ros::Timer map_timer_;  // 定时器
     VectorXd cur_vel_;
     double max_acc_;
+    double w_obs_,w_pos_,w_v_,w_goal_;
+    bool obs_constrained_;
     
 
     // 测试相关

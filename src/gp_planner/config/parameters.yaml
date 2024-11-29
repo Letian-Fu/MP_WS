@@ -35,6 +35,7 @@ settings:
   obs_check_inter: 5
   sdf_file: sdf/obs_test_one_box.bin
   cost_sigma: 0.02
+  obs_thresh: 0.15
   fix_pose_sigma: 0.0001
   fix_vel_sigma: 0.0001
   Qc: 2.0
@@ -53,10 +54,16 @@ settings:
   planner_type: mpc
   frequency: 30
   ref_inter_num: 1
-  total_time: 0.1
+  total_time: 0.15
   total_step: 5
-  epsilon: 0.05
-  max_acc: 50
+  epsilon: 0.03
+  max_acc: 1000
+  w_obs: 0.3
+  w_pos: 1
+  w_v: 0.2
+  w_goal: 0.7
+  obs_constrained: true
+
 
 sdf:
   static_file: /home/roboert/MP_WS/src/gp_planner/sdf_data/sdf_data_static_py.txt

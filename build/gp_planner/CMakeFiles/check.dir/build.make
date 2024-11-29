@@ -54,7 +54,7 @@ CMAKE_BINARY_DIR = /home/roboert/MP_WS/build
 include gp_planner/CMakeFiles/check.dir/progress.make
 
 gp_planner/CMakeFiles/check:
-	cd /home/roboert/MP_WS/build/gp_planner && /usr/bin/ctest -C Release --output-on-failure
+	cd /home/roboert/MP_WS/build/gp_planner && /usr/bin/ctest -C RelWithDebInfo --output-on-failure
 
 check: gp_planner/CMakeFiles/check
 check: gp_planner/CMakeFiles/check.dir/build.make

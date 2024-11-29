@@ -205,8 +205,8 @@ class DynamicSDF:
             # self.add_obstacle([40, 40, 9], [60, 60, 5], self.map)
             if velocity != 0:
                 # 调用add_dynamic_obstacle函数
-                # self.add_dynamic_obstacle(position, size, velocity, direction, self.total_time, self.total_steps,self.map, self.prob_map)
-                self.add_dynamic_obstacle_static(position, size, velocity, direction, self.total_time, self.total_steps,self.map, self.prob_map)
+                self.add_dynamic_obstacle(position, size, velocity, direction, self.total_time, self.total_steps,self.map, self.prob_map)
+                # self.add_dynamic_obstacle_static(position, size, velocity, direction, self.total_time, self.total_steps,self.map, self.prob_map)
                 self.sdf = self.signedDistanceField3D(self.map, self.cell_size,self.prob_map)
                 self.update_flag = True
             else :
