@@ -52,10 +52,11 @@ settings:
   # mpc setting
   planner_type: mpc
   frequency: 30
-  ref_inter_num: 2
-  total_time: 0.2
+  ref_inter_num: 1
+  total_time: 0.1
   total_step: 5
   epsilon: 0.05
+  max_acc: 50
 
 sdf:
   static_file: /home/roboert/MP_WS/src/gp_planner/sdf_data/sdf_data_static_py.txt
@@ -75,4 +76,4 @@ sdf:
   # cols: 80
   # z: 60
 
-iterations: 100
+iterations: 2

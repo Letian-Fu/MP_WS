@@ -178,6 +178,8 @@ public:
     bool real_robot_;
     std::shared_ptr<std::mutex> mutex_;  // 互斥锁
     ros::Timer map_timer_;  // 定时器
+    VectorXd cur_vel_;
+    double max_acc_;
     
 
     // 测试相关
