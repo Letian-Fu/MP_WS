@@ -16,13 +16,13 @@ bool is_collision = false;
 
 void bumperCallback(const gazebo_msgs::ContactsState::ConstPtr& msg) {
     if (!msg->states.empty()) {
-        ROS_INFO("Collision detected!");
+        // ROS_INFO("Collision detected!");
         is_collision = true;
-        for (const auto& contact : msg->states) {
-            ROS_INFO("Contact between [%s] and [%s]",
-                     contact.collision1_name.c_str(),
-                     contact.collision2_name.c_str());
-        }
+        // for (const auto& contact : msg->states) {
+        //     ROS_INFO("Contact between [%s] and [%s]",
+        //              contact.collision1_name.c_str(),
+        //              contact.collision2_name.c_str());
+        // }
     } else {
         // ROS_INFO("No collision detected.");
     }
@@ -45,7 +45,7 @@ int main(int argc, char **argv)
     bool moving_to_a = true;  // 当前目标是点 A 或点 B
 
     // 实验控制变量
-    int max_iterations = 4;  // 最大往复次数（比如 10 次往返）
+    int max_iterations = 2;  // 最大往复次数（比如 10 次往返）
     int iteration = 0;
     bool is_reached = true;
     std::vector<VectorXd> results(max_iterations, VectorXd::Zero(6));
@@ -55,7 +55,7 @@ int main(int argc, char **argv)
     ros::AsyncSpinner spinner(2); // 使用 2 个线程处理回调
     spinner.start();
 
-    my_planner.planner_type_ = "gp";
+    // my_planner.planner_type_ = "mpc";
     auto start = std::chrono::high_resolution_clock::now();
     auto stop = std::chrono::high_resolution_clock::now();
     // 计算持续时间
@@ -109,6 +109,8 @@ int main(int argc, char **argv)
             col_scene->decoupleParent();
             my_planner.start_conf_ = my_planner.arm_pos_;
             my_planner.end_conf_ = target;
+            // cout<<"start_conf: "<<my_planner.start_conf_.transpose()<<endl;
+            // cout<<"end_conf: "<<my_planner.end_conf_.transpose()<<endl;
             my_planner.is_global_success_ = my_planner.rrt_planner_.RRT_Plan(col_scene,my_planner.start_conf_,my_planner.end_conf_,my_planner.global_results_);
             if(my_planner.is_global_success_)  {
                 my_planner.publishGlobalPath();

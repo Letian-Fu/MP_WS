@@ -194,10 +194,6 @@ ArmModel.h
 Optimizer.h
 /home/roboert/MP_WS/src/gp_planner/src/local_planner/Optimizer.h
 
-/home/roboert/MP_WS/src/gp_planner/src/local_planner/OptimizerSetting.cpp
-OptimizerSetting.h
-/home/roboert/MP_WS/src/gp_planner/src/local_planner/OptimizerSetting.h
-
 /opt/ros/noetic/include/actionlib/action_definition.h
 
 /opt/ros/noetic/include/actionlib/client/action_client.h
