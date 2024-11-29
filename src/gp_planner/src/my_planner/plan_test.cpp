@@ -46,6 +46,7 @@ int main(int argc, char **argv)
 
     // 实验控制变量
     int max_iterations = 2;  // 最大往复次数（比如 10 次往返）
+    n.getParam("iterations", max_iterations);
     int iteration = 0;
     bool is_reached = true;
     std::vector<VectorXd> results(max_iterations, VectorXd::Zero(6));
@@ -169,5 +170,22 @@ int main(int argc, char **argv)
         }
         std::cout << std::endl;
     }
+    // 计算每列的平均值
+    std::vector<double> averages(results[0].size(), 0.0); // 初始化为0
+    for (int j = 0; j < results[0].size(); j++) {
+        double sum = 0.0;
+        for (int i = 0; i < results.size(); i++) {
+            sum += results[i][j];
+        }
+        averages[j] = sum / results.size();
+    }
+
+    // 输出平均值
+    std::cout << std::string(12 * 7, '-') << std::endl;
+    std::cout << std::setw(12) << "Average";
+    for (double avg : averages) {
+        std::cout << std::setw(12) << avg;
+    }
+    std::cout << std::endl;
     return 0;
 }

@@ -277,8 +277,9 @@ vector<VectorXd> MyPlanner::generateTraj(const VectorXd& cur_pos){
             gp_cost += (gp_factor.evaluateError(temp_values.at<gtsam::Vector>(gtsam::Symbol('x',m)),gtsam::Vector::Zero(6),
                         temp_values.at<gtsam::Vector>(gtsam::Symbol('x',m)),gtsam::Vector::Zero(6),nullptr,nullptr,nullptr,nullptr)).sum();
         }
+        coll_cost = coll_cost / 5;
         // 比较，优先coll_cost最低（最低为0），在coll_cost一样的基础上比较goal_cost,选goal_cost最小的那个为best_traj
-        if (coll_cost <= 1.0 && ((coll_cost <= 1.0 && gp_cost < bestScore_gp)|| (coll_cost <= 1.0 && gp_cost == bestScore_gp && goal_cost<bestScore_goal))) {
+        if (coll_cost <= 0.2 && ((coll_cost <= 0.2 && gp_cost < bestScore_gp)|| (coll_cost <= 0.2 && gp_cost == bestScore_gp && goal_cost<bestScore_goal))) {
             bestScore_obs = coll_cost;
             bestScore_goal = goal_cost;
             bestScore_gp = gp_cost;
@@ -462,13 +463,13 @@ void MyPlanner::LocalPlanningCallback(const ros::TimerEvent&){
             exec_values_ = gp_planner::interpolateTraj(opt_values, opt_setting_.Qc_model, delta_t_, control_inter_);
             // double init_coll_cost = gp_planner::CollisionCost(robot_, sdf_, init_values, opt_setting_);
             double opt_coll_cost = gp_planner::CollisionCost(robot_, sdf_, opt_values, opt_setting_)/(opt_setting_.total_step*opt_setting_.obs_check_inter-opt_setting_.total_step);
-            if(opt_coll_cost< 0.5)    {
+            if(opt_coll_cost< 0.2)    {
                 is_local_success_ = true;
                 // ref_flag_ = true;
             }
             else {
                 // cout<<"plan error: "<<opt_coll_cost<<endl;
-                ROS_INFO("Plan error: %f", opt_coll_cost);
+                // ROS_INFO("Plan error: %f", opt_coll_cost);
                 auto start_2 = std::chrono::high_resolution_clock::now();
                 local_results_ = generateTraj(arm_pos_);
                 local_results_.clear();
@@ -547,8 +548,11 @@ void MyPlanner::LocalPlanningCallback(const ros::TimerEvent&){
             auto start = std::chrono::high_resolution_clock::now();
             vector<VectorXd> local_ref_path = getLocalRefPath();
             vector<VectorXd> temp;
+            delta_t_ = opt_setting_.total_time / opt_setting_.total_step;
             temp = mpcSolve(local_ref_path,arm_pos_,obs_pos_,obs_vel_,obs_direction_);
-            if (temp.empty()) {
+            VectorXd next_pos(6);
+            next_pos<<temp[0](0),temp[0](1),temp[0](2),temp[0](3),temp[0](4),temp[0](5);
+            if (temp.empty() || calculateDistance(arm_pos_,next_pos)>max_vel_*delta_t_ ){
                 std::cerr << "Error: temp is empty after MPC solve!" << std::endl;
                 is_local_success_ = false;
             }
@@ -556,11 +560,11 @@ void MyPlanner::LocalPlanningCallback(const ros::TimerEvent&){
                 is_local_success_ = true;
                 // local_results_ = temp;
                 // exec_step_ = local_results_.size();
-                delta_t_ = opt_setting_.total_time / opt_setting_.total_step;
+                
                 exec_step_ = 2;
                 local_results_.resize(exec_step_);
-                local_results_[0]=temp[1];
-                local_results_[1]=temp[2];
+                local_results_[0]=temp[0];
+                local_results_[1]=temp[1];
 
                 // exec_step_ = opt_setting_.total_step + control_inter_ * (opt_setting_.total_step - 1);
                 // local_results_.resize(exec_step_);
@@ -578,7 +582,7 @@ void MyPlanner::LocalPlanningCallback(const ros::TimerEvent&){
                 //         local_results_[index++] = inter;
                 //     }
                 // }
-                // // 最后一个点直接插入
+                // 最后一个点直接插入
                 // local_results_[index] = temp.back();
             }
             // 停止计时
@@ -615,7 +619,7 @@ void MyPlanner::LocalPlanningCallback(const ros::TimerEvent&){
             }
             ROS_ASSERT(arm_pos_.size() == dof_);
             ROS_ASSERT(local_results_[i].size() >= 2 * dof_);
-            publishTrajectory(static_cast<int>(0.5 * exec_step_),true);
+            publishTrajectory(static_cast<int>(exec_step_),true);
         }
         else if(planner_type_ =="mpc"){
             ROS_ASSERT(arm_pos_.size() == dof_);
@@ -685,8 +689,8 @@ std::vector<VectorXd> MyPlanner::mpcSolve(const vector<VectorXd>& ref_path, cons
     for (size_t t=0;t<N-1;t++){
         for(size_t i=0;i<n_controls;i++){
             size_t control_index = N * n_states + t * n_controls + i;
-            vars_lowerbound[control_index] = -1.5; // 控制输入（关节速度）下界
-            vars_upperbound[control_index] = 1.5;  // 控制输入（关节速度）上界
+            vars_lowerbound[control_index] = -1.0 * max_vel_; // 控制输入（关节速度）下界
+            vars_upperbound[control_index] = max_vel_;  // 控制输入（关节速度）上界
         }
     }
 
@@ -697,8 +701,8 @@ std::vector<VectorXd> MyPlanner::mpcSolve(const vector<VectorXd>& ref_path, cons
     for(size_t t=0;t<N-2;t++){
         for(size_t i=0;i<n_controls;i++){
             size_t idx = 6 + t * n_controls + i;
-            constraints_lowerbound[idx] = -1.0 * T;
-            constraints_upperbound[idx] = 1.0 * T;
+            constraints_lowerbound[idx] = -100 * T;
+            constraints_upperbound[idx] = 100 * T;
         }
     }
     // 设置避障约束的上下限
@@ -783,7 +787,7 @@ std::vector<VectorXd> MyPlanner::mpcSolve(const vector<VectorXd>& ref_path, cons
             for(size_t t=0; t<N;t++){
                 for(size_t i=0;i<n_states;i++){
                     CppAD::AD<double> goal_error = vars[t * n_states + i] - goal_pose[i];
-                    fg[0] += 0.4 * CppAD::pow(goal_error,2);
+                    fg[0] += 0.3 * CppAD::pow(goal_error,2);
                 }
             }
 
@@ -853,7 +857,7 @@ std::vector<VectorXd> MyPlanner::mpcSolve(const vector<VectorXd>& ref_path, cons
         }
     };
 
-    FG_eval fg_eval(ref_path, obs_pos, obs_vel, obs_direction, safe_radius, n_states, n_controls, N, T, x0, end_conf_);
+    FG_eval fg_eval(ref_path, obs_pos, obs_vel, obs_direction, safe_radius, n_states, n_controls, N, T, arm_pos_, end_conf_);
 
     // IPOPT 选项
     std::string options;
@@ -880,7 +884,7 @@ std::vector<VectorXd> MyPlanner::mpcSolve(const vector<VectorXd>& ref_path, cons
     for (size_t t = 0; t < N-1; ++t) {
         // 提取关节角度（位置）
         for (size_t i = 0; i < n_states; ++i) {
-            trajectory[t][i] = solution.x[t * n_states + i]; // 前部分是关节角度
+            trajectory[t][i] = solution.x[(t+1) * n_states + i]; // 前部分是关节角度
         }
         // 提取关节速度（控制量）
         for (size_t i = 0; i < n_controls; ++i) {
@@ -1026,7 +1030,7 @@ void MyPlanner::publishTrajectory(int exec_step, bool pub_vel){
         if(pub_vel) goal.trajectory.points[0].velocities.resize(dof_);
         for(int j=0;j<dof_;j++){
             goal.trajectory.points[0].positions[j] = arm_pos_(j);
-            goal.trajectory.points[0].velocities[j] = local_results_[0](j+dof_);
+            // goal.trajectory.points[0].velocities[j] = local_results_[0](j+dof_);
         }
         goal.trajectory.points[0].time_from_start = ros::Duration(0);
         for (int i = 0; i < exec_step; i++) {
