@@ -25,18 +25,18 @@ global_planner:
   MAX_TREE_NUM: 2000
 
 settings:
-  # planner_type: gp
-  # frequency: 10
-  # ref_inter_num: 4
-  # total_time: 1.0
-  # total_step: 10
-  # epsilon: 0.15
+  planner_type: gp
+  frequency: 10
+  ref_inter_num: 3
+  total_time: 0.7
+  total_step: 10
+  epsilon: 0.15
   control_inter: 5
   obs_check_inter: 5
-  cost_sigma: 0.04
+  cost_sigma: 0.05
   obs_thresh: 0.10
   traj_cut: 1.0
-  fix_pose_sigma: 0.0001
+  fix_pose_sigma: 0.0003
   fix_vel_sigma: 0.0001
   Qc: 2.0
   opt_type: LM
@@ -51,12 +51,12 @@ settings:
   decay_factor: 0.5
   map_update_frenquency: 10
   # mpc setting
-  planner_type: mpc
-  frequency: 30
-  ref_inter_num: 1
-  total_time: 0.15
-  total_step: 5
-  epsilon: 0.03
+  # planner_type: mpc
+  # frequency: 30
+  # ref_inter_num: 1
+  # total_time: 0.15
+  # total_step: 5
+  # epsilon: 0.03
   max_acc: 1000
   w_obs: 0.3
   w_pos: 1
@@ -83,4 +83,4 @@ sdf:
   # cols: 80
   # z: 60
 
-iterations: 100
+iterations: 2

@@ -28,7 +28,7 @@ def move_obstacle():
     set_state = rospy.ServiceProxy('/gazebo/set_model_state', SetModelState)
     # 障碍物的名称
     model_name = 'moving_sphere'  # 替换为你的障碍物模型名称
-    rate_ = 30
+    rate_ = 50
     rate = rospy.Rate(rate_)  # 控制循环的频率
     # 创建发布者
     pub = rospy.Publisher('/obstacle_info', Float64MultiArray, queue_size=10)
@@ -82,7 +82,7 @@ def move_obstacle():
         # 上下往复运动参数
         start = np.array([-0.6, 0.0, 0.3])  # 垂直方向起点
         end = np.array([-0.6, 0.0, 0.9])    # 垂直方向终点
-        linear_speed = 0.2  # 匀速运动的速度 (m/s)
+        linear_speed = 0.3  # 匀速运动的速度 (m/s)
     elif mode == 'horizontal':
         # 水平往复运动参数
         start = np.array([-1.0, 0.0, 0.5])  # 水平方向起点

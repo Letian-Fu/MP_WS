@@ -455,7 +455,7 @@ void MyPlanner::LocalPlanningCallback(const ros::TimerEvent&){
             gtsam::Vector end_conf = ConvertToGtsamVector(local_ref_path[local_ref_path.size()-1]);
             // end_conf = ConvertToGtsamVector(end_conf_);
             gtsam::Values init_values;
-            if(calculateDistance(arm_pos_,local_ref_path[0])>0.2 || !ref_flag_){
+            if(calculateDistance(arm_pos_,local_ref_path[0])>0.5 || !ref_flag_){
                 init_values = gp_planner::initArmTrajStraightLine(ConvertToGtsamVector(arm_pos_), end_conf, opt_setting_.total_step);
             }
             else{

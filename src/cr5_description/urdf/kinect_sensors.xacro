@@ -69,7 +69,7 @@
 	<link name="camera_depth_optical_frame"/>
 	
   <gazebo reference="camera_link">
-    <sensor type="depth" name="camera">
+    <sensor type="depth" name="kinect">
       <always_on>true</always_on>
       <update_rate>30.0</update_rate>
       <camera>
@@ -85,7 +85,7 @@
         </clip>
       </camera>
       <plugin name="kinect_camera_controller" filename="libgazebo_ros_openni_kinect.so">
-        <cameraName>camera</cameraName>
+        <cameraName>kinect</cameraName>
         <alwaysOn>true</alwaysOn>
 <!-- Keep this zero, update_rate in the parent <sensor> tag will control the frame rate. -->
         <updateRate>0</updateRate>
