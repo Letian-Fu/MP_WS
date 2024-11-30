@@ -26,16 +26,16 @@ global_planner:
 
 settings:
   # planner_type: gp
-  # frequency: 5
-  # ref_inter_num: 3
+  # frequency: 10
+  # ref_inter_num: 4
   # total_time: 1.0
   # total_step: 10
-  # epsilon: 0.1
+  # epsilon: 0.15
   control_inter: 5
   obs_check_inter: 5
-  sdf_file: sdf/obs_test_one_box.bin
-  cost_sigma: 0.02
-  obs_thresh: 0.15
+  cost_sigma: 0.04
+  obs_thresh: 0.10
+  traj_cut: 1.0
   fix_pose_sigma: 0.0001
   fix_vel_sigma: 0.0001
   Qc: 2.0
@@ -44,10 +44,10 @@ settings:
   flag_vel_limit: true
   joint_pos_limits_up: 3.14
   joint_pos_limits_down: -3.14
-  max_vel: 1.5
+  max_vel: 2.0
   pos_limit_sigma: 0.0001
   vel_limit_sigma: 0.0001
-  goal_tolerance: 0.1
+  goal_tolerance: 0.15
   decay_factor: 0.5
   map_update_frenquency: 10
   # mpc setting
@@ -83,4 +83,4 @@ sdf:
   # cols: 80
   # z: 60
 
-iterations: 2
+iterations: 100

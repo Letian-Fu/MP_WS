@@ -1,2 +1,0 @@
-set(rosdemo_v4_MESSAGE_FILES "")
-set(rosdemo_v4_SERVICE_FILES "/home/roboert/MP_WS/src/TCP-IP-ROS-6AXis/rosdemo_v4/srv/EnableRobot.srv;/home/roboert/MP_WS/src/TCP-IP-ROS-6AXis/rosdemo_v4/srv/DisableRobot.srv;/home/roboert/MP_WS/src/TCP-IP-ROS-6AXis/rosdemo_v4/srv/ClearError.srv;/home/roboert/MP_WS/src/TCP-IP-ROS-6AXis/rosdemo_v4/srv/GetErrorID.srv;/home/roboert/MP_WS/src/TCP-IP-ROS-6AXis/rosdemo_v4/srv/MovJ.srv")

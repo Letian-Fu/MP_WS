@@ -197,6 +197,7 @@ gazebo_client_("/arm_controller/follow_joint_trajectory", true)
     is_local_success_ = false;
     ref_flag_ = false;
     nh.getParam("settings/obs_thresh", obs_thresh_);
+    nh.getParam("settings/traj_cut", traj_cut_);
 
     path_length_ = 0;
     plan_time_cost_ = 0;
@@ -479,9 +480,11 @@ void MyPlanner::LocalPlanningCallback(const ros::TimerEvent&){
             // 输出花费的时间
             // std::cout << "Local planning took " << duration.count() << " ms" << std::endl;
             // ROS_INFO("Local planning took %.2f ms", static_cast<double>(duration.co)));
+            exec_step_ = opt_setting_.total_step + control_inter_ * (opt_setting_.total_step - 1);
             exec_values_ = gp_planner::interpolateTraj(opt_values, opt_setting_.Qc_model, delta_t_, control_inter_);
             // double init_coll_cost = gp_planner::CollisionCost(robot_, sdf_, init_values, opt_setting_);
-            double opt_coll_cost = gp_planner::CollisionCost(robot_, sdf_, opt_values, opt_setting_)/(opt_setting_.total_step*opt_setting_.obs_check_inter-opt_setting_.total_step);
+            // double opt_coll_cost = gp_planner::CollisionCost(robot_, sdf_, opt_values, opt_setting_)/(opt_setting_.total_step*opt_setting_.obs_check_inter-opt_setting_.total_step);
+            double opt_coll_cost = gp_planner::CollisionCost(robot_, sdf_, exec_values_, opt_setting_)/(exec_step_);
             if(opt_coll_cost< obs_thresh_)    {
                 is_local_success_ = true;
                 // ref_flag_ = true;
@@ -631,7 +634,6 @@ void MyPlanner::LocalPlanningCallback(const ros::TimerEvent&){
         }
         publishLocalPath();
         if(planner_type_=="gp"){
-            exec_step_ = opt_setting_.total_step + control_inter_ * (opt_setting_.total_step - 1);
             local_results_.resize(exec_step_);
             for(size_t i = 0;i<exec_step_;i++){
                 gtsam::Vector pos_temp = exec_values_.at<gtsam::Vector>(gtsam::Symbol('x',i));
@@ -644,7 +646,7 @@ void MyPlanner::LocalPlanningCallback(const ros::TimerEvent&){
             }
             ROS_ASSERT(arm_pos_.size() == dof_);
             ROS_ASSERT(local_results_[i].size() >= 2 * dof_);
-            publishTrajectory(static_cast<int>(exec_step_),true);
+            publishTrajectory(static_cast<int>(traj_cut_ * exec_step_),true);
         }
         else if(planner_type_ =="mpc"){
             ROS_ASSERT(arm_pos_.size() == dof_);

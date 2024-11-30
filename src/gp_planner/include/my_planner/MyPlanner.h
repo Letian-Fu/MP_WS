@@ -144,6 +144,7 @@ public:
     bool ref_flag_;
     int count_;
     double obs_thresh_;
+    double traj_cut_;
     // esdf相关
     gp_planner::SDF sdf_;
     std::vector<gtsam::Matrix> static_data_;
