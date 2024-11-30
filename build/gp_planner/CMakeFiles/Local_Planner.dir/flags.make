@@ -6,5 +6,5 @@ CXX_FLAGS = -O2 -g -DNDEBUG -fPIC   -std=c++17
 
 CXX_DEFINES = -DLocal_Planner_EXPORTS -DROSCONSOLE_BACKEND_LOG4CXX -DROS_BUILD_SHARED_LIBS=1 -DROS_PACKAGE_NAME=\"gp_planner\"
 
-CXX_INCLUDES = -I/home/roboert/MP_WS/devel/include -I/usr/local/include/eigen3 -I/home/roboert/MP_WS/src/gp_planner/include -I/home/roboert/MP_WS/src/gp_planner/include/global_planner -I/home/roboert/MP_WS/src/gp_planner/include/local_planner -I/opt/ros/noetic/include -I/opt/ros/noetic/share/xmlrpcpp/cmake/../../../include/xmlrpcpp -I/usr/include/eigen3 -I/usr/include/bullet -I/usr/include/OGRE -I/usr/include/opencv4 -I/usr/include/pcl-1.10 -I/usr/include/vtk-7.1 -I/usr/include/freetype2 
+CXX_INCLUDES = -I/home/roboert/MP_WS/devel/include -I/usr/local/include/eigen3 -I/home/roboert/MP_WS/src/TCP-IP-CR-CPP-V3/CppDemo/api -I/home/roboert/MP_WS/src/TCP-IP-CR-CPP-V3/CppDemo -I/home/roboert/MP_WS/src/gp_planner/include -I/home/roboert/MP_WS/src/gp_planner/include/global_planner -I/home/roboert/MP_WS/src/gp_planner/include/local_planner -I/opt/ros/noetic/include -I/opt/ros/noetic/share/xmlrpcpp/cmake/../../../include/xmlrpcpp -I/usr/include/eigen3 -I/usr/include/bullet -I/usr/include/OGRE -I/usr/include/opencv4 -I/usr/include/pcl-1.10 -I/usr/include/vtk-7.1 -I/usr/include/freetype2 
 

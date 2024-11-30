@@ -64,6 +64,14 @@ include_directories( ${Boost_INCLUDE_DIRS} )
 find_package(gpmp2 REQUIRED)
 include_directories(${gpmp2_INCLUDE_DIR})
 
+# 添加 TCP-IP-CR-CPP-V3 的路径
+add_subdirectory(${CMAKE_SOURCE_DIR}/TCP-IP-CR-CPP-V3/CppDemo ${CMAKE_BINARY_DIR}/TCP-IP-CR-CPP-V3)
+
+# 包含 TCP-IP-CR-CPP-V3 的头文件
+include_directories(/home/roboert/MP_WS/src/TCP-IP-CR-CPP-V3/CppDemo/api)
+include_directories(/home/roboert/MP_WS/src/TCP-IP-CR-CPP-V3/CppDemo)
+link_directories(/home/roboert/MP_WS/src/TCP-IP-CR-CPP-V3/CppDemo)
+
 include_directories(
  include
  include/global_planner
@@ -130,6 +138,7 @@ target_link_libraries(My_Planner
   Local_Planner
   ${catkin_LIBRARIES}
   ${OpenCV_LIBRARIES}
+  DobotTcpAPI
   ipopt
   ${IPOPT_INCLUDE_DIRS}
 )
@@ -178,6 +187,7 @@ target_link_libraries(plan_test
   ${catkin_LIBRARIES}
   ${GTSAM_LIBRARIES}
   ${OpenCV_LIBRARIES}
+  DobotTcpAPI
 )
 
 add_executable(get_depth src/my_planner/GetDepth.cpp)
@@ -186,4 +196,13 @@ target_link_libraries(get_depth
   ${catkin_LIBRARIES}
   ${GTSAM_LIBRARIES}
   ${OpenCV_LIBRARIES}
+)
+add_executable(control_test src/my_planner/control_test.cpp)
+target_link_libraries(control_test
+  My_Planner
+  ${catkin_LIBRARIES}
+  ${GTSAM_LIBRARIES}
+  ${OpenCV_LIBRARIES}
+  DobotTcpAPI
+  Threads::Threads
 )

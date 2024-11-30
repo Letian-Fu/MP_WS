@@ -2,7 +2,9 @@
 /src/gp_planner/sdf_data
 /src/gp_planner/scripts/yolo_scripts
 /src/TCP-IP-ROS-6AXis
+/src/TCP-IP-CR-CPP-V3
 *.pt
 *.wts
 *.zip
 /build/TCP-IP-ROS-6AXis
+/build/TCP-IP-CR-CPP-V3

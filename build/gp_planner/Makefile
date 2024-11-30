@@ -168,6 +168,21 @@ depend:
 .PHONY : depend
 
 # Convenience name for target.
+gp_planner/CMakeFiles/control_test.dir/rule:
+	cd /home/roboert/MP_WS/build && $(MAKE) -f CMakeFiles/Makefile2 gp_planner/CMakeFiles/control_test.dir/rule
+.PHONY : gp_planner/CMakeFiles/control_test.dir/rule
+
+# Convenience name for target.
+control_test: gp_planner/CMakeFiles/control_test.dir/rule
+
+.PHONY : control_test
+
+# fast build rule for target.
+control_test/fast:
+	cd /home/roboert/MP_WS/build && $(MAKE) -f gp_planner/CMakeFiles/control_test.dir/build.make gp_planner/CMakeFiles/control_test.dir/build
+.PHONY : control_test/fast
+
+# Convenience name for target.
 gp_planner/CMakeFiles/get_depth.dir/rule:
 	cd /home/roboert/MP_WS/build && $(MAKE) -f CMakeFiles/Makefile2 gp_planner/CMakeFiles/get_depth.dir/rule
 .PHONY : gp_planner/CMakeFiles/get_depth.dir/rule
@@ -1787,6 +1802,33 @@ src/my_planner/MyPlanner.cpp.s:
 	cd /home/roboert/MP_WS/build && $(MAKE) -f gp_planner/CMakeFiles/My_Planner.dir/build.make gp_planner/CMakeFiles/My_Planner.dir/src/my_planner/MyPlanner.cpp.s
 .PHONY : src/my_planner/MyPlanner.cpp.s
 
+src/my_planner/control_test.o: src/my_planner/control_test.cpp.o
+
+.PHONY : src/my_planner/control_test.o
+
+# target to build an object file
+src/my_planner/control_test.cpp.o:
+	cd /home/roboert/MP_WS/build && $(MAKE) -f gp_planner/CMakeFiles/control_test.dir/build.make gp_planner/CMakeFiles/control_test.dir/src/my_planner/control_test.cpp.o
+.PHONY : src/my_planner/control_test.cpp.o
+
+src/my_planner/control_test.i: src/my_planner/control_test.cpp.i
+
+.PHONY : src/my_planner/control_test.i
+
+# target to preprocess a source file
+src/my_planner/control_test.cpp.i:
+	cd /home/roboert/MP_WS/build && $(MAKE) -f gp_planner/CMakeFiles/control_test.dir/build.make gp_planner/CMakeFiles/control_test.dir/src/my_planner/control_test.cpp.i
+.PHONY : src/my_planner/control_test.cpp.i
+
+src/my_planner/control_test.s: src/my_planner/control_test.cpp.s
+
+.PHONY : src/my_planner/control_test.s
+
+# target to generate assembly for a file
+src/my_planner/control_test.cpp.s:
+	cd /home/roboert/MP_WS/build && $(MAKE) -f gp_planner/CMakeFiles/control_test.dir/build.make gp_planner/CMakeFiles/control_test.dir/src/my_planner/control_test.cpp.s
+.PHONY : src/my_planner/control_test.cpp.s
+
 src/my_planner/plan_test.o: src/my_planner/plan_test.cpp.o
 
 .PHONY : src/my_planner/plan_test.o
@@ -1824,6 +1866,7 @@ help:
 	@echo "... install/local"
 	@echo "... edit_cache"
 	@echo "... test"
+	@echo "... control_test"
 	@echo "... get_depth"
 	@echo "... plan_test"
 	@echo "... Global_Planner"
@@ -1947,6 +1990,9 @@ help:
 	@echo "... src/my_planner/MyPlanner.o"
 	@echo "... src/my_planner/MyPlanner.i"
 	@echo "... src/my_planner/MyPlanner.s"
+	@echo "... src/my_planner/control_test.o"
+	@echo "... src/my_planner/control_test.i"
+	@echo "... src/my_planner/control_test.s"
 	@echo "... src/my_planner/plan_test.o"
 	@echo "... src/my_planner/plan_test.i"
 	@echo "... src/my_planner/plan_test.s"

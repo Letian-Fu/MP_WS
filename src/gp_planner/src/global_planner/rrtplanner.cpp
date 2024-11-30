@@ -42,7 +42,9 @@ RRTPlanner::RRTPlanner(ros::NodeHandle nh, robot_model::RobotModelPtr kinematic_
     fai_=fai_rate_*step_;
     MAX_FAIL_NUM_ = 5*MAX_TREE_NUM_;
     inter_num_ = 50;
-    joint_model_group_ = kinematic_model_->getJointModelGroup("arm");
+    std::string group_name;
+    nh.getParam("group_name", group_name);
+    joint_model_group_ = kinematic_model_->getJointModelGroup(group_name);
     joint_all_names_ = joint_model_group_->getJointModelNames();
     kinematic_state_=std::make_shared<robot_state::RobotState>(kinematic_model_);
     kinematic_state_->setToDefaultValues();

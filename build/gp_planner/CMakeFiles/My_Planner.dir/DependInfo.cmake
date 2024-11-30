@@ -20,6 +20,8 @@ set(CMAKE_TARGET_DEFINITIONS_CXX
 set(CMAKE_CXX_TARGET_INCLUDE_PATH
   "/home/roboert/MP_WS/devel/include"
   "/usr/local/include/eigen3"
+  "/home/roboert/MP_WS/src/TCP-IP-CR-CPP-V3/CppDemo/api"
+  "/home/roboert/MP_WS/src/TCP-IP-CR-CPP-V3/CppDemo"
   "/home/roboert/MP_WS/src/gp_planner/include"
   "/home/roboert/MP_WS/src/gp_planner/include/global_planner"
   "/home/roboert/MP_WS/src/gp_planner/include/local_planner"
@@ -38,6 +40,7 @@ set(CMAKE_CXX_TARGET_INCLUDE_PATH
 set(CMAKE_TARGET_LINKED_INFO_FILES
   "/home/roboert/MP_WS/build/gp_planner/CMakeFiles/Global_Planner.dir/DependInfo.cmake"
   "/home/roboert/MP_WS/build/gp_planner/CMakeFiles/Local_Planner.dir/DependInfo.cmake"
+  "/home/roboert/MP_WS/build/TCP-IP-CR-CPP-V3/CMakeFiles/DobotTcpAPI.dir/DependInfo.cmake"
   )
 
 # Fortran module output directory.

@@ -4939,6 +4939,19 @@ cr5_description_xacro_generated_to_devel_space_/fast:
 .PHONY : cr5_description_xacro_generated_to_devel_space_/fast
 
 #=============================================================================
+# Target rules for targets named control_test
+
+# Build rule for target.
+control_test: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 control_test
+.PHONY : control_test
+
+# fast build rule for target.
+control_test/fast:
+	$(MAKE) -f gp_planner/CMakeFiles/control_test.dir/build.make gp_planner/CMakeFiles/control_test.dir/build
+.PHONY : control_test/fast
+
+#=============================================================================
 # Target rules for targets named get_depth
 
 # Build rule for target.
@@ -6108,6 +6121,32 @@ object_recognition_msgs_generate_messages_nodejs/fast:
 	$(MAKE) -f gp_planner/CMakeFiles/object_recognition_msgs_generate_messages_nodejs.dir/build.make gp_planner/CMakeFiles/object_recognition_msgs_generate_messages_nodejs.dir/build
 .PHONY : object_recognition_msgs_generate_messages_nodejs/fast
 
+#=============================================================================
+# Target rules for targets named DobotTcpDemo
+
+# Build rule for target.
+DobotTcpDemo: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 DobotTcpDemo
+.PHONY : DobotTcpDemo
+
+# fast build rule for target.
+DobotTcpDemo/fast:
+	$(MAKE) -f TCP-IP-CR-CPP-V3/CMakeFiles/DobotTcpDemo.dir/build.make TCP-IP-CR-CPP-V3/CMakeFiles/DobotTcpDemo.dir/build
+.PHONY : DobotTcpDemo/fast
+
+#=============================================================================
+# Target rules for targets named DobotTcpAPI
+
+# Build rule for target.
+DobotTcpAPI: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 DobotTcpAPI
+.PHONY : DobotTcpAPI
+
+# fast build rule for target.
+DobotTcpAPI/fast:
+	$(MAKE) -f TCP-IP-CR-CPP-V3/CMakeFiles/DobotTcpAPI.dir/build.make TCP-IP-CR-CPP-V3/CMakeFiles/DobotTcpAPI.dir/build
+.PHONY : DobotTcpAPI/fast
+
 # Help Target
 help:
 	@echo "The following are some of the valid targets for this Makefile:"
@@ -6488,6 +6527,7 @@ help:
 	@echo "... map_msgs_generate_messages_nodejs"
 	@echo "... rviz_dobot_control_autogen"
 	@echo "... cr5_description_xacro_generated_to_devel_space_"
+	@echo "... control_test"
 	@echo "... get_depth"
 	@echo "... plan_test"
 	@echo "... Global_Planner"
@@ -6578,6 +6618,8 @@ help:
 	@echo "... object_recognition_msgs_generate_messages_cpp"
 	@echo "... object_recognition_msgs_generate_messages_eus"
 	@echo "... object_recognition_msgs_generate_messages_nodejs"
+	@echo "... DobotTcpDemo"
+	@echo "... DobotTcpAPI"
 .PHONY : help
 
 

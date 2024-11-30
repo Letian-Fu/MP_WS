@@ -393,6 +393,7 @@ plan_test_EXTERNAL_OBJECTS =
 /home/roboert/MP_WS/devel/lib/gp_planner/plan_test: /usr/lib/x86_64-linux-gnu/libopencv_viz.so.4.2.0
 /home/roboert/MP_WS/devel/lib/gp_planner/plan_test: /usr/lib/x86_64-linux-gnu/libopencv_xobjdetect.so.4.2.0
 /home/roboert/MP_WS/devel/lib/gp_planner/plan_test: /usr/lib/x86_64-linux-gnu/libopencv_xphoto.so.4.2.0
+/home/roboert/MP_WS/devel/lib/gp_planner/plan_test: /home/roboert/MP_WS/devel/lib/libDobotTcpAPI.a
 /home/roboert/MP_WS/devel/lib/gp_planner/plan_test: /usr/lib/x86_64-linux-gnu/libopencv_highgui.so.4.2.0
 /home/roboert/MP_WS/devel/lib/gp_planner/plan_test: /usr/lib/x86_64-linux-gnu/libopencv_phase_unwrapping.so.4.2.0
 /home/roboert/MP_WS/devel/lib/gp_planner/plan_test: /usr/lib/x86_64-linux-gnu/libopencv_optflow.so.4.2.0

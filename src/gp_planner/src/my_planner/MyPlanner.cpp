@@ -11,14 +11,15 @@ MyPlanner::MyPlanner(ros::NodeHandle& nh):
 nh_(nh),
 real_robot_client_("/cr5_robot/joint_controller/follow_joint_trajectory", true),
 gazebo_client_("/arm_controller/follow_joint_trajectory", true)
-{
-    move_group_ = new Move_Group("arm");
+{   
+    nh.getParam("group_name", group_name_);
+    move_group_ = new Move_Group(group_name_);
     planning_scene_ = new Scene();
     robot_model_loader_ = new Robot_Model_Loader("robot_description");
     kinematic_model_ = robot_model_loader_->getModel();
     kinematic_state_=std::make_shared<robot_state::RobotState>(kinematic_model_);
     kinematic_state_->setToDefaultValues();
-    joint_model_group_ = kinematic_model_->getJointModelGroup("arm");
+    joint_model_group_ = kinematic_model_->getJointModelGroup(group_name_);
     if (nh.hasParam("robot/DOF"))
         nh.getParam("robot/DOF", dof_);
     else{
@@ -186,10 +187,22 @@ gazebo_client_("/arm_controller/follow_joint_trajectory", true)
 
     real_robot_ = false;
     nh.getParam("real_robot", real_robot_);
+    // if(real_robot_){
+    //     ROS_INFO("Waiting for Real Robot action server...");
+    //     real_robot_client_.waitForServer();
+    //     ROS_INFO("Real Robot action server connected.");
+    // }
+    robotIp_ = "192.168.43.9";
+    controlPort_ = 29999;
+    movePort_ = 30003;
+    feekPort_ = 30004;
     if(real_robot_){
-        ROS_INFO("Waiting for Real Robot action server...");
-        real_robot_client_.waitForServer();
-        ROS_INFO("Real Robot action server connected.");
+        m_Dashboard_.Connect(robotIp_, controlPort_);
+        m_DobotMove_.Connect(robotIp_, movePort_);
+        m_CFeedback_.Connect(robotIp_, feekPort_);
+        // 连接并启动机器人
+        m_Dashboard_.EnableRobot();
+        m_Dashboard_.ClearError();
     }
 
     is_plan_success_ = false;
@@ -418,9 +431,29 @@ vector<VectorXd> MyPlanner::getLocalRefPath() {
 
 void MyPlanner::armStateCallback(const sensor_msgs::JointState::ConstPtr &msg) {
     for (int i=0;i<dof_;i++){
-        arm_pos_(i)=msg->position[i+2];
-        cur_vel_(i)=msg->velocity[i+2];
+        if(msg->position.size()==8){
+            arm_pos_(i)=msg->position[i+2];
+            cur_vel_(i)=msg->velocity[i+2];
+        }
+        else if(msg->position.size()==6){
+            arm_pos_(i)=msg->position[i];
+            cur_vel_(i)=msg->velocity[i];
+        }
     }
+    if(real_robot_){
+        Dobot::CJointPoint Point;
+        Point.j1=arm_pos_(0) * 180.0 / M_PI;
+        Point.j2=arm_pos_(1) * 180.0 / M_PI;
+        Point.j3=arm_pos_(2) * 180.0 / M_PI;
+        Point.j4=arm_pos_(3) * 180.0 / M_PI;
+        Point.j5=arm_pos_(4) * 180.0 / M_PI;
+        Point.j6=arm_pos_(5) * 180.0 / M_PI;
+        m_Dashboard_.ClearError();
+        // m_Dashboard_.ContinueScript();
+        m_DobotMove_.JointMovJ(Point);
+        // m_DobotMove_.ServoJ(Point,"User=1");
+    }
+
 }
 
 void MyPlanner::GlobalPlanCallback(const moveit_msgs::MoveGroupActionGoal::ConstPtr &msg) {

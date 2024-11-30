@@ -88,3 +88,9 @@ if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_
   file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/share/gp_planner" TYPE FILE FILES "/home/roboert/MP_WS/src/gp_planner/package.xml")
 endif()
 
+if(NOT CMAKE_INSTALL_LOCAL_ONLY)
+  # Include the install script for each subdirectory.
+  include("/home/roboert/MP_WS/build/TCP-IP-CR-CPP-V3/cmake_install.cmake")
+
+endif()
+

@@ -414,6 +414,7 @@ get_depth_EXTERNAL_OBJECTS =
 /home/roboert/MP_WS/devel/lib/gp_planner/get_depth: /usr/lib/x86_64-linux-gnu/libopencv_core.so.4.2.0
 /home/roboert/MP_WS/devel/lib/gp_planner/get_depth: /home/roboert/MP_WS/devel/lib/libGlobal_Planner.so
 /home/roboert/MP_WS/devel/lib/gp_planner/get_depth: /home/roboert/MP_WS/devel/lib/libLocal_Planner.so
+/home/roboert/MP_WS/devel/lib/gp_planner/get_depth: /home/roboert/MP_WS/devel/lib/libDobotTcpAPI.a
 /home/roboert/MP_WS/devel/lib/gp_planner/get_depth: /usr/lib/x86_64-linux-gnu/libboost_serialization.so.1.71.0
 /home/roboert/MP_WS/devel/lib/gp_planner/get_depth: /usr/lib/x86_64-linux-gnu/libboost_system.so.1.71.0
 /home/roboert/MP_WS/devel/lib/gp_planner/get_depth: /usr/lib/x86_64-linux-gnu/libboost_filesystem.so.1.71.0

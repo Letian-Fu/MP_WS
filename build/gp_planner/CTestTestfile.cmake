@@ -4,3 +4,4 @@
 # 
 # This file includes the relevant testing commands required for 
 # testing this directory and lists subdirectories to be tested as well.
+subdirs("../TCP-IP-CR-CPP-V3")

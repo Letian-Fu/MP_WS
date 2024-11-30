@@ -92,12 +92,26 @@ class DynamicSDF:
         half_size_col = int(math.floor((size[1] - 1) / 2))
         half_size_z = int(math.floor((size[2] - 1) / 2))
 
-        # occupency grid
-        map[position[0] - half_size_row - 1:position[0] + half_size_row,
-            position[1] - half_size_col - 1:position[1] + half_size_col,
-            position[2] - half_size_z - 1:position[2] + half_size_z] = np.ones(
-                (2 * half_size_row + 1, 2 * half_size_col + 1,
-                2 * half_size_z + 1))
+        start_row = max(0, position[0] - half_size_row - 1)
+        end_row = min(map.shape[0], position[0] + half_size_row)
+
+        start_col = max(0, position[1] - half_size_col - 1)
+        end_col = min(map.shape[1], position[1] + half_size_col)
+
+        start_z = max(0, position[2] - half_size_z - 1)
+        end_z = min(map.shape[2], position[2] + half_size_z)
+
+        fill_size_row = end_row - start_row
+        fill_size_col = end_col - start_col
+        fill_size_z = end_z - start_z
+        map[start_row:end_row, start_col:end_col, start_z:end_z] = np.ones((fill_size_row, fill_size_col, fill_size_z))
+
+        # # occupency grid
+        # map[position[0] - half_size_row - 1:position[0] + half_size_row,
+        #     position[1] - half_size_col - 1:position[1] + half_size_col,
+        #     position[2] - half_size_z - 1:position[2] + half_size_z] = np.ones(
+        #         (2 * half_size_row + 1, 2 * half_size_col + 1,
+        #         2 * half_size_z + 1))
 
         return map
 
@@ -201,12 +215,18 @@ class DynamicSDF:
             self.map = np.zeros((self.rows, self.cols, self.z))
             self.sdf = np.zeros((self.rows, self.cols, self.z))
             self.prob_map = np.ones((self.rows, self.cols, self.z))
-            self.add_obstacle([20, 20, 5], [30, 30, 3], self.map)
-            # self.add_obstacle([40, 40, 9], [60, 60, 5], self.map)
+            # # floor
+            # self.add_obstacle([20, 20, 5], [30, 30, 3], self.map)
+            # # pingmu
+            # self.add_obstacle([8, 12, 10], [2, 6, 6], self.map)
+            # # zawu
+            # self.add_obstacle([35, 15, 10], [6, 8, 6], self.map)
+            # # shebei
+            # self.add_obstacle([1, 8, 8], [5, 5, 2], self.map)
             if velocity != 0:
                 # 调用add_dynamic_obstacle函数
-                # self.add_dynamic_obstacle(position, size, velocity, direction, self.total_time, self.total_steps,self.map, self.prob_map)
-                self.add_dynamic_obstacle_static(position, size, velocity, direction, self.total_time, self.total_steps,self.map, self.prob_map)
+                self.add_dynamic_obstacle(position, size, velocity, direction, self.total_time, self.total_steps,self.map, self.prob_map)
+                # self.add_dynamic_obstacle_static(position, size, velocity, direction, self.total_time, self.total_steps,self.map, self.prob_map)
                 self.sdf = self.signedDistanceField3D(self.map, self.cell_size,self.prob_map)
                 self.update_flag = True
             else :

@@ -393,6 +393,7 @@ My_Planner_EXTERNAL_OBJECTS =
 /home/roboert/MP_WS/devel/lib/libMy_Planner.so: /usr/lib/x86_64-linux-gnu/libopencv_viz.so.4.2.0
 /home/roboert/MP_WS/devel/lib/libMy_Planner.so: /usr/lib/x86_64-linux-gnu/libopencv_xobjdetect.so.4.2.0
 /home/roboert/MP_WS/devel/lib/libMy_Planner.so: /usr/lib/x86_64-linux-gnu/libopencv_xphoto.so.4.2.0
+/home/roboert/MP_WS/devel/lib/libMy_Planner.so: /home/roboert/MP_WS/devel/lib/libDobotTcpAPI.a
 /home/roboert/MP_WS/devel/lib/libMy_Planner.so: /usr/lib/x86_64-linux-gnu/libopencv_highgui.so.4.2.0
 /home/roboert/MP_WS/devel/lib/libMy_Planner.so: /usr/lib/x86_64-linux-gnu/libopencv_datasets.so.4.2.0
 /home/roboert/MP_WS/devel/lib/libMy_Planner.so: /usr/lib/x86_64-linux-gnu/libopencv_plot.so.4.2.0

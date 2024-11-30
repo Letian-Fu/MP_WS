@@ -14,7 +14,11 @@
 #undef HAVE_CSTDDEF
 #include <cppad/cppad.hpp>
 #include <cppad/ipopt/solve.hpp>
-
+#include "Dashboard.h"
+#include "DobotMove.h"
+#include "Feedback.h"
+#include "ErrorInfoBean.h"
+#include "ErrorInfoHelper.h"
 struct ADBodySphere {
     size_t link_id;        // 关联的关节索引
     double radius;         // 球体半径
@@ -126,6 +130,7 @@ public:
     Robot_Model_Loader *robot_model_loader_;
     std::vector<std::string> joint_all_names_;
     const robot_state::JointModelGroup *joint_model_group_;
+    string group_name_;
 
     // 机器人相关参数
     int dof_;
@@ -192,6 +197,19 @@ public:
     int plan_times_;
     std::string planner_type_;
     ros::Time last_update_time_;
+
+    // 实物相关
+    std::string robotIp_;
+    unsigned int controlPort_;
+    unsigned int movePort_;
+    unsigned int feekPort_;
+
+    Dobot::CDobotMove m_DobotMove_;
+    Dobot::CDashboard m_Dashboard_;
+    Dobot::CFeedback m_CFeedback_;
+    Dobot::CFeedbackData feedbackData_;
+    Dobot::CErrorInfoBeans m_ErrorInfoBeans_;
+    Dobot::CErrorInfoHelper m_CErrorInfoHelper_;
 
 
 public:

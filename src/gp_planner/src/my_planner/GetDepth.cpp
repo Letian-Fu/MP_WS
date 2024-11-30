@@ -175,8 +175,10 @@ void callback(const gp_planner::BoundingBoxArray::ConstPtr &bounding_boxes_msg, 
     sphere_center_cam.point.z = center_z;
 
     try {
-         geometry_msgs::TransformStamped transform_stamped = tf_buffer.lookupTransform(
-            "world", sphere_center_cam.header.frame_id, cloud_msg->header.stamp, ros::Duration(0.1));
+        //  geometry_msgs::TransformStamped transform_stamped = tf_buffer.lookupTransform(
+        //     "world", sphere_center_cam.header.frame_id, cloud_msg->header.stamp, ros::Duration(0.1));
+        geometry_msgs::TransformStamped transform_stamped = tf_buffer.lookupTransform(
+            "base_link", sphere_center_cam.header.frame_id, cloud_msg->header.stamp, ros::Duration(0.1));
         tf2::doTransform(sphere_center_cam, sphere_center_world, transform_stamped);
 
         std::cout<<"Sphere center in world frame: ( "<< 

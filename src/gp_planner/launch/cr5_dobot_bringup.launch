@@ -1,0 +1,52 @@
+<launch>
+  <arg name="gazebo_gui" default="true" doc="Start Gazebo GUI"/>
+  <arg name="paused" default="false" doc="Start Gazebo paused"/>
+  <arg name="use_sim_time" default="true"/>
+  <arg name="headless" default="false"/>
+  <arg name="debug" default="false"/>
+  <arg name="world_name" default="worlds/empty.world" doc="Gazebo world file"/>
+  <arg name="world_pose" default="-x 0 -y 0 -z 0 -R 0 -P 0 -Y 0" doc="Pose to spawn the robot at"/>
+  <arg name="initial_joint_positions" default="" doc="Initial joint configuration of the robot"/>
+  <!-- Launch Gazebo  -->
+  <arg name="DOBOT_TYPE" default="$(env DOBOT_TYPE)" />
+  <param name="robot_description" command="$(find xacro)/xacro --inorder '$(find dobot_gazebo)/urdf/cr5_robot_with_kinect.xacro'"/>
+
+  <!--GUI used to send fake joint values-->
+  <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher">
+    <param name="use_gui" value="false"/>
+    <rosparam param="/source_list">[cr5_robot/joint_states]</rosparam>
+
+  </node>
+  <include file="$(find dobot_gazebo)/launch/robot_control.xml"/>
+  
+  <include file="$(find gazebo_ros)/launch/empty_world.launch">
+    <arg name="world_name" value="$(find gp_planner)/worlds/real_obs.world"/>
+    <arg name="debug" value="$(arg debug)" />
+    <arg name="gui" value="$(arg gazebo_gui)" />
+    <arg name="paused" value="false"/>
+    <arg name="use_sim_time" value="$(arg use_sim_time)"/>
+    <arg name="headless" value="$(arg headless)"/>
+  </include>
+  <node 
+     name="urdf_spawner" 
+     pkg="gazebo_ros" 
+     type="spawn_model" 
+     respawn="false" output="screen"
+     args="-urdf -param robot_description -model $(arg DOBOT_TYPE)_robot"/>
+
+  <!-- Spawn the Gazebo ROS controllers -->
+  <!-- <node name="gazebo_controller_spawner" pkg="controller_manager" type="spawner" respawn="false" output="screen" args="joint_state_controller" /> -->
+
+  <!-- Given the published joint states, publish tf for the robot links -->
+  <!-- <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" respawn="true" output="screen" /> -->
+
+  <!-- moveit launch file -->
+  <!-- <include file="$(find cr5_moveit_config)/launch/moveit_planning_execution.launch" /> -->
+  <!-- <include file="$(find dobot_moveit)/launch/moveit.launch" /> -->
+
+  <!-- <rosparam command="load" file="$(find gp_planner)/config/parameters.yaml" /> -->
+  <!-- <node name="moving_sphere" pkg="gp_planner" type="moving_sphere.py" output="screen" /> -->
+  <!-- <node name="static_sdf" pkg="gp_planner" type="static_sdf.py" output="screen" /> -->
+  <!-- <node name="dynamic_sdf" pkg="gp_planner" type="dynamic_sdf.py" output="screen" /> -->
+
+</launch>
