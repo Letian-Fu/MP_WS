@@ -1,4 +1,7 @@
-real_robot: true
+real_robot: false
+robot_speed_ratio: 20
+robot_acc_ratio: 50
+robot_cp_ratio: 50
 # group_name: cr5_arm
 group_name: arm
 robot:
@@ -32,7 +35,7 @@ settings:
   ref_inter_num: 3
   total_time: 1.0
   total_step: 10
-  epsilon: 0.1
+  epsilon: 0.12
   control_inter: 5
   obs_check_inter: 5
   cost_sigma: 0.02

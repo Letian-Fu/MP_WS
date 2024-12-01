@@ -210,6 +210,9 @@ public:
     Dobot::CFeedbackData feedbackData_;
     Dobot::CErrorInfoBeans m_ErrorInfoBeans_;
     Dobot::CErrorInfoHelper m_CErrorInfoHelper_;
+    int robot_speed_ratio_; //速度比例
+    int robot_acc_ratio_;   //加速度比例
+    int robot_cp_ratio_;    //平滑过渡比例
 
 
 public:

@@ -1,4 +1,6 @@
-#include "ros/ros.h"
+#include "my_planner/MyPlanner.h"
+#include <ros/ros.h>
+#include <Eigen/Dense>
 #include "Dashboard.h"
 #include "DobotMove.h"
 #include "Feedback.h"
@@ -30,20 +32,23 @@ int main(int argc, char** argv) {
     // 发送运动指令
     Dobot::CJointPoint PointA;
     Dobot::CJointPoint PointB;
-    double pointa[] = {37.9, 82.1, -49.6, -32.4, -121.27, 0};
-    // double pointb[] = {-48.8, 74.9, -42.1, -32.9, -34.8, 0};
     std::vector<double> arm_pos_ = {-0.3896469859665963, 1.4763991778866625, -0.6610719524804844, -0.5897822008469467, -1.0095268161938282, -0.025555435324681852}; 
-    // for(int i=0;i<6;i++){
-    //     arm_pos[i] = arm_pos[i] * 180.0 / M_PI;
-    // }
-    // memcpy(&PointA, pointa, sizeof(PointA));
-    // memcpy(&PointB, pointb, sizeof(PointB));
-    PointA.j1=arm_pos_[0] * 180.0 / M_PI;
-    PointA.j2=arm_pos_[1] * 180.0 / M_PI;
-    PointA.j3=arm_pos_[2] * 180.0 / M_PI;
-    PointA.j4=arm_pos_[3] * 180.0 / M_PI;
-    PointA.j5=arm_pos_[4] * 180.0 / M_PI;
-    PointA.j6=arm_pos_[5] * 180.0 / M_PI;
+    Eigen::VectorXd target_a(6),target_b(6);
+    target_a << 0.656,1.433,-0.866,-0.566,-2.115,0;  // 点 A
+    target_b << -0.851,1.309,-0.735,-0.574,-0.608,0;  // 点 B
+    // PointA.j1=target_a[0] * 180.0 / M_PI;
+    // PointA.j2=target_a[1] * 180.0 / M_PI;
+    // PointA.j3=target_a[2] * 180.0 / M_PI;
+    // PointA.j4=target_a[3] * 180.0 / M_PI;
+    // PointA.j5=target_a[4] * 180.0 / M_PI;
+    // PointA.j6=target_a[5] * 180.0 / M_PI;
+
+    // PointA.j1=target_b[0] * 180.0 / M_PI;
+    // PointA.j2=target_b[1] * 180.0 / M_PI;
+    // PointA.j3=target_b[2] * 180.0 / M_PI;
+    // PointA.j4=target_b[3] * 180.0 / M_PI;
+    // PointA.j5=target_b[4] * 180.0 / M_PI;
+    // PointA.j6=target_b[5] * 180.0 / M_PI;
     m_DobotMove.JointMovJ(PointA);
     // DobotTcpDemo::moveArriveFinish(PointA);
     // m_DobotMove.JointMovJ(PointB);

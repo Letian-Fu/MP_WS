@@ -215,14 +215,14 @@ class DynamicSDF:
             self.map = np.zeros((self.rows, self.cols, self.z))
             self.sdf = np.zeros((self.rows, self.cols, self.z))
             self.prob_map = np.ones((self.rows, self.cols, self.z))
-            # # floor
-            # self.add_obstacle([20, 20, 5], [30, 30, 3], self.map)
-            # # pingmu
-            # self.add_obstacle([8, 12, 10], [2, 6, 6], self.map)
-            # # zawu
-            # self.add_obstacle([35, 15, 10], [6, 8, 6], self.map)
-            # # shebei
-            # self.add_obstacle([1, 8, 8], [5, 5, 2], self.map)
+            # floor
+            self.add_obstacle([20, 20, 5], [30, 30, 3], self.map)
+            # pingmu
+            self.add_obstacle([8, 12, 10], [2, 6, 6], self.map)
+            # zawu
+            self.add_obstacle([35, 15, 10], [6, 8, 6], self.map)
+            # shebei
+            self.add_obstacle([1, 8, 8], [5, 5, 2], self.map)
             if velocity != 0:
                 # 调用add_dynamic_obstacle函数
                 self.add_dynamic_obstacle(position, size, velocity, direction, self.total_time, self.total_steps,self.map, self.prob_map)

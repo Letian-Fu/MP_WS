@@ -187,11 +187,9 @@ gazebo_client_("/arm_controller/follow_joint_trajectory", true)
 
     real_robot_ = false;
     nh.getParam("real_robot", real_robot_);
-    // if(real_robot_){
-    //     ROS_INFO("Waiting for Real Robot action server...");
-    //     real_robot_client_.waitForServer();
-    //     ROS_INFO("Real Robot action server connected.");
-    // }
+    nh.getParam("robot_speed_ratio", robot_speed_ratio_);
+    nh.getParam("robot_acc_ratio", robot_acc_ratio_);
+    nh.getParam("robot_cp_ratio", robot_cp_ratio_);
     robotIp_ = "192.168.43.9";
     controlPort_ = 29999;
     movePort_ = 30003;
@@ -203,6 +201,9 @@ gazebo_client_("/arm_controller/follow_joint_trajectory", true)
         // 连接并启动机器人
         m_Dashboard_.EnableRobot();
         m_Dashboard_.ClearError();
+        m_Dashboard_.SpeedFactor(robot_speed_ratio_);
+        m_Dashboard_.AccJ(robot_acc_ratio_);
+        m_Dashboard_.CP(robot_cp_ratio_);
     }
 
     is_plan_success_ = false;
@@ -449,9 +450,9 @@ void MyPlanner::armStateCallback(const sensor_msgs::JointState::ConstPtr &msg) {
         Point.j5=arm_pos_(4) * 180.0 / M_PI;
         Point.j6=arm_pos_(5) * 180.0 / M_PI;
         m_Dashboard_.ClearError();
-        // m_Dashboard_.ContinueScript();
-        m_DobotMove_.JointMovJ(Point);
-        // m_DobotMove_.ServoJ(Point,"User=1");
+        // m_Dashboard_.Continue()();
+        // m_DobotMove_.JointMovJ(Point);
+        m_DobotMove_.ServoJ(Point,"t=0.02","lookahead_time=50","gain=500");
     }
 
 }

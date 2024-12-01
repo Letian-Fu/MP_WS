@@ -9,7 +9,8 @@
 #include <chrono>
 #include <cmath>
 #include <thread>  // std::this_thread::sleep_for
-
+#include <fstream> // 用于文件操作
+#include <iomanip> // 用于格式化输出
 
 
 bool is_collision = false;
@@ -33,6 +34,12 @@ int main(int argc, char **argv)
     ros::init (argc, argv, "plan_test");
     ros::NodeHandle n;
     MyPlanner my_planner(n);
+    // 文件输出流，用于记录关节角度
+    std::ofstream joint_angle_file("/home/roboert/MP_WS/src/gp_planner/exp_data/joint_angles.txt", std::ios::out | std::ios::trunc);
+    if (!joint_angle_file.is_open()) {
+        ROS_ERROR("Failed to open file for writing joint angles!");
+        return -1;
+    }
     // TF2 Buffer 和 Listener，用于记录末端执行器的位置信息
     tf2_ros::Buffer tf_buffer;
     tf2_ros::TransformListener tf_listener(tf_buffer);
@@ -72,6 +79,15 @@ int main(int argc, char **argv)
     double path_length = 0;
     while(ros::ok() && iteration < max_iterations){
         current_joints = my_planner.arm_pos_;
+        // 转换关节角度：弧度 -> 角度
+        VectorXd current_joints_deg = current_joints * 180.0 / M_PI;
+
+        // 将关节角度写入文件
+        joint_angle_file << iteration + 1; // 写入当前迭代号
+        for (int i = 0; i < current_joints_deg.size(); ++i) {
+            joint_angle_file << "," << std::fixed << std::setprecision(2) << current_joints_deg[i];
+        }
+        joint_angle_file << std::endl;
         if(last_joints.norm()!=0){
             double diff_norm = (current_joints - last_joints).norm();
             if (std::isfinite(diff_norm)) { // 检查是否为有限值
@@ -202,5 +218,8 @@ int main(int argc, char **argv)
         std::cout << std::setw(12) << avg;
     }
     std::cout << std::endl;
+    // 关闭文件
+    joint_angle_file.close();
+    ROS_INFO("Joint angle data has been saved to joint_angles.txt");
     return 0;
 }
