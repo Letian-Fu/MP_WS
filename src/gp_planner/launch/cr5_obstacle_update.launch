@@ -1,0 +1,5 @@
+
+<launch>
+    <node name="moving_sphere" pkg="gp_planner" type="moving_sphere.py" output="screen" />
+    <node name="dynamic_sdf" pkg="gp_planner" type="dynamic_sdf.py" output="screen" />  
+</launch>

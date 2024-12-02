@@ -9,8 +9,8 @@
 
 MyPlanner::MyPlanner(ros::NodeHandle& nh):
 nh_(nh),
-real_robot_client_("/cr5_robot/joint_controller/follow_joint_trajectory", true),
-gazebo_client_("/arm_controller/follow_joint_trajectory", true)
+real_robot_client_("/arm_controller/follow_joint_trajectory", true),
+gazebo_client_("/cr5_robot/joint_controller/follow_joint_trajectory", true)
 {   
     nh.getParam("group_name", group_name_);
     move_group_ = new Move_Group(group_name_);
@@ -190,21 +190,25 @@ gazebo_client_("/arm_controller/follow_joint_trajectory", true)
     nh.getParam("robot_speed_ratio", robot_speed_ratio_);
     nh.getParam("robot_acc_ratio", robot_acc_ratio_);
     nh.getParam("robot_cp_ratio", robot_cp_ratio_);
-    robotIp_ = "192.168.43.9";
-    controlPort_ = 29999;
-    movePort_ = 30003;
-    feekPort_ = 30004;
-    if(real_robot_){
-        m_Dashboard_.Connect(robotIp_, controlPort_);
-        m_DobotMove_.Connect(robotIp_, movePort_);
-        m_CFeedback_.Connect(robotIp_, feekPort_);
-        // 连接并启动机器人
-        m_Dashboard_.EnableRobot();
-        m_Dashboard_.ClearError();
-        m_Dashboard_.SpeedFactor(robot_speed_ratio_);
-        m_Dashboard_.AccJ(robot_acc_ratio_);
-        m_Dashboard_.CP(robot_cp_ratio_);
-    }
+    nh.getParam("control_frequency", control_frequency_);
+    nh.getParam("plan_real_robot", plan_real_robot_);
+    joint_pub = nh.advertise<std_msgs::Float64MultiArray>("/current_joints_deg", 10);
+    // robotIp_ = "192.168.43.9";
+    // controlPort_ = 29999;
+    // movePort_ = 30003;
+    // feekPort_ = 30004;
+    // if(real_robot_){
+    //     m_Dashboard_.Connect(robotIp_, controlPort_);
+    //     m_DobotMove_.Connect(robotIp_, movePort_);
+    //     m_CFeedback_.Connect(robotIp_, feekPort_);
+    //     // 连接并启动机器人
+    //     m_Dashboard_.EnableRobot();
+    //     m_Dashboard_.ClearError();
+    //     m_Dashboard_.SpeedFactor(robot_speed_ratio_);
+    //     m_Dashboard_.AccJ(robot_acc_ratio_);
+    //     m_Dashboard_.CP(robot_cp_ratio_);
+    // }
+    last_record_time_ = std::chrono::high_resolution_clock::now();
 
     is_plan_success_ = false;
     is_global_success_ = false;
@@ -441,19 +445,45 @@ void MyPlanner::armStateCallback(const sensor_msgs::JointState::ConstPtr &msg) {
             cur_vel_(i)=msg->velocity[i];
         }
     }
-    if(real_robot_){
-        Dobot::CJointPoint Point;
-        Point.j1=arm_pos_(0) * 180.0 / M_PI;
-        Point.j2=arm_pos_(1) * 180.0 / M_PI;
-        Point.j3=arm_pos_(2) * 180.0 / M_PI;
-        Point.j4=arm_pos_(3) * 180.0 / M_PI;
-        Point.j5=arm_pos_(4) * 180.0 / M_PI;
-        Point.j6=arm_pos_(5) * 180.0 / M_PI;
-        m_Dashboard_.ClearError();
-        // m_Dashboard_.Continue()();
-        // m_DobotMove_.JointMovJ(Point);
-        m_DobotMove_.ServoJ(Point,"t=0.02","lookahead_time=50","gain=500");
+
+    if(plan_real_robot_){
+        // 构造 std_msgs::Float64MultiArray 消息
+        std_msgs::Float64MultiArray joint_msg;
+        joint_msg.layout.dim.push_back(std_msgs::MultiArrayDimension());
+        joint_msg.layout.dim[0].label = "joints";
+        joint_msg.layout.dim[0].size = arm_pos_.size();
+        joint_msg.layout.dim[0].stride = arm_pos_.size();
+        joint_msg.layout.data_offset = 0;
+
+        // 填充数据
+        for (int i = 0; i < arm_pos_.size(); ++i) {
+            joint_msg.data.push_back(arm_pos_(i)*180.0/M_PI);
+        }
+
+        // 发布消息
+        joint_pub.publish(joint_msg);
     }
+    // if(real_robot_){
+         // 获取当前时间点
+    //     auto current_time = std::chrono::high_resolution_clock::now();
+    //     auto time_since_last_record = std::chrono::duration_cast<std::chrono::milliseconds>(current_time - last_record_time_);
+    //     // 如果距离上次记录的时间超过 50ms，则记录一次数据
+    //     if (time_since_last_record.count() >= 1000.0/control_frequency_) {
+    //         Dobot::CJointPoint Point;
+    //         Point.j1=arm_pos_(0) * 180.0 / M_PI;
+    //         Point.j2=arm_pos_(1) * 180.0 / M_PI;
+    //         Point.j3=arm_pos_(2) * 180.0 / M_PI;
+    //         Point.j4=arm_pos_(3) * 180.0 / M_PI;
+    //         Point.j5=arm_pos_(4) * 180.0 / M_PI;
+    //         Point.j6=arm_pos_(5) * 180.0 / M_PI;
+    //         m_Dashboard_.ClearError();
+    //         // m_Dashboard_.Continue();
+    //         // m_DobotMove_.Sync();
+    //         // m_DobotMove_.ServoJ(Point,"t=0.1","lookahead_time=50","gain=500");
+    //         m_DobotMove_.JointMovJ(Point);
+    //         last_record_time_ = current_time;
+    //     }
+    // }
 
 }
 
@@ -513,7 +543,7 @@ void MyPlanner::LocalPlanningCallback(const ros::TimerEvent&){
             plan_time_cost_ += static_cast<double>(duration.count());
             // 输出花费的时间
             // std::cout << "Local planning took " << duration.count() << " ms" << std::endl;
-            // ROS_INFO("Local planning took %.2f ms", static_cast<double>(duration.co)));
+            ROS_INFO("Local planning took %.2f ms", static_cast<double>(duration.count()));
             exec_step_ = opt_setting_.total_step + control_inter_ * (opt_setting_.total_step - 1);
             exec_values_ = gp_planner::interpolateTraj(opt_values, opt_setting_.Qc_model, delta_t_, control_inter_);
             // double init_coll_cost = gp_planner::CollisionCost(robot_, sdf_, init_values, opt_setting_);
@@ -585,7 +615,7 @@ void MyPlanner::LocalPlanningCallback(const ros::TimerEvent&){
                 }
                 else{
                     count_++;
-                    if(count_ > 100){
+                    if(count_ > 50){
                         planning_scene_monitor::PlanningSceneMonitorPtr monitor_ptr_udef = std::make_shared<planning_scene_monitor::PlanningSceneMonitor>("robot_description");
                         monitor_ptr_udef->requestPlanningSceneState("get_planning_scene");
                         planning_scene_monitor::LockedPlanningSceneRW ps(monitor_ptr_udef);
@@ -668,6 +698,7 @@ void MyPlanner::LocalPlanningCallback(const ros::TimerEvent&){
         }
         publishLocalPath();
         if(planner_type_=="gp"){
+            if(exec_values_.size()==0)  return;
             local_results_.resize(exec_step_);
             for(size_t i = 0;i<exec_step_;i++){
                 gtsam::Vector pos_temp = exec_values_.at<gtsam::Vector>(gtsam::Symbol('x',i));
@@ -1003,9 +1034,10 @@ std::vector<VectorXd> MyPlanner::mpcSolve(const vector<VectorXd>& ref_path, cons
 void MyPlanner::publishLocalPath(){
     nav_msgs::Path path;
     path.header.stamp = ros::Time::now();
-    path.header.frame_id="world";
+    path.header.frame_id="base_link";
     path.poses.clear();
     if(planner_type_ == "gp"){
+        if(exec_values_.size()==0)  return;
         exec_step_ = opt_setting_.total_step + control_inter_ * (opt_setting_.total_step - 1);
         local_results_.resize(exec_step_);
         for(size_t i = 0;i<exec_step_;i++){
@@ -1046,7 +1078,7 @@ void MyPlanner::publishLocalPath(){
 void MyPlanner::publishGlobalPath(){
     nav_msgs::Path path;
     path.header.stamp = ros::Time::now();
-    path.header.frame_id="world";
+    path.header.frame_id="base_link";
     path.poses.clear();
     for(size_t i=0;i<global_results_.size();i++){
         VectorXd theta(6);

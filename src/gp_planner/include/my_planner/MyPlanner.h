@@ -19,6 +19,7 @@
 #include "Feedback.h"
 #include "ErrorInfoBean.h"
 #include "ErrorInfoHelper.h"
+
 struct ADBodySphere {
     size_t link_id;        // 关联的关节索引
     double radius;         // 球体半径
@@ -190,6 +191,7 @@ public:
     double w_obs_,w_pos_,w_v_,w_goal_;
     bool obs_constrained_;
     
+    
 
     // 测试相关
     double path_length_,end_path_length_;
@@ -213,6 +215,11 @@ public:
     int robot_speed_ratio_; //速度比例
     int robot_acc_ratio_;   //加速度比例
     int robot_cp_ratio_;    //平滑过渡比例
+    int control_frequency_;
+    // 用于记录时间的变量
+    std::chrono::time_point<std::chrono::high_resolution_clock> last_record_time_; // 上一次记录的时间点
+    bool plan_real_robot_;
+    ros::Publisher joint_pub;
 
 
 public:

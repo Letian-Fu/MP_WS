@@ -28,7 +28,7 @@ def move_obstacle():
     set_state = rospy.ServiceProxy('/gazebo/set_model_state', SetModelState)
     # 障碍物的名称
     model_name = 'moving_sphere'  # 替换为你的障碍物模型名称
-    rate_ = 50
+    rate_ = 30
     rate = rospy.Rate(rate_)  # 控制循环的频率
     # 创建发布者
     pub = rospy.Publisher('/obstacle_info', Float64MultiArray, queue_size=10)
@@ -94,6 +94,7 @@ def move_obstacle():
     shebei_pose.position.z = 0.05 
     shebei_pose.orientation.w = 1.0
 
+
     shebei.primitives.append(shebei_primitive)
     shebei.primitive_poses.append(shebei_pose)
     shebei.operation = CollisionObject.ADD
@@ -115,7 +116,7 @@ def move_obstacle():
     # 设置长方体的位置
     pingmu_pose = Pose()
     pingmu_pose.position.x = -0.42
-    pingmu_pose.position.y = -0.61
+    pingmu_pose.position.y = -0.7
     pingmu_pose.position.z = 0.15 
     pingmu_pose.orientation.w = 1.0
 
@@ -135,7 +136,7 @@ def move_obstacle():
     # 假设障碍物是一个长方体
     zawu_primitive = SolidPrimitive()
     zawu_primitive.type = zawu_primitive.BOX
-    zawu_primitive.dimensions=[0.4, 0.3, 0.3]
+    zawu_primitive.dimensions=[0.4, 0.1, 0.3]
 
     # 设置长方体的位置
     zawu_pose = Pose()
@@ -158,9 +159,9 @@ def move_obstacle():
     mode = 'vertical'  # 'helical', 'linear', 'vertical', 'horizontal', or 'combined'
     if mode == 'vertical':
         # 上下往复运动参数
-        start = np.array([-0.6, 0.0, 0.3])  # 垂直方向起点
-        end = np.array([-0.6, 0.0, 0.9])    # 垂直方向终点
-        linear_speed = 0.1  # 匀速运动的速度 (m/s)
+        start = np.array([-0.6, 0.0, 0.2])  # 垂直方向起点
+        end = np.array([-0.6, 0.0, 0.75])    # 垂直方向终点
+        linear_speed = 0.25  # 匀速运动的速度 (m/s)
     elif mode == 'horizontal':
         # 水平往复运动参数
         start = np.array([-1.0, 0.0, 0.5])  # 水平方向起点

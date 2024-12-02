@@ -24,7 +24,7 @@ class DynamicSDF:
         self.sdf = np.zeros((self.rows, self.cols, self.z))
         self.prob_map = np.ones((self.rows, self.cols, self.z))
         self.epsilon = 0.1
-        self.total_time = 1.5
+        self.total_time = 1.2
         self.total_steps = 10
         self.opt_setting_ = type('opt_setting', (object,), {'epsilon': self.epsilon})()
         self.update_flag = False
@@ -142,7 +142,7 @@ class DynamicSDF:
                 continue
             # 计算障碍物的移动距离
             # distance_moved = velocity * time_step
-            probability = 1.0 - (0.35 * step / total_steps)
+            probability = 1.0 - (0.25 * step / total_steps)
             start_row = max(0, current_position[0] - half_size_row - 1)
             end_row = min(map.shape[0], current_position[0] + half_size_row)
 
@@ -211,18 +211,18 @@ class DynamicSDF:
             position = [grid_r, grid_c, grid_z]
             direction = [direction_y, direction_x, direction_z]
             velocity = linear_speed / self.cell_size
-            size = 2 * obs_size / self.cell_size
+            size = 2 * obs_size / self.cell_size + self.epsilon / self.cell_size
             self.map = np.zeros((self.rows, self.cols, self.z))
             self.sdf = np.zeros((self.rows, self.cols, self.z))
             self.prob_map = np.ones((self.rows, self.cols, self.z))
             # floor
             self.add_obstacle([20, 20, 5], [30, 30, 3], self.map)
-            # pingmu
-            self.add_obstacle([8, 12, 10], [2, 6, 6], self.map)
-            # zawu
-            self.add_obstacle([35, 15, 10], [6, 8, 6], self.map)
+            # # pingmu
+            # self.add_obstacle([6, 12, 10], [2, 6, 6], self.map)
+            # # zawu
+            # self.add_obstacle([34, 15, 10], [2, 8, 6], self.map)
             # shebei
-            self.add_obstacle([1, 8, 8], [5, 5, 2], self.map)
+            self.add_obstacle([18, 1, 8], [5, 5, 10], self.map)
             if velocity != 0:
                 # 调用add_dynamic_obstacle函数
                 self.add_dynamic_obstacle(position, size, velocity, direction, self.total_time, self.total_steps,self.map, self.prob_map)
@@ -254,12 +254,18 @@ class DynamicSDF:
             position = [grid_r, grid_c, grid_z]
             direction = [direction_y, direction_x, direction_z]
             velocity = linear_speed / self.cell_size
-            size = 2 * obs_size / self.cell_size + 2
+            size = obs_size / self.cell_size
             self.map = np.zeros((self.rows, self.cols, self.z))
             self.sdf = np.zeros((self.rows, self.cols, self.z))
             self.prob_map = np.ones((self.rows, self.cols, self.z))
+            # floor
             self.add_obstacle([20, 20, 5], [30, 30, 3], self.map)
-            # self.add_obstacle([50, 50, 8], [80, 80, 3], self.map)
+            # pingmu
+            self.add_obstacle([8, 12, 10], [2, 6, 6], self.map)
+            # zawu
+            self.add_obstacle([34, 15, 10], [2, 8, 6], self.map)
+            # shebei
+            self.add_obstacle([1, 8, 8], [5, 5, 2], self.map)
             if velocity != 0:
                 # 调用add_dynamic_obstacle函数
                 self.add_dynamic_obstacle(position, size, velocity, direction, self.total_time, self.total_steps,self.map, self.prob_map)

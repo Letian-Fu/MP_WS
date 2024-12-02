@@ -4939,6 +4939,19 @@ cr5_description_xacro_generated_to_devel_space_/fast:
 .PHONY : cr5_description_xacro_generated_to_devel_space_/fast
 
 #=============================================================================
+# Target rules for targets named control_test_2
+
+# Build rule for target.
+control_test_2: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 control_test_2
+.PHONY : control_test_2
+
+# fast build rule for target.
+control_test_2/fast:
+	$(MAKE) -f gp_planner/CMakeFiles/control_test_2.dir/build.make gp_planner/CMakeFiles/control_test_2.dir/build
+.PHONY : control_test_2/fast
+
+#=============================================================================
 # Target rules for targets named control_test
 
 # Build rule for target.
@@ -5093,6 +5106,19 @@ all.tests: cmake_check_build_system
 all.tests/fast:
 	$(MAKE) -f gp_planner/CMakeFiles/all.tests.dir/build.make gp_planner/CMakeFiles/all.tests.dir/build
 .PHONY : all.tests/fast
+
+#=============================================================================
+# Target rules for targets named control_test_3
+
+# Build rule for target.
+control_test_3: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 control_test_3
+.PHONY : control_test_3
+
+# fast build rule for target.
+control_test_3/fast:
+	$(MAKE) -f gp_planner/CMakeFiles/control_test_3.dir/build.make gp_planner/CMakeFiles/control_test_3.dir/build
+.PHONY : control_test_3/fast
 
 #=============================================================================
 # Target rules for targets named check_valgrind
@@ -6527,6 +6553,7 @@ help:
 	@echo "... map_msgs_generate_messages_nodejs"
 	@echo "... rviz_dobot_control_autogen"
 	@echo "... cr5_description_xacro_generated_to_devel_space_"
+	@echo "... control_test_2"
 	@echo "... control_test"
 	@echo "... get_depth"
 	@echo "... plan_test"
@@ -6539,6 +6566,7 @@ help:
 	@echo "... _gp_planner_generate_messages_check_deps_BoundingBoxArray"
 	@echo "... gp_planner_generate_messages"
 	@echo "... all.tests"
+	@echo "... control_test_3"
 	@echo "... check_valgrind"
 	@echo "... check"
 	@echo "... gp_planner_generate_messages_py"

@@ -206,3 +206,23 @@ target_link_libraries(control_test
   DobotTcpAPI
   Threads::Threads
 )
+
+add_executable(control_test_2 src/my_planner/control_test_2.cpp)
+target_link_libraries(control_test_2
+  My_Planner
+  ${catkin_LIBRARIES}
+  ${GTSAM_LIBRARIES}
+  ${OpenCV_LIBRARIES}
+  DobotTcpAPI
+  Threads::Threads
+)
+
+add_executable(control_test_3 src/my_planner/control_test_3.cpp)
+target_link_libraries(control_test_3
+  My_Planner
+  ${catkin_LIBRARIES}
+  ${GTSAM_LIBRARIES}
+  ${OpenCV_LIBRARIES}
+  DobotTcpAPI
+  Threads::Threads
+)

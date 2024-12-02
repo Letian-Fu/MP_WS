@@ -1,9 +1,11 @@
 real_robot: false
-robot_speed_ratio: 20
-robot_acc_ratio: 50
-robot_cp_ratio: 50
-# group_name: cr5_arm
-group_name: arm
+plan_real_robot: false
+robot_speed_ratio: 30
+robot_acc_ratio: 99
+robot_cp_ratio: 99
+control_frequency: 500
+group_name: cr5_arm
+# group_name: arm
 robot:
   DOF: 6
   arm_base: {orientation: [0, 0, 0, 1], position: [0, 0, 0]}
@@ -19,10 +21,13 @@ robot:
     zs: [0,0,0.1,0.1,0.1,0.1,0.1,0,0,0,0,0,0,0,0.1]
     rs: [0.08,0.08,0.06,0.06,0.06,0.06,0.06,0.08,0.06,0.06,0.08,0.07,0.06,0.06,0.06]
   arm_joint_names: [joint1, joint2, joint3, joint4, joint5, joint6]
-  arm_state_topic: /joint_states
+  # arm_state_topic: /joint_states
+  arm_state_topic: cr5_robot/joint_states
   trajectory_control_topic: /arm_joint_controller/follow_joint_trajectory
   est_traj_pub_topic: /gpmp2_planner/est_traj
   plan_traj_pub_topic: /gpmp2_planner/plan_traj
+  # gazebo_client: /arm_controller/follow_joint_trajectory
+  gazebo_client: /cr5_robot/joint_controller/follow_joint_trajectory
 
 global_planner:
   step_rate: 0.03
@@ -31,30 +36,30 @@ global_planner:
 
 settings:
   planner_type: gp
-  frequency: 5
+  frequency: 8
   ref_inter_num: 3
   total_time: 1.0
   total_step: 10
   epsilon: 0.12
   control_inter: 5
   obs_check_inter: 5
-  cost_sigma: 0.02
-  obs_thresh: 0.1
-  traj_cut: 1.0
-  fix_pose_sigma: 0.0001
+  cost_sigma: 0.4
+  obs_thresh: 0.05
+  traj_cut: 0.5
+  fix_pose_sigma: 0.00025
   fix_vel_sigma: 0.0001
-  Qc: 2.0
+  Qc: 3.0
   opt_type: LM
   flag_pos_limit: true
   flag_vel_limit: true
   joint_pos_limits_up: 3.14
   joint_pos_limits_down: -3.14
-  max_vel: 2.0
+  max_vel: 1.5
   pos_limit_sigma: 0.0001
-  vel_limit_sigma: 0.0001
+  vel_limit_sigma: 0.0002
   goal_tolerance: 0.15
   decay_factor: 0.5
-  map_update_frenquency: 10
+  map_update_frenquency: 15
   # mpc setting
   # planner_type: mpc
   # frequency: 30

@@ -11,6 +11,11 @@
 #include <thread>  // std::this_thread::sleep_for
 #include <fstream> // 用于文件操作
 #include <iomanip> // 用于格式化输出
+#include "Dashboard.h"
+#include "DobotMove.h"
+#include "Feedback.h"
+#include "ErrorInfoBean.h"
+#include "ErrorInfoHelper.h"
 
 
 bool is_collision = false;
@@ -40,6 +45,7 @@ int main(int argc, char **argv)
         ROS_ERROR("Failed to open file for writing joint angles!");
         return -1;
     }
+    joint_angle_file << "Joint1(deg),Joint2(deg),Joint3(deg),Joint4(deg),Joint5(deg),Joint6(deg)" << std::endl;
     // TF2 Buffer 和 Listener，用于记录末端执行器的位置信息
     tf2_ros::Buffer tf_buffer;
     tf2_ros::TransformListener tf_listener(tf_buffer);
@@ -77,17 +83,60 @@ int main(int argc, char **argv)
     last_end_effector_positions.setZero();
     double joints_change = 0;
     double path_length = 0;
+
+    // 用于记录时间的变量
+    auto last_record_time = std::chrono::high_resolution_clock::now(); // 上一次记录的时间点
+
+    bool plan_real_robot = false;
+
+    // 创建一个发布者，将 current_joints_deg 发布到 "current_joints_deg" 话题
+    // ros::Publisher joint_pub = n.advertise<std_msgs::Float64MultiArray>("/current_joints_deg", 10);
+    int control_frequency_;
+    n.getParam("control_frequency", control_frequency_);
+    n.getParam("plan_real_robot", plan_real_robot);
+
     while(ros::ok() && iteration < max_iterations){
         current_joints = my_planner.arm_pos_;
         // 转换关节角度：弧度 -> 角度
         VectorXd current_joints_deg = current_joints * 180.0 / M_PI;
+        
+         // 获取当前时间点
+        auto current_time = std::chrono::high_resolution_clock::now();
+        auto time_since_last_record = std::chrono::duration_cast<std::chrono::milliseconds>(current_time - last_record_time);
 
-        // 将关节角度写入文件
-        joint_angle_file << iteration + 1; // 写入当前迭代号
-        for (int i = 0; i < current_joints_deg.size(); ++i) {
-            joint_angle_file << "," << std::fixed << std::setprecision(2) << current_joints_deg[i];
+        // 如果距离上次记录的时间超过 50ms，则记录一次数据
+        if (time_since_last_record.count() >= 1000.0/control_frequency_) {
+            // 转换关节角度：弧度 -> 角度
+            VectorXd current_joints_deg = current_joints * 180.0 / M_PI;
+
+            // 将关节角度写入文件
+            // joint_angle_file << iteration + 1 << "," << time_since_last_record.count(); // 写入当前迭代号和时间
+            joint_angle_file <<std::fixed << std::setprecision(2) << current_joints_deg[0];
+            for (int i = 1; i < current_joints_deg.size(); ++i) {
+                joint_angle_file << "," << std::fixed << std::setprecision(2) << current_joints_deg[i];
+            }
+            joint_angle_file << std::endl;
+            // if(plan_real_robot){
+            //     // 构造 std_msgs::Float64MultiArray 消息
+            //     std_msgs::Float64MultiArray joint_msg;
+            //     joint_msg.layout.dim.push_back(std_msgs::MultiArrayDimension());
+            //     joint_msg.layout.dim[0].label = "joints";
+            //     joint_msg.layout.dim[0].size = current_joints_deg.size();
+            //     joint_msg.layout.dim[0].stride = current_joints_deg.size();
+            //     joint_msg.layout.data_offset = 0;
+
+            //     // 填充数据
+            //     for (int i = 0; i < current_joints_deg.size(); ++i) {
+            //         joint_msg.data.push_back(current_joints_deg(i));
+            //     }
+
+            //     // 发布消息
+            //     joint_pub.publish(joint_msg);
+            // }
+
+            // 更新上一次记录时间
+            last_record_time = current_time;
         }
-        joint_angle_file << std::endl;
         if(last_joints.norm()!=0){
             double diff_norm = (current_joints - last_joints).norm();
             if (std::isfinite(diff_norm)) { // 检查是否为有限值

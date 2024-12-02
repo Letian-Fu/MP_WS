@@ -183,11 +183,11 @@
           <wrench>0 0 0 0 -0 0</wrench>
         </link>
       </model>
-      <model name='pingmu_0'>
-        <pose>-0.42 -0.61 0.15 0 -0 0</pose>
+      <model name='pingmu'>
+        <pose>-0.42 -0.7 0.15 0 -0 0</pose>
         <scale>1 1 1</scale>
         <link name='link'>
-          <pose>-0.42 -0.61 0.15 0 -0 0</pose>
+          <pose>-0.42 -0.7 0.15 0 -0 0</pose>
           <velocity>0 0 0 0 -0 0</velocity>
           <acceleration>0 0 0 0 -0 0</acceleration>
           <wrench>0 0 0 0 -0 0</wrench>
@@ -204,10 +204,10 @@
         </link>
       </model>
       <model name='zawu'>
-        <pose>-0.25 0.65 0.15 0 -0 0</pose>
+        <pose>-0.25 0.7 0.15 0 -0 0</pose>
         <scale>1 1 1</scale>
         <link name='link'>
-          <pose>-0.25 0.65 0.15 0 -0 0</pose>
+          <pose>-0.25 0.7 0.15 0 -0 0</pose>
           <velocity>0 0 0 0 -0 0</velocity>
           <acceleration>0 0 0 0 -0 0</acceleration>
           <wrench>0 0 0 0 -0 0</wrench>
@@ -235,7 +235,7 @@
         <enable_wind>0</enable_wind>
         <kinematic>0</kinematic>
         <pose>0 0 0 0 -0 0</pose>
-        <gravity>1</gravity>
+        <gravity>0</gravity>
         <visual name='visual'>
           <geometry>
             <box>
@@ -319,7 +319,7 @@
       <allow_auto_disable>1</allow_auto_disable>
       <pose>1.21358 -0.223069 0.5 0 -0 0</pose>
     </model>
-    <model name='pingmu_0'>
+    <model name='pingmu'>
       <link name='link'>
         <inertial>
           <mass>0.0001</mass>
@@ -337,7 +337,7 @@
         <enable_wind>0</enable_wind>
         <kinematic>0</kinematic>
         <pose>0 0 0 0 -0 0</pose>
-        <gravity>1</gravity>
+        <gravity>0</gravity>
         <visual name='visual'>
           <geometry>
             <box>
@@ -424,7 +424,7 @@
     <model name='zawu'>
       <link name='link'>
         <inertial>
-          <mass>1</mass>
+          <mass>0.0001</mass>
           <inertia>
             <ixx>0.166667</ixx>
             <ixy>0</ixy>
@@ -439,11 +439,11 @@
         <enable_wind>0</enable_wind>
         <kinematic>0</kinematic>
         <pose>0 0 0 0 -0 0</pose>
-        <gravity>1</gravity>
+        <gravity>0</gravity>
         <visual name='visual'>
           <geometry>
             <box>
-              <size>0.4 0.3 0.3</size>
+              <size>0.4 0.1 0.3</size>
             </box>
           </geometry>
           <material>
@@ -469,7 +469,7 @@
           <pose>0 0 0 0 -0 0</pose>
           <geometry>
             <box>
-              <size>0.4 0.3 0.3</size>
+              <size>0.4 0.1 0.3</size>
             </box>
           </geometry>
           <surface>

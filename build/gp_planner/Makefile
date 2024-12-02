@@ -168,6 +168,21 @@ depend:
 .PHONY : depend
 
 # Convenience name for target.
+gp_planner/CMakeFiles/control_test_2.dir/rule:
+	cd /home/roboert/MP_WS/build && $(MAKE) -f CMakeFiles/Makefile2 gp_planner/CMakeFiles/control_test_2.dir/rule
+.PHONY : gp_planner/CMakeFiles/control_test_2.dir/rule
+
+# Convenience name for target.
+control_test_2: gp_planner/CMakeFiles/control_test_2.dir/rule
+
+.PHONY : control_test_2
+
+# fast build rule for target.
+control_test_2/fast:
+	cd /home/roboert/MP_WS/build && $(MAKE) -f gp_planner/CMakeFiles/control_test_2.dir/build.make gp_planner/CMakeFiles/control_test_2.dir/build
+.PHONY : control_test_2/fast
+
+# Convenience name for target.
 gp_planner/CMakeFiles/control_test.dir/rule:
 	cd /home/roboert/MP_WS/build && $(MAKE) -f CMakeFiles/Makefile2 gp_planner/CMakeFiles/control_test.dir/rule
 .PHONY : gp_planner/CMakeFiles/control_test.dir/rule
@@ -346,6 +361,21 @@ all.tests: gp_planner/CMakeFiles/all.tests.dir/rule
 all.tests/fast:
 	cd /home/roboert/MP_WS/build && $(MAKE) -f gp_planner/CMakeFiles/all.tests.dir/build.make gp_planner/CMakeFiles/all.tests.dir/build
 .PHONY : all.tests/fast
+
+# Convenience name for target.
+gp_planner/CMakeFiles/control_test_3.dir/rule:
+	cd /home/roboert/MP_WS/build && $(MAKE) -f CMakeFiles/Makefile2 gp_planner/CMakeFiles/control_test_3.dir/rule
+.PHONY : gp_planner/CMakeFiles/control_test_3.dir/rule
+
+# Convenience name for target.
+control_test_3: gp_planner/CMakeFiles/control_test_3.dir/rule
+
+.PHONY : control_test_3
+
+# fast build rule for target.
+control_test_3/fast:
+	cd /home/roboert/MP_WS/build && $(MAKE) -f gp_planner/CMakeFiles/control_test_3.dir/build.make gp_planner/CMakeFiles/control_test_3.dir/build
+.PHONY : control_test_3/fast
 
 # Convenience name for target.
 gp_planner/CMakeFiles/check_valgrind.dir/rule:
@@ -1829,6 +1859,60 @@ src/my_planner/control_test.cpp.s:
 	cd /home/roboert/MP_WS/build && $(MAKE) -f gp_planner/CMakeFiles/control_test.dir/build.make gp_planner/CMakeFiles/control_test.dir/src/my_planner/control_test.cpp.s
 .PHONY : src/my_planner/control_test.cpp.s
 
+src/my_planner/control_test_2.o: src/my_planner/control_test_2.cpp.o
+
+.PHONY : src/my_planner/control_test_2.o
+
+# target to build an object file
+src/my_planner/control_test_2.cpp.o:
+	cd /home/roboert/MP_WS/build && $(MAKE) -f gp_planner/CMakeFiles/control_test_2.dir/build.make gp_planner/CMakeFiles/control_test_2.dir/src/my_planner/control_test_2.cpp.o
+.PHONY : src/my_planner/control_test_2.cpp.o
+
+src/my_planner/control_test_2.i: src/my_planner/control_test_2.cpp.i
+
+.PHONY : src/my_planner/control_test_2.i
+
+# target to preprocess a source file
+src/my_planner/control_test_2.cpp.i:
+	cd /home/roboert/MP_WS/build && $(MAKE) -f gp_planner/CMakeFiles/control_test_2.dir/build.make gp_planner/CMakeFiles/control_test_2.dir/src/my_planner/control_test_2.cpp.i
+.PHONY : src/my_planner/control_test_2.cpp.i
+
+src/my_planner/control_test_2.s: src/my_planner/control_test_2.cpp.s
+
+.PHONY : src/my_planner/control_test_2.s
+
+# target to generate assembly for a file
+src/my_planner/control_test_2.cpp.s:
+	cd /home/roboert/MP_WS/build && $(MAKE) -f gp_planner/CMakeFiles/control_test_2.dir/build.make gp_planner/CMakeFiles/control_test_2.dir/src/my_planner/control_test_2.cpp.s
+.PHONY : src/my_planner/control_test_2.cpp.s
+
+src/my_planner/control_test_3.o: src/my_planner/control_test_3.cpp.o
+
+.PHONY : src/my_planner/control_test_3.o
+
+# target to build an object file
+src/my_planner/control_test_3.cpp.o:
+	cd /home/roboert/MP_WS/build && $(MAKE) -f gp_planner/CMakeFiles/control_test_3.dir/build.make gp_planner/CMakeFiles/control_test_3.dir/src/my_planner/control_test_3.cpp.o
+.PHONY : src/my_planner/control_test_3.cpp.o
+
+src/my_planner/control_test_3.i: src/my_planner/control_test_3.cpp.i
+
+.PHONY : src/my_planner/control_test_3.i
+
+# target to preprocess a source file
+src/my_planner/control_test_3.cpp.i:
+	cd /home/roboert/MP_WS/build && $(MAKE) -f gp_planner/CMakeFiles/control_test_3.dir/build.make gp_planner/CMakeFiles/control_test_3.dir/src/my_planner/control_test_3.cpp.i
+.PHONY : src/my_planner/control_test_3.cpp.i
+
+src/my_planner/control_test_3.s: src/my_planner/control_test_3.cpp.s
+
+.PHONY : src/my_planner/control_test_3.s
+
+# target to generate assembly for a file
+src/my_planner/control_test_3.cpp.s:
+	cd /home/roboert/MP_WS/build && $(MAKE) -f gp_planner/CMakeFiles/control_test_3.dir/build.make gp_planner/CMakeFiles/control_test_3.dir/src/my_planner/control_test_3.cpp.s
+.PHONY : src/my_planner/control_test_3.cpp.s
+
 src/my_planner/plan_test.o: src/my_planner/plan_test.cpp.o
 
 .PHONY : src/my_planner/plan_test.o
@@ -1866,6 +1950,7 @@ help:
 	@echo "... install/local"
 	@echo "... edit_cache"
 	@echo "... test"
+	@echo "... control_test_2"
 	@echo "... control_test"
 	@echo "... get_depth"
 	@echo "... plan_test"
@@ -1880,6 +1965,7 @@ help:
 	@echo "... _gp_planner_generate_messages_check_deps_BoundingBoxArray"
 	@echo "... gp_planner_generate_messages"
 	@echo "... all.tests"
+	@echo "... control_test_3"
 	@echo "... check_valgrind"
 	@echo "... check"
 	@echo "... gp_planner_generate_messages_py"
@@ -1993,6 +2079,12 @@ help:
 	@echo "... src/my_planner/control_test.o"
 	@echo "... src/my_planner/control_test.i"
 	@echo "... src/my_planner/control_test.s"
+	@echo "... src/my_planner/control_test_2.o"
+	@echo "... src/my_planner/control_test_2.i"
+	@echo "... src/my_planner/control_test_2.s"
+	@echo "... src/my_planner/control_test_3.o"
+	@echo "... src/my_planner/control_test_3.i"
+	@echo "... src/my_planner/control_test_3.s"
 	@echo "... src/my_planner/plan_test.o"
 	@echo "... src/my_planner/plan_test.i"
 	@echo "... src/my_planner/plan_test.s"
