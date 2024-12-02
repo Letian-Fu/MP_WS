@@ -286,6 +286,21 @@ public:
         return cvMat;
     }
 
+    inline VectorXd limitJointVelocities(const Eigen::VectorXd& velocities, double max_velocity) {
+        Eigen::VectorXd limited_velocities = velocities;
+
+        // 遍历每个分量，限制其值
+        for (int i = 0; i < limited_velocities.size(); ++i) {
+            if (limited_velocities[i] > max_velocity) {
+                limited_velocities[i] = max_velocity;
+            } else if (limited_velocities[i] < -max_velocity) {
+                limited_velocities[i] = -max_velocity;
+            }
+        }
+
+        return limited_velocities;
+    }
+
     // // 将cv::Mat转换为gtsam::Matrix
     // inline gtsam::Matrix cvMatToGtsamMatrix(const cv::Mat& cvMat) {
     //     gtsam::Matrix matrix(cvMat.rows, cvMat.cols);

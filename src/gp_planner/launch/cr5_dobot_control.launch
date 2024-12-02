@@ -1,5 +1,7 @@
 <launch>
     <rosparam command="load" file="$(find gp_planner)/config/parameters.yaml" />
-    <node name="control_test_3" pkg="gp_planner" type="control_test_3" output="screen" />
+    <!-- <node name="control_test" pkg="gp_planner" type="control_test" output="screen" /> -->
+    <node name="control_test_2" pkg="gp_planner" type="control_test_2" output="screen" />
+    <!-- <node name="control_test_3" pkg="gp_planner" type="control_test_3" output="screen" /> -->
     
 </launch>

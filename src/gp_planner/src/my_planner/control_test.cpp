@@ -6,70 +6,113 @@
 #include "Feedback.h"
 #include "ErrorInfoBean.h"
 #include "ErrorInfoHelper.h"
+#include <iostream>
+#include <fstream>
+#include <sstream>
+#include <vector>
+#include <string>
+#include <boost/asio.hpp>
+#include <thread>
+#include <chrono>
 
-int main(int argc, char** argv) {
-    ros::init(argc, argv, "control_test");
-    ros::NodeHandle nh;
-    std::string robotIp = "192.168.43.9";
-    unsigned int controlPort = 29999;
-    unsigned int movePort = 30003;
-    unsigned int feekPort = 30004;
+class DobotController{
 
+private:
     Dobot::CDobotMove m_DobotMove;
     Dobot::CDashboard m_Dashboard;
     Dobot::CFeedback m_CFeedback;
     Dobot::CFeedbackData feedbackData;
     Dobot::CErrorInfoBeans m_ErrorInfoBeans;
     Dobot::CErrorInfoHelper m_CErrorInfoHelper;
-    m_Dashboard.Connect(robotIp, controlPort);
-    m_DobotMove.Connect(robotIp, movePort);
-    m_CFeedback.Connect(robotIp, feekPort);
+    bool plan_real_robot_;
+    int robot_speed_ratio_ ;
+    int robot_acc_ratio_ ;
+    int robot_cp_ratio_ ;
+    ros::Subscriber cur_joint_sub_;
+
+public:
+    DobotController(ros::NodeHandle &nh){
+        nh.getParam("plan_real_robot", plan_real_robot_);
+        nh.getParam("robot_speed_ratio", robot_speed_ratio_);
+        nh.getParam("robot_acc_ratio", robot_acc_ratio_);
+        nh.getParam("robot_cp_ratio", robot_cp_ratio_);
+        cur_joint_sub_ = nh.subscribe("/current_joints_deg", 1, &DobotController::JointCallback,this);
+    }
+
+    void Connect(){
+        if(plan_real_robot_){
+            std::string robotIp = "192.168.43.9";
+            unsigned int controlPort = 29999;
+            unsigned int movePort = 30003;
+            unsigned int feekPort = 30004;
+            m_Dashboard.Connect(robotIp, controlPort);
+            m_DobotMove.Connect(robotIp, movePort);
+            m_CFeedback.Connect(robotIp, feekPort);
+            // 连接并启动机器人
+            m_Dashboard.EnableRobot();
+            m_Dashboard.ClearError();
+            m_Dashboard.SpeedFactor(robot_speed_ratio_);
+            m_Dashboard.AccJ(robot_acc_ratio_);
+            m_Dashboard.CP(robot_cp_ratio_);
+        }
+    }
+
+    void Disconnect(){
+        if(plan_real_robot_){
+            // 断开连接
+            m_DobotMove.Disconnect();
+            m_Dashboard.Disconnect();
+            m_CFeedback.Disconnect();
+        }
+    }
+
+    void JointCallback(const std_msgs::Float64MultiArray::ConstPtr& msg){
+        // 检查消息的 layout 和数据是否有效
+        if (msg->layout.dim.empty() || msg->layout.dim[0].label != "joints") {
+            ROS_ERROR("Invalid layout in received joint message. Expected label: 'joints'.");
+            return;
+        }
+
+        if (msg->layout.dim[0].size != 6 || msg->data.size() != 6) {
+            ROS_ERROR("Invalid joint data size. Expected 6 values, but got %lu.", msg->data.size());
+            return;
+        }
+        if(plan_real_robot_){
+            Dobot::CJointPoint Point;
+            Point.j1=msg->data[0];
+            Point.j2=msg->data[1];
+            Point.j3=msg->data[2];
+            Point.j4=msg->data[3];
+            Point.j5=msg->data[4];
+            Point.j6=msg->data[5];
+            m_Dashboard.ClearError();
+            // m_Dashboard.Continue();
+            m_DobotMove.Sync();
+            // m_DobotMove.ServoJ(Point,"t=0.5","lookahead_time=50","gain=500");
+            m_DobotMove.JointMovJ(Point);
+            
+        }
+    }
+
+    ~DobotController() {
+        // 确保在析构时断开连接
+        Disconnect();
+    }
+};
 
 
-    int robot_speed_ratio_ = 20;
-    int robot_acc_ratio_ = 50;
-    int robot_cp_ratio_ = 50;
-    // 连接并启动机器人
-    m_Dashboard.EnableRobot();
-    m_Dashboard.ClearError();
-    m_Dashboard.SpeedFactor(robot_speed_ratio_);
-    m_Dashboard.AccJ(robot_acc_ratio_);
-    m_Dashboard.CP(robot_cp_ratio_);
+int main(int argc, char** argv) {
+    ros::init(argc, argv, "control_test");
+    ros::NodeHandle nh;
 
-    // 发送运动指令
-    Dobot::CJointPoint PointA;
-    Dobot::CJointPoint PointB;
-    // std::vector<double> arm_pos_ = {-0.3896469859665963, 1.4763991778866625, -0.6610719524804844, -0.5897822008469467, -1.0095268161938282, -0.025555435324681852}; 
-    Eigen::VectorXd target_a(6),target_b(6);
-    target_a << 0.656,1.433,-0.866,-0.566,-2.115,0;  // 点 A
-    target_b << -0.831,1.309,-0.735,-0.574,-0.608,0;  // 点 B
-    PointA.j1=target_a[0] * 180.0 / M_PI;
-    PointA.j2=target_a[1] * 180.0 / M_PI;
-    PointA.j3=target_a[2] * 180.0 / M_PI;
-    PointA.j4=target_a[3] * 180.0 / M_PI;
-    PointA.j5=target_a[4] * 180.0 / M_PI;
-    PointA.j6=target_a[5] * 180.0 / M_PI;
-
-    PointB.j1=target_b[0] * 180.0 / M_PI;
-    PointB.j2=target_b[1] * 180.0 / M_PI;
-    PointB.j3=target_b[2] * 180.0 / M_PI;
-    PointB.j4=target_b[3] * 180.0 / M_PI;
-    PointB.j5=target_b[4] * 180.0 / M_PI;
-    PointB.j6=target_b[5] * 180.0 / M_PI;
-    m_DobotMove.JointMovJ(PointA);
-    // DobotTcpDemo::moveArriveFinish(PointA);
-    m_DobotMove.JointMovJ(PointB);
-    // DobotTcpDemo::moveArriveFinish(PointB);
-    std::string tracename = "/home/roboert/MP_WS/src/gp_planner/exp_data/joint_angles_1.txt";
-    std::string StartPose = m_Dashboard.GetPathStartPose(tracename);
-    std::cout<<StartPose;
-    Dobot::CJointPoint start_point;
-
-
-    // 断开连接
-    m_DobotMove.Disconnect();
-    m_Dashboard.Disconnect();
-    m_CFeedback.Disconnect();
+    DobotController controller(nh);
+    // 连接机器人
+    controller.Connect();
+    // 开始多线程处理回调
+    ros::AsyncSpinner spinner(2); // 使用 2 个线程处理回调
+    spinner.start();
+    // 等待 ROS 运行
+    ros::waitForShutdown();
 
     return 0;
 }

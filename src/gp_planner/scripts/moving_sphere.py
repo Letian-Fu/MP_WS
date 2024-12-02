@@ -28,7 +28,7 @@ def move_obstacle():
     set_state = rospy.ServiceProxy('/gazebo/set_model_state', SetModelState)
     # 障碍物的名称
     model_name = 'moving_sphere'  # 替换为你的障碍物模型名称
-    rate_ = 30
+    rate_ = 20
     rate = rospy.Rate(rate_)  # 控制循环的频率
     # 创建发布者
     pub = rospy.Publisher('/obstacle_info', Float64MultiArray, queue_size=10)
@@ -102,6 +102,32 @@ def move_obstacle():
     # 应用碰撞对象到规划场景
     planning_scene_interface.add_object(shebei)
 
+    # # 更新MoveIt中的规划场景(地板)
+    # shebei2 = CollisionObject()
+    # shebei2.header.frame_id = "base_link"
+    # shebei2.header.stamp = rospy.Time.now()
+    # shebei2.id = "shebei2"
+
+    # # 假设障碍物是一个长方体
+    # shebei2_primitive = SolidPrimitive()
+    # shebei2_primitive.type = shebei2_primitive.BOX
+    # shebei2_primitive.dimensions=[0.35, 0.35, 0.4]
+
+    # # 设置长方体的位置
+    # shebei2_pose = Pose()
+    # shebei2_pose.position.x = -0.75
+    # shebei2_pose.position.y = 0
+    # shebei2_pose.position.z = 0.05 
+    # shebei2_pose.orientation.w = 1.0
+
+
+    # shebei2.primitives.append(shebei2_primitive)
+    # shebei2.primitive_poses.append(shebei2_pose)
+    # shebei2.operation = CollisionObject.ADD
+
+    # # 应用碰撞对象到规划场景
+    # planning_scene_interface.add_object(shebei2)
+
     # 更新MoveIt中的规划场景(地板)
     pingmu = CollisionObject()
     pingmu.header.frame_id = "base_link"
@@ -160,8 +186,8 @@ def move_obstacle():
     if mode == 'vertical':
         # 上下往复运动参数
         start = np.array([-0.6, 0.0, 0.2])  # 垂直方向起点
-        end = np.array([-0.6, 0.0, 0.75])    # 垂直方向终点
-        linear_speed = 0.25  # 匀速运动的速度 (m/s)
+        end = np.array([-0.6, 0.0, 0.8])    # 垂直方向终点
+        linear_speed = 0.2  # 匀速运动的速度 (m/s)
     elif mode == 'horizontal':
         # 水平往复运动参数
         start = np.array([-1.0, 0.0, 0.5])  # 水平方向起点
@@ -170,8 +196,8 @@ def move_obstacle():
     # 计算运动方向和周期
     direction = (end - start) / np.linalg.norm(end - start)  # 单位方向向量
     position = start.copy()  # 障碍物的初始位置
-    moving_forward = True  # 初始状态为“向终点移动”
     distance = np.linalg.norm(end - start)
+    amplitude = distance / 2                                # 运动范围的一半
     period = 2*distance / linear_speed
     delta_t = 1.0 / rate_                                      # 时间步长（假设帧率为 30 FPS）
     rospy.loginfo("Obstacle will move back and forth between start and end.")
@@ -188,22 +214,13 @@ def move_obstacle():
             t_back = t - period / 2  # 后半周期的相对时间
             direction = (start - end) / np.linalg.norm(start - end)  # 终点到起点的单位方向
             position = end + direction * linear_speed * t_back
-        # if moving_forward:
-        #     # 向终点移动
-        #     position += direction * linear_speed / 30  # 每帧移动一点
-        #     # 检查是否到达终点
-        #     if np.linalg.norm(position - end) < 1e-3:  # 允许一个小误差
-        #         position = end.copy()  # 确保位置精确为终点
-        #         direction = -direction  # 反转方向
-        #         moving_forward = False  # 切换为返回阶段
-        # else:
-        #     # 返回起点
-        #     position += direction * linear_speed / 30  # 每帧移动一点
-        #     # 检查是否到达起点
-        #     if np.linalg.norm(position - start) < 1e-3:  # 允许一个小误差
-        #         position = start.copy()  # 确保位置精确为起点
-        #         direction = -direction  # 反转方向
-        #         moving_forward = True  # 切换为前进阶段
+        # # 使用正弦函数计算障碍物位置
+        # alpha = 0.5 * (1 - math.cos(2 * math.pi * t / period))  # 平滑系数 (0 到 1)
+        # position = start + alpha * (end - start)
+
+        # # 使用正弦函数的导数计算速度
+        # velocity = direction * amplitude * (2 * math.pi / period) * math.cos(2 * math.pi * t / period)
+        # linear_speed_actual = np.linalg.norm(velocity)  # 瞬时速度大小
         # 位置解包
         x, y, z = position
         # 设置障碍物的位姿

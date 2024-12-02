@@ -120,39 +120,57 @@ int main(int argc, char** argv) {
         std::cerr << "No points to execute." << std::endl;
         return -1;
     }
-    for(const auto &point: points){
-        // std::cout<<point.j1<<","<<point.j2<<","<<point.j3<<","<<point.j4<<","<<point.j5<<","<<point.j6<<std::endl;
-        if(plan_real_robot){
-            // auto start_time = std::chrono::high_resolution_clock::now();
-            // 发送运动指令
-            Dobot::CJointPoint Point;
-            Point.j1=point.j1;
-            Point.j2=point.j2;
-            Point.j3=point.j3;
-            Point.j4=point.j4;
-            Point.j5=point.j5;
-            Point.j6=point.j6;
-            // m_Dashboard.ClearError();
-            // m_Dashboard.Continue();
-            // m_DobotMove.Sync();
-            // m_DobotMove.ServoJ(Point,"t=0.1","lookahead_time=50","gain=500");
+    for(int i=0;i<points.size();i++){
+        auto point = points[i];
+        Dobot::CJointPoint Point;
+        Point.j1=point.j1;
+        Point.j2=point.j2;
+        Point.j3=point.j3;
+        Point.j4=point.j4;
+        Point.j5=point.j5;
+        Point.j6=point.j6;
+        if(i==0){
             m_DobotMove.JointMovJ(Point);
             m_DobotMove.Sync();
-            // // 记录结束时间
-            // auto end_time = std::chrono::high_resolution_clock::now();
-
-            // // 计算指令执行时间
-            // auto elapsed_time = std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time).count();
-
-            // // 计算剩余时间并等待
-            // int remaining_time = 30 - elapsed_time;  // 30ms 控制周期
-            // if (remaining_time > 0) {
-            //     std::this_thread::sleep_for(std::chrono::milliseconds(remaining_time));
-            // } else {
-            //     std::cerr << "Warning: Execution time exceeded 30ms! (" << elapsed_time << "ms)" << std::endl;
-            // }
+        }
+        else{
+            m_DobotMove.ServoJ(Point,"t=0.4");
+            // m_DobotMove.Sync();
         }
     }
+    // for(const auto &point: points){
+    //     // std::cout<<point.j1<<","<<point.j2<<","<<point.j3<<","<<point.j4<<","<<point.j5<<","<<point.j6<<std::endl;
+    //     if(plan_real_robot){
+    //         // auto start_time = std::chrono::high_resolution_clock::now();
+    //         // 发送运动指令
+    //         Dobot::CJointPoint Point;
+    //         Point.j1=point.j1;
+    //         Point.j2=point.j2;
+    //         Point.j3=point.j3;
+    //         Point.j4=point.j4;
+    //         Point.j5=point.j5;
+    //         Point.j6=point.j6;
+    //         // m_Dashboard.ClearError();
+    //         // m_Dashboard.Continue();
+    //         // m_DobotMove.Sync();
+    //         // m_DobotMove.ServoJ(Point,"t=0.1","lookahead_time=50","gain=500");
+    //         m_DobotMove.JointMovJ(Point);
+    //         m_DobotMove.Sync();
+    //         // // 记录结束时间
+    //         // auto end_time = std::chrono::high_resolution_clock::now();
+
+    //         // // 计算指令执行时间
+    //         // auto elapsed_time = std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time).count();
+
+    //         // // 计算剩余时间并等待
+    //         // int remaining_time = 30 - elapsed_time;  // 30ms 控制周期
+    //         // if (remaining_time > 0) {
+    //         //     std::this_thread::sleep_for(std::chrono::milliseconds(remaining_time));
+    //         // } else {
+    //         //     std::cerr << "Warning: Execution time exceeded 30ms! (" << elapsed_time << "ms)" << std::endl;
+    //         // }
+    //     }
+    // }
 
 
     if(plan_real_robot){

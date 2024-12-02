@@ -249,8 +249,8 @@ gtsam::Values MyPlanner::InitWithRef(const std::vector<Eigen::VectorXd>& ref_pat
         init_values.insert(gtsam::Symbol('x', i), conf);
     }
     // init vel as avg vel
-    gtsam::Vector avg_vel = (end_conf - init_conf) / total_step;
-    // gtsam::Vector avg_vel = ConvertToGtsamVector(cur_vel_);
+    // gtsam::Vector avg_vel = (end_conf - init_conf) / total_step;
+    gtsam::Vector avg_vel = ConvertToGtsamVector(cur_vel_);
     for (size_t i = 0; i <= total_step; i++)
         init_values.insert(gtsam::Symbol('v', i), avg_vel);
     return init_values;
@@ -511,6 +511,18 @@ void MyPlanner::LocalPlanningCallback(const ros::TimerEvent&){
     is_local_success_ = false;
     local_results_.clear();
     auto start = std::chrono::high_resolution_clock::now();
+    count_++;
+    if(count_ > 60){
+        planning_scene_monitor::PlanningSceneMonitorPtr monitor_ptr_udef = std::make_shared<planning_scene_monitor::PlanningSceneMonitor>("robot_description");
+        monitor_ptr_udef->requestPlanningSceneState("get_planning_scene");
+        planning_scene_monitor::LockedPlanningSceneRW ps(monitor_ptr_udef);
+        ps->getCurrentStateNonConst().update();
+        planning_scene::PlanningScenePtr col_scene = ps->diff();
+        col_scene->decoupleParent();
+        is_global_success_ = rrt_planner_.RRT_Plan(col_scene,arm_pos_,end_conf_,global_results_);
+        if(is_global_success_)  publishGlobalPath();
+        count_ = 0;
+    }
     if(is_global_success_ && calculateDistance(arm_pos_, end_conf_)> goal_tolerance_){
         plan_times_ ++;
         if(planner_type_ == "gp"){
@@ -529,8 +541,10 @@ void MyPlanner::LocalPlanningCallback(const ros::TimerEvent&){
             total_time = opt_setting_.total_time;
             start_vel_ = (end_conf - start_conf) / total_time;
             end_vel_ = (end_conf - start_conf) / total_time;
-            // start_vel_ = cur_vel_;
-            // end_vel_ = cur_vel_;
+            start_vel_ = limitJointVelocities(start_vel_,max_vel_);
+            end_vel_ = limitJointVelocities(end_vel_,max_vel_);
+            // start_vel_ = gtsam::Vector::Zero(6)
+            // end_vel_.setZero();
             opt_setting_.set_total_time(total_time);
             gtsam::Values opt_values = gp_planner::Optimizer(robot_,sdf_,start_conf,end_conf,
                                                             ConvertToGtsamVector(start_vel_),ConvertToGtsamVector(end_vel_),
@@ -612,20 +626,6 @@ void MyPlanner::LocalPlanningCallback(const ros::TimerEvent&){
                         boost::bind(&MyPlanner::doneCb, this, _1, _2),       // 目标完成时的回调
                         boost::bind(&MyPlanner::activeCb, this),            // 目标激活时的回调
                         boost::bind(&MyPlanner::feedbackCb, this, _1));     // 接收到反馈的回调
-                }
-                else{
-                    count_++;
-                    if(count_ > 50){
-                        planning_scene_monitor::PlanningSceneMonitorPtr monitor_ptr_udef = std::make_shared<planning_scene_monitor::PlanningSceneMonitor>("robot_description");
-                        monitor_ptr_udef->requestPlanningSceneState("get_planning_scene");
-                        planning_scene_monitor::LockedPlanningSceneRW ps(monitor_ptr_udef);
-                        ps->getCurrentStateNonConst().update();
-                        planning_scene::PlanningScenePtr col_scene = ps->diff();
-                        col_scene->decoupleParent();
-                        is_global_success_ = rrt_planner_.RRT_Plan(col_scene,arm_pos_,end_conf_,global_results_);
-                        if(is_global_success_)  publishGlobalPath();
-                        count_ = 0;
-                    }
                 }
                 // ref_flag_ = false;
             }

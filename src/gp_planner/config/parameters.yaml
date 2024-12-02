@@ -1,9 +1,9 @@
 real_robot: false
-plan_real_robot: false
-robot_speed_ratio: 30
-robot_acc_ratio: 99
+plan_real_robot: true
+robot_speed_ratio: 50
+robot_acc_ratio: 90
 robot_cp_ratio: 99
-control_frequency: 500
+control_frequency: 80
 group_name: cr5_arm
 # group_name: arm
 robot:
@@ -36,28 +36,28 @@ global_planner:
 
 settings:
   planner_type: gp
-  frequency: 8
+  frequency: 5
   ref_inter_num: 3
   total_time: 1.0
   total_step: 10
   epsilon: 0.12
-  control_inter: 5
+  control_inter: 15
   obs_check_inter: 5
   cost_sigma: 0.4
-  obs_thresh: 0.05
+  obs_thresh: 0.1
   traj_cut: 0.5
-  fix_pose_sigma: 0.00025
+  fix_pose_sigma: 0.0003
   fix_vel_sigma: 0.0001
-  Qc: 3.0
+  Qc: 2.0
   opt_type: LM
   flag_pos_limit: true
   flag_vel_limit: true
   joint_pos_limits_up: 3.14
   joint_pos_limits_down: -3.14
-  max_vel: 1.5
+  max_vel: 0.5
   pos_limit_sigma: 0.0001
-  vel_limit_sigma: 0.0002
-  goal_tolerance: 0.15
+  vel_limit_sigma: 0.001
+  goal_tolerance: 0.1
   decay_factor: 0.5
   map_update_frenquency: 15
   # mpc setting

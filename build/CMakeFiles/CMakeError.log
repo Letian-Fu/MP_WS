@@ -71,3 +71,41 @@ make: *** [Makefile:121: cmTC_acad0/fast] Error 2
 
 Source file was:
 int main() { return 0; }
+Determining if the function sgemm_ exists failed with the following output:
+Change Dir: /home/roboert/MP_WS/build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make cmTC_07d5a/fast && /usr/bin/make -f CMakeFiles/cmTC_07d5a.dir/build.make CMakeFiles/cmTC_07d5a.dir/build
+make[1]: Entering directory '/home/roboert/MP_WS/build/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_07d5a.dir/CheckFunctionExists.c.o
+/usr/bin/cc   -DCHECK_FUNCTION_EXISTS=sgemm_   -o CMakeFiles/cmTC_07d5a.dir/CheckFunctionExists.c.o   -c /usr/share/cmake-3.16/Modules/CheckFunctionExists.c
+Linking C executable cmTC_07d5a
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_07d5a.dir/link.txt --verbose=1
+/usr/bin/cc  -DCHECK_FUNCTION_EXISTS=sgemm_    -rdynamic CMakeFiles/cmTC_07d5a.dir/CheckFunctionExists.c.o  -o cmTC_07d5a 
+/usr/bin/ld: CMakeFiles/cmTC_07d5a.dir/CheckFunctionExists.c.o: in function `main':
+CheckFunctionExists.c:(.text+0x14): undefined reference to `sgemm_'
+collect2: error: ld returned 1 exit status
+make[1]: *** [CMakeFiles/cmTC_07d5a.dir/build.make:87: cmTC_07d5a] Error 1
+make[1]: Leaving directory '/home/roboert/MP_WS/build/CMakeFiles/CMakeTmp'
+make: *** [Makefile:121: cmTC_07d5a/fast] Error 2
+
+
+
+Determining if the function cheev_ exists failed with the following output:
+Change Dir: /home/roboert/MP_WS/build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make cmTC_66415/fast && /usr/bin/make -f CMakeFiles/cmTC_66415.dir/build.make CMakeFiles/cmTC_66415.dir/build
+make[1]: Entering directory '/home/roboert/MP_WS/build/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_66415.dir/CheckFunctionExists.c.o
+/usr/bin/cc   -DCHECK_FUNCTION_EXISTS=cheev_   -o CMakeFiles/cmTC_66415.dir/CheckFunctionExists.c.o   -c /usr/share/cmake-3.16/Modules/CheckFunctionExists.c
+Linking C executable cmTC_66415
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_66415.dir/link.txt --verbose=1
+/usr/bin/cc  -DCHECK_FUNCTION_EXISTS=cheev_    -rdynamic CMakeFiles/cmTC_66415.dir/CheckFunctionExists.c.o  -o cmTC_66415  /usr/lib/x86_64-linux-gnu/libblas.so 
+/usr/bin/ld: CMakeFiles/cmTC_66415.dir/CheckFunctionExists.c.o: in function `main':
+CheckFunctionExists.c:(.text+0x14): undefined reference to `cheev_'
+collect2: error: ld returned 1 exit status
+make[1]: *** [CMakeFiles/cmTC_66415.dir/build.make:88: cmTC_66415] Error 1
+make[1]: Leaving directory '/home/roboert/MP_WS/build/CMakeFiles/CMakeTmp'
+make: *** [Makefile:121: cmTC_66415/fast] Error 2
+
+
+

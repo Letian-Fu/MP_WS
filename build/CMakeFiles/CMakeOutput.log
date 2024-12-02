@@ -894,3 +894,31 @@ Parsed CXX OpenMP implicit link information from above output:
   implicit fwks: []
 
 
+Determining if the function sgemm_ exists passed with the following output:
+Change Dir: /home/roboert/MP_WS/build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make cmTC_0387f/fast && /usr/bin/make -f CMakeFiles/cmTC_0387f.dir/build.make CMakeFiles/cmTC_0387f.dir/build
+make[1]: Entering directory '/home/roboert/MP_WS/build/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_0387f.dir/CheckFunctionExists.c.o
+/usr/bin/cc   -DCHECK_FUNCTION_EXISTS=sgemm_   -o CMakeFiles/cmTC_0387f.dir/CheckFunctionExists.c.o   -c /usr/share/cmake-3.16/Modules/CheckFunctionExists.c
+Linking C executable cmTC_0387f
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_0387f.dir/link.txt --verbose=1
+/usr/bin/cc  -DCHECK_FUNCTION_EXISTS=sgemm_    -rdynamic CMakeFiles/cmTC_0387f.dir/CheckFunctionExists.c.o  -o cmTC_0387f  /usr/lib/x86_64-linux-gnu/libblas.so 
+make[1]: Leaving directory '/home/roboert/MP_WS/build/CMakeFiles/CMakeTmp'
+
+
+
+Determining if the function cheev_ exists passed with the following output:
+Change Dir: /home/roboert/MP_WS/build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make cmTC_2c352/fast && /usr/bin/make -f CMakeFiles/cmTC_2c352.dir/build.make CMakeFiles/cmTC_2c352.dir/build
+make[1]: Entering directory '/home/roboert/MP_WS/build/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_2c352.dir/CheckFunctionExists.c.o
+/usr/bin/cc   -DCHECK_FUNCTION_EXISTS=cheev_   -o CMakeFiles/cmTC_2c352.dir/CheckFunctionExists.c.o   -c /usr/share/cmake-3.16/Modules/CheckFunctionExists.c
+Linking C executable cmTC_2c352
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_2c352.dir/link.txt --verbose=1
+/usr/bin/cc  -DCHECK_FUNCTION_EXISTS=cheev_    -rdynamic CMakeFiles/cmTC_2c352.dir/CheckFunctionExists.c.o  -o cmTC_2c352  /usr/lib/x86_64-linux-gnu/liblapack.so /usr/lib/x86_64-linux-gnu/libblas.so 
+make[1]: Leaving directory '/home/roboert/MP_WS/build/CMakeFiles/CMakeTmp'
+
+
+

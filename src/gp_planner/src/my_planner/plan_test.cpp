@@ -45,7 +45,6 @@ int main(int argc, char **argv)
         ROS_ERROR("Failed to open file for writing joint angles!");
         return -1;
     }
-    joint_angle_file << "Joint1(deg),Joint2(deg),Joint3(deg),Joint4(deg),Joint5(deg),Joint6(deg)" << std::endl;
     // TF2 Buffer 和 Listener，用于记录末端执行器的位置信息
     tf2_ros::Buffer tf_buffer;
     tf2_ros::TransformListener tf_listener(tf_buffer);
@@ -176,6 +175,9 @@ int main(int argc, char **argv)
             my_planner.start_conf_ = my_planner.arm_pos_;
             my_planner.end_conf_ = target;
             my_planner.is_global_success_ = my_planner.rrt_planner_.RRT_Plan(col_scene,my_planner.start_conf_,my_planner.end_conf_,my_planner.global_results_);
+            while(!my_planner.is_global_success_){
+                my_planner.is_global_success_ = my_planner.rrt_planner_.RRT_Plan(col_scene,my_planner.start_conf_,my_planner.end_conf_,my_planner.global_results_);
+            }
             if(my_planner.is_global_success_)  {
                 my_planner.publishGlobalPath();
                 is_reached = false;

@@ -142,7 +142,7 @@ class DynamicSDF:
                 continue
             # 计算障碍物的移动距离
             # distance_moved = velocity * time_step
-            probability = 1.0 - (0.25 * step / total_steps)
+            probability = 1.0 - (0.4 * step / total_steps)
             start_row = max(0, current_position[0] - half_size_row - 1)
             end_row = min(map.shape[0], current_position[0] + half_size_row)
 
@@ -219,10 +219,12 @@ class DynamicSDF:
             self.add_obstacle([20, 20, 5], [30, 30, 3], self.map)
             # # pingmu
             # self.add_obstacle([6, 12, 10], [2, 6, 6], self.map)
-            # # zawu
-            # self.add_obstacle([34, 15, 10], [2, 8, 6], self.map)
+            # zawu
+            self.add_obstacle([34, 15, 10], [2, 8, 6], self.map)
             # shebei
             self.add_obstacle([18, 1, 8], [5, 5, 10], self.map)
+
+            self.add_obstacle([20, 5, 8], [7, 7, 8], self.map)
             if velocity != 0:
                 # 调用add_dynamic_obstacle函数
                 self.add_dynamic_obstacle(position, size, velocity, direction, self.total_time, self.total_steps,self.map, self.prob_map)

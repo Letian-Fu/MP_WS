@@ -36,7 +36,7 @@ public:
         nh.getParam("robot_speed_ratio", robot_speed_ratio_);
         nh.getParam("robot_acc_ratio", robot_acc_ratio_);
         nh.getParam("robot_cp_ratio", robot_cp_ratio_);
-        cur_joint_sub_ = nh.subscribe("/current_joints_deg", 1, &DobotController::JointCallback,this);
+        cur_joint_sub_ = nh.subscribe("/current_joints_deg", 10, &DobotController::JointCallback,this);
     }
 
     void Connect(){
@@ -88,8 +88,9 @@ public:
             m_Dashboard.ClearError();
             // m_Dashboard.Continue();
             // m_DobotMove.Sync();
-            // m_DobotMove.ServoJ(Point,"t=0.1","lookahead_time=50","gain=500");
-            m_DobotMove.JointMovJ(Point);
+            m_DobotMove.ServoJ(Point,"t=0.5");
+            // m_DobotMove.Sync();
+            // m_DobotMove.JointMovJ(Point);
         }
     }
 
