@@ -1,0 +1,96 @@
+real_robot: false
+plan_real_robot: true
+robot_speed_ratio: 50
+robot_acc_ratio: 90
+robot_cp_ratio: 99
+control_frequency: 80
+group_name: cr5_arm
+# group_name: arm
+robot:
+  DOF: 6
+  arm_base: {orientation: [0, 0, 0, 1], position: [0, 0, 0]}
+  DH:
+    alpha: [1.5708, 0.0, 0.0, 1.5708, -1.5708, 0.0]
+    a: [0.0, -0.427, -0.357, 0.0, 0.0, 0.0]
+    d: [0.147, 0.0, 0.0, 0.141, 0.116, 0.105]
+    theta: [0.0, -1.5708, 0.0, -1.5708, 0.0, 0.0]
+  spheres: 
+    js: [0,0,1,1,1,1,1,1,2,2,2,3,4,5,5]
+    xs: [0,0,0,0.105,0.210,0.315,0.420,0,0.11,0.22,0,0,0,0,0]
+    ys: [-0.1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+    zs: [0,0,0.1,0.1,0.1,0.1,0.1,0,0,0,0,0,0,0,0.1]
+    rs: [0.08,0.08,0.06,0.06,0.06,0.06,0.06,0.08,0.06,0.06,0.08,0.07,0.06,0.06,0.06]
+  arm_joint_names: [joint1, joint2, joint3, joint4, joint5, joint6]
+  # arm_state_topic: /joint_states
+  arm_state_topic: cr5_robot/joint_states
+  trajectory_control_topic: /arm_joint_controller/follow_joint_trajectory
+  est_traj_pub_topic: /gpmp2_planner/est_traj
+  plan_traj_pub_topic: /gpmp2_planner/plan_traj
+  # gazebo_client: /arm_controller/follow_joint_trajectory
+  gazebo_client: /cr5_robot/joint_controller/follow_joint_trajectory
+
+global_planner:
+  step_rate: 0.03
+  fai_rate: 1.01
+  MAX_TREE_NUM: 2000
+
+settings:
+  planner_type: gp
+  frequency: 5
+  ref_inter_num: 3
+  total_time: 1.0
+  total_step: 10
+  epsilon: 0.12
+  control_inter: 15
+  obs_check_inter: 5
+  cost_sigma: 0.4
+  obs_thresh: 0.1
+  traj_cut: 0.5
+  fix_pose_sigma: 0.0003
+  fix_vel_sigma: 0.0001
+  Qc: 2.0
+  opt_type: LM
+  flag_pos_limit: true
+  flag_vel_limit: true
+  joint_pos_limits_up: 3.14
+  joint_pos_limits_down: -3.14
+  max_vel: 0.5
+  pos_limit_sigma: 0.0001
+  vel_limit_sigma: 0.001
+  goal_tolerance: 0.1
+  decay_factor: 0.5
+  map_update_frenquency: 15
+  # mpc setting
+  # planner_type: mpc
+  # frequency: 30
+  # ref_inter_num: 1
+  # total_time: 0.15
+  # total_step: 5
+  # epsilon: 0.03
+  max_acc: 1000
+  w_obs: 0.3
+  w_pos: 1
+  w_v: 0.2
+  w_goal: 0.7
+  obs_constrained: true
+
+
+sdf:
+  static_file: /home/roboert/MP_WS/src/gp_planner/sdf_data/sdf_data_static_py.txt
+  dynamic_file: /home/roboert/MP_WS/src/gp_planner/sdf_data/sdf_data_dynamic_py.txt
+  origin_x: -1
+  origin_y: -1
+  origin_z: -0.35
+  cell_size: 0.05
+  rows: 40
+  cols: 40
+  z: 30
+  # origin_x: -1
+  # origin_y: -1
+  # origin_z: -0.35
+  # cell_size: 0.025
+  # rows: 80
+  # cols: 80
+  # z: 60
+
+iterations: 2

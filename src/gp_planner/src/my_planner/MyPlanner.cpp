@@ -236,6 +236,9 @@ gazebo_client_("/cr5_robot/joint_controller/follow_joint_trajectory", true)
     nh.getParam("settings/obs_constrained", obs_constrained_);
     cur_vel_.resize(dof_);
     cur_vel_.setZero();
+
+    nh.getParam("settings/use_random_perturbation", use_random_perturbation_);
+    nh.getParam("settings/use_obstacle_gradient", use_obstacle_gradient_);
 }
 
 gtsam::Values MyPlanner::InitWithRef(const std::vector<Eigen::VectorXd>& ref_path, int total_step){
@@ -434,6 +437,108 @@ vector<VectorXd> MyPlanner::getLocalRefPath() {
 //     // }
 // }
 
+// 对初值添加随机扰动
+gtsam::Values MyPlanner::addRandomPerturbation(const gtsam::Values& init_values, double perturbation_scale) {
+    gtsam::Values perturbed_values = init_values;
+    // 使用随机设备初始化生成器，保证随机性
+    std::random_device rd;
+    std::default_random_engine generator(rd());
+    std::normal_distribution<double> distribution(0.0, perturbation_scale);
+    ROS_INFO("Starting to add random perturbations with scale %.2f", perturbation_scale);
+    for (size_t i = 0; i < opt_setting_.total_step; ++i) {
+        gtsam::Key pose_key = gtsam::Symbol('x', i);
+        gtsam::Key vel_key = gtsam::Symbol('v', i);
+
+        try {
+            // 对位姿添加扰动
+            if (init_values.exists(pose_key)) {
+                gtsam::Vector pose = init_values.at<gtsam::Vector>(pose_key);
+                size_t pose_size = pose.size();
+                for (size_t j = 0; j < pose_size; ++j) {
+                    pose(j) += distribution(generator);
+                }
+                perturbed_values.update(pose_key, pose);
+            }
+
+            // 对速度添加扰动
+            if (init_values.exists(vel_key)) {
+                gtsam::Vector vel = init_values.at<gtsam::Vector>(vel_key);
+                size_t vel_size = vel.size();
+                for (size_t j = 0; j < vel_size; ++j) {
+                    vel(j) += distribution(generator);
+                }
+                perturbed_values.update(vel_key, vel);
+            }
+        } catch (const std::exception& e) {
+            ROS_ERROR("Error perturbing key [%c%d]: %s", 'x', i, e.what());
+        }
+    }
+    return perturbed_values;
+}
+// 对初值根据esdf梯度进行修改
+gtsam::Values MyPlanner::adjustByObstacleGradient(const gtsam::Values& init_values, 
+                                       const gp_planner::SDF& sdf, double step_size) {
+    gtsam::Values adjusted_values = init_values;
+    ROS_INFO("Gradient adaption");
+    double max_gradient = 1.0;
+    for (size_t i = 0; i < opt_setting_.total_step; ++i) {
+        gtsam::Key pose_key = gtsam::Symbol('x', i); // 获取当前轨迹点的关节角状态
+        gtsam::Key vel_key = gtsam::Symbol('v', i); // 获取当前轨迹点的关节速度状态
+
+        if (init_values.exists(pose_key)) {
+            gtsam::Vector pose = init_values.at<gtsam::Vector>(pose_key); // 12维状态（6个关节角+6个关节速度）
+
+            // 提取当前关节角（前6维）
+            gtsam::Vector joint_angles = pose.head(6);
+
+            // 获取机器人连杆上球体的中心位置
+            std::vector<gtsam::Point3> sphere_centers;
+            std::vector<gtsam::Matrix> jacobians; // 雅可比矩阵
+            robot_.sphereCenters(joint_angles, sphere_centers, jacobians);
+
+            // 初始化关节角调整量
+            gtsam::Vector delta_q = gtsam::Vector::Zero(6);
+
+            // 遍历每个球体，计算梯度并累积关节角调整量
+            for (size_t j = 0; j < sphere_centers.size(); ++j) {
+                const gtsam::Point3& center = sphere_centers[j];
+                const gtsam::Matrix& J = jacobians[j]; // 当前球体的雅可比矩阵
+
+                try {
+                    // 获取当前球体在 SDF 中的梯度（笛卡尔空间中的梯度）
+                    gtsam::Vector3 gradient;
+                    sdf.getSignedDistance(center, gradient);
+
+                    // 限制梯度大小，防止梯度过大导致调整幅度过大
+                    if (gradient.norm() > max_gradient) {
+                        gradient = gradient.normalized() * max_gradient;
+                    }
+
+                    // 将笛卡尔空间的梯度映射到关节空间
+                    delta_q += J.transpose() * gradient; // 使用雅可比矩阵的转置
+                } catch (const gp_planner::SDFQueryOutOfRange&) {
+                    // 如果超出 SDF 范围，跳过该球体
+                    ROS_WARN("Sphere center is out of SDF range, skipping adjustment for sphere %zu.", j);
+                }
+            }
+
+            // 按步长调整关节角
+            joint_angles -= step_size * delta_q;
+
+            // 更新调整后的关节角部分
+            pose.head(6) = joint_angles;
+            adjusted_values.update(pose_key, pose);
+        }
+
+        // 保持关节速度部分不变
+        if (init_values.exists(vel_key)) {
+            gtsam::Vector vel = init_values.at<gtsam::Vector>(vel_key);
+            adjusted_values.update(vel_key, vel);
+        }
+    }
+    return adjusted_values;
+}
+
 void MyPlanner::armStateCallback(const sensor_msgs::JointState::ConstPtr &msg) {
     for (int i=0;i<dof_;i++){
         if(msg->position.size()==8){
@@ -512,6 +617,7 @@ void MyPlanner::LocalPlanningCallback(const ros::TimerEvent&){
     local_results_.clear();
     auto start = std::chrono::high_resolution_clock::now();
     count_++;
+    vector<VectorXd> local_ref_path;
     if(count_ > 60){
         planning_scene_monitor::PlanningSceneMonitorPtr monitor_ptr_udef = std::make_shared<planning_scene_monitor::PlanningSceneMonitor>("robot_description");
         monitor_ptr_udef->requestPlanningSceneState("get_planning_scene");
@@ -523,10 +629,10 @@ void MyPlanner::LocalPlanningCallback(const ros::TimerEvent&){
         if(is_global_success_)  publishGlobalPath();
         count_ = 0;
     }
+    if(is_global_success_) local_ref_path= getLocalRefPath();
     if(is_global_success_ && calculateDistance(arm_pos_, end_conf_)> goal_tolerance_){
         plan_times_ ++;
         if(planner_type_ == "gp"){
-            vector<VectorXd> local_ref_path = getLocalRefPath();
             gtsam::Vector start_conf = ConvertToGtsamVector(arm_pos_);
             gtsam::Vector end_conf = ConvertToGtsamVector(local_ref_path[local_ref_path.size()-1]);
             // end_conf = ConvertToGtsamVector(end_conf_);
@@ -537,6 +643,7 @@ void MyPlanner::LocalPlanningCallback(const ros::TimerEvent&){
             else{
                 init_values = InitWithRef(local_ref_path, opt_setting_.total_step);
             }
+            init_values_ = init_values;
             double total_time =  traj_total_time_*calculateDistance(start_conf,end_conf) / max_vel_ ;
             total_time = opt_setting_.total_time;
             start_vel_ = (end_conf - start_conf) / total_time;
@@ -632,7 +739,6 @@ void MyPlanner::LocalPlanningCallback(const ros::TimerEvent&){
         }
         else if(planner_type_ == "mpc"){
             auto start = std::chrono::high_resolution_clock::now();
-            vector<VectorXd> local_ref_path = getLocalRefPath();
             vector<VectorXd> temp;
             delta_t_ = opt_setting_.total_time / opt_setting_.total_step;
             temp = mpcSolve(local_ref_path,arm_pos_,obs_pos_,obs_vel_,obs_direction_);
@@ -690,6 +796,39 @@ void MyPlanner::LocalPlanningCallback(const ros::TimerEvent&){
         is_local_success_ = true;
         // is_global_success_ = false;
         ROS_INFO("Plan Finished...");
+    }
+    if (is_global_success_ && !is_local_success_ && planner_type_ == "gp") {
+        ROS_WARN("Optimization failed, attempting to adjust initial values...");
+        gtsam::Values adapt_values;
+        // 随机扰动或基于障碍物梯度调整初值
+        if (use_random_perturbation_) {
+            double perturbation_scale = 0.05; // 设置扰动强度
+            adapt_values = addRandomPerturbation(init_values_, perturbation_scale);
+            ROS_INFO("Adjusted initial values using random perturbation.");
+        } else if (use_obstacle_gradient_) {
+            double step_size = 0.1; // 设置沿梯度方向的调整步长
+            adapt_values = adjustByObstacleGradient(init_values_, sdf_, step_size);
+            ROS_INFO("Adjusted initial values using obstacle gradient.");
+        }
+        if(use_random_perturbation_ || use_obstacle_gradient_){
+            gtsam::Vector start_conf = ConvertToGtsamVector(arm_pos_);
+            gtsam::Vector end_conf = ConvertToGtsamVector(local_ref_path[local_ref_path.size()-1]);
+            // 再次进行优化
+            gtsam::Values opt_values = gp_planner::Optimizer(robot_, sdf_, start_conf, end_conf,
+                                            ConvertToGtsamVector(start_vel_), ConvertToGtsamVector(end_vel_),
+                                            adapt_values, opt_setting_,
+                                            ConvertToGtsamVector(end_conf_));
+
+            exec_values_ = gp_planner::interpolateTraj(opt_values, opt_setting_.Qc_model, delta_t_, control_inter_);
+            // 检查优化结果
+            double opt_coll_cost = gp_planner::CollisionCost(robot_, sdf_, exec_values_, opt_setting_) / exec_step_;
+            if (opt_coll_cost < obs_thresh_) {
+                is_local_success_ = true;
+                ROS_INFO("Optimization succeeded after adjusting initial values.");
+            } else {
+                ROS_WARN("Optimization still failed after adjustment.");
+            }
+        }
     }
     is_plan_success_ = is_global_success_ && is_local_success_;
     if(is_plan_success_){

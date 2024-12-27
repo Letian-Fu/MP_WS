@@ -75,7 +75,35 @@ gtsam::Vector LimitCostVel(const gtsam::Vector& vel,
     return err;
 }
 
-/// hinge loss obstacle cost function
+// hinge loss obstacle cost function
+// inline double hingeLossObstacleCost(
+//     const gtsam::Point3& point, const SDF& sdf, double eps,
+//     gtsam::OptionalJacobian<1, 3> H_point = std::nullopt) {
+//     gtsam::Vector3 field_gradient;
+//     double dist_signed;
+//     try {
+//         dist_signed = sdf.getSignedDistance(point, field_gradient);
+//         // cout<<"dist_signed: "<<dist_signed<<endl;
+//     } catch (SDFQueryOutOfRange&) {
+//         // std::cout << "[hingeLossObstacleCost] WARNING: querying signed distance
+//         // out of range, "
+//         //    "assume zero obstacle cost." << std::endl;
+//         if (H_point) *H_point = gtsam::Matrix13::Zero();
+//         return 0.0;
+//     }
+
+//     if (dist_signed > eps) {
+//         // faraway no error
+//         if (H_point) *H_point = gtsam::Matrix13::Zero();
+//         return 0.0;
+
+//     } else {
+//         // outside but < eps or inside object
+//         if (H_point) *H_point = -field_gradient.transpose();
+//         return eps - dist_signed;
+//     }
+// }
+
 inline double hingeLossObstacleCost(
     const gtsam::Point3& point, const SDF& sdf, double eps,
     gtsam::OptionalJacobian<1, 3> H_point = std::nullopt) {
@@ -97,10 +125,23 @@ inline double hingeLossObstacleCost(
         if (H_point) *H_point = gtsam::Matrix13::Zero();
         return 0.0;
 
+    } else if (dist_signed >= 0.0) {
+        // 情况 2: 0 ≤ d(c) ≤ ε, 损失为 (1 / 2ε) * (d(c) - ε)^2
+        double diff = dist_signed - eps;
+        double cost = (0.5 / eps) * diff * diff;
+        if (H_point) {
+            // 雅可比: ∂L/∂point = (1 / ε) * (d(c) - ε) * (-∇d(c))
+            *H_point = (1.0 / eps) * diff * (-field_gradient.transpose());
+        }
+        return cost;
     } else {
-        // outside but < eps or inside object
-        if (H_point) *H_point = -field_gradient.transpose();
-        return eps - dist_signed;
+        // 情况 3: d(c) < 0, 损失为 (1 / 2) * ε - d(c)
+        double cost = (0.5 * eps) - dist_signed;
+        if (H_point) {
+            // 雅可比: ∂L/∂point = -(-∇d(c)) = ∇d(c)
+            *H_point = -field_gradient.transpose();
+        }
+        return cost;
     }
 }
 

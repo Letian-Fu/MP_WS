@@ -163,7 +163,8 @@ public:
     // 规划结果
     std::vector<Eigen::VectorXd> global_results_;
     std::vector<Eigen::VectorXd> local_results_;
-    gtsam::Values exec_values_;
+    gtsam::Values init_values_,exec_values_;
+    bool use_random_perturbation_,use_obstacle_gradient_;
 
     // ros相关
     ros::NodeHandle nh_;
@@ -249,6 +250,11 @@ public:
     vector<VectorXd> getLocalRefPath();
     // 从全局路径生成初始values
     gtsam::Values InitWithRef(const std::vector<Eigen::VectorXd>& ref_path, int total_step);
+    // 对初值添加随机扰动
+    gtsam::Values addRandomPerturbation(const gtsam::Values& init_values, double perturbation_scale);
+    // 根据障碍物梯度改变初值
+    gtsam::Values adjustByObstacleGradient(const gtsam::Values& init_values, const gp_planner::SDF& sdf, double step_size);
+
     // GtsamVector转换成EigenVector
     inline Eigen::VectorXd ConvertToEigenVector(const gtsam::Vector &gtsamVector){
         Eigen::VectorXd eigenVector;
