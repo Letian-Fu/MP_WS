@@ -129,8 +129,8 @@ public:
             delta_t_(delta_t),
             tau_(tau){
                 Qc_ = getQc(Qc_model_);
-                Lambda_ = calcLambda(Qc_,delta_t_,tau_);
-                Psi_ = calcPsi(Qc_, delta_t_, tau_);
+                Lambda_ = CalcLambda(Qc_,delta_t_,tau_);
+                Psi_ = CalcPsi(Qc_, delta_t_, tau_);
             }
     ~ObsGPFactor() override {}
 

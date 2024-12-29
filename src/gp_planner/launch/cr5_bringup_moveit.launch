@@ -15,11 +15,10 @@
 
   <!-- moveit launch file -->
   <!-- <include file="$(find cr5_moveit_config)/launch/moveit_planning_execution.launch" /> -->
-  <include file="$(find cr5_moveit_config)/launch/demo.launch" pass_all_args="true">
-    <!-- robot_description is loaded by gazebo.launch, to enable Gazebo features -->
+  <!-- <include file="$(find cr5_moveit_config)/launch/demo.launch" pass_all_args="true">
     <arg name="load_robot_description" value="false" />
     <arg name="moveit_controller_manager" value="ros_control" />
-  </include>
+  </include> -->
 
   <!-- <rosparam command="load" file="$(find gp_planner)/config/parameters.yaml" /> -->
   <!-- <node name="moving_sphere" pkg="gp_planner" type="moving_sphere.py" output="screen" /> -->

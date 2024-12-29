@@ -497,7 +497,8 @@ int main(int argc, char **argv) {
     // 创建发布者
     pub_obstacle_info = nh.advertise<std_msgs::Float64MultiArray>("/obstacle_info_detected", 10);
     message_filters::Subscriber<gp_planner::BoundingBoxArray> bouding_boxes_sub(nh, "/bounding_boxes", 10);
-    message_filters::Subscriber<sensor_msgs::PointCloud2> cloud_sub(nh, "/camera/depth_registered/points", 10);
+    message_filters::Subscriber<sensor_msgs::PointCloud2> cloud_sub(nh, "/kinect/depth_registered/points", 10);
+    // message_filters::Subscriber<sensor_msgs::PointCloud2> cloud_sub(nh, "/camera/depth_registered/points", 10);
     typedef message_filters::sync_policies::ApproximateTime<gp_planner::BoundingBoxArray,sensor_msgs::PointCloud2> SyncPolicy;
     message_filters::Synchronizer<SyncPolicy> sync(SyncPolicy(50), bouding_boxes_sub, cloud_sub);
     sync.registerCallback(boost::bind(&callback, _1, _2));

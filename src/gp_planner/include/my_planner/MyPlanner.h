@@ -160,11 +160,13 @@ public:
     std::string static_file_,dynamic_file_;
     // 优化器参数
     gp_planner::OptimizerSetting opt_setting_;
+    double goal_sigma_;
     // 规划结果
     std::vector<Eigen::VectorXd> global_results_;
     std::vector<Eigen::VectorXd> local_results_;
     gtsam::Values init_values_,exec_values_;
     bool use_random_perturbation_,use_obstacle_gradient_;
+    double perturbation_scale_,gradient_step_size_;
 
     // ros相关
     ros::NodeHandle nh_;
@@ -192,12 +194,10 @@ public:
     double w_obs_,w_pos_,w_v_,w_goal_;
     bool obs_constrained_;
     
-    
-
     // 测试相关
     double path_length_,end_path_length_;
-    double plan_time_cost_;
-    int plan_times_;
+    long double plan_time_cost_;
+    long plan_times_;
     std::string planner_type_;
     ros::Time last_update_time_;
 

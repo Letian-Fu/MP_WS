@@ -15,16 +15,21 @@ gtsam::Matrix getQc(const gtsam::SharedNoiseModel Qc_model) {
 }
 
 /// calculate Q
-inline gtsam::Matrix calcQ(const gtsam::Matrix& Qc, double tau) {
+inline gtsam::Matrix CalcQ(const gtsam::Matrix& Qc, double tau) {
   assert(Qc.rows() == Qc.cols());
   return (gtsam::Matrix(2 * Qc.rows(), 2 * Qc.rows())
               << 1.0 / 3 * pow(tau, 3.0) * Qc,
           1.0 / 2 * pow(tau, 2.0) * Qc, 1.0 / 2 * pow(tau, 2.0) * Qc, tau * Qc)
       .finished();
+//   return (gtsam::Matrix(2 * Qc.rows(), 2 * Qc.rows())
+//               << pow(tau, 2.0) * Qc,  // 二次关系
+//           tau * Qc,                 // 一次关系
+//           tau * Qc, tau * Qc)
+//       .finished();
 }
 
 /// calculate Q_inv
-inline gtsam::Matrix calcQ_inv(const gtsam::Matrix& Qc, double tau) {
+inline gtsam::Matrix CalcQ_inv(const gtsam::Matrix& Qc, double tau) {
   assert(Qc.rows() == Qc.cols());
   const gtsam::Matrix Qc_inv = Qc.inverse();
   return (gtsam::Matrix(2 * Qc.rows(), 2 * Qc.rows())
@@ -32,31 +37,41 @@ inline gtsam::Matrix calcQ_inv(const gtsam::Matrix& Qc, double tau) {
           (-6.0) * pow(tau, -2.0) * Qc_inv, (-6.0) * pow(tau, -2.0) * Qc_inv,
           4.0 * pow(tau, -1.0) * Qc_inv)
       .finished();
+//   return (gtsam::Matrix(2 * Qc.rows(), 2 * Qc.rows())
+//               << 2.0 * pow(tau, -2.0) * Qc_inv,
+//           (-1.0) * pow(tau, -1.0) * Qc_inv, (-1.0) * pow(tau, -1.0) * Qc_inv,
+//           pow(tau, -1.0) * Qc_inv)
+//       .finished();
 }
 
 /// calculate Phi
-inline gtsam::Matrix calcPhi(size_t dof, double tau) {
+inline gtsam::Matrix CalcPhi(size_t dof, double tau) {
   return (gtsam::Matrix(2 * dof, 2 * dof) << gtsam::Matrix::Identity(dof, dof),
           tau * gtsam::Matrix::Identity(dof, dof),
           gtsam::Matrix::Zero(dof, dof), gtsam::Matrix::Identity(dof, dof))
       .finished();
+//   double coupling_factor = std::min(tau, 1.0);  // 限制耦合强度
+//   return (gtsam::Matrix(2 * dof, 2 * dof) << gtsam::Matrix::Identity(dof, dof),
+//           coupling_factor * gtsam::Matrix::Identity(dof, dof),
+//           gtsam::Matrix::Zero(dof, dof), gtsam::Matrix::Identity(dof, dof))
+//       .finished();
 }
 
 /// calculate Lambda
-inline gtsam::Matrix calcLambda(const gtsam::Matrix& Qc, double delta_t,
+inline gtsam::Matrix CalcLambda(const gtsam::Matrix& Qc, double delta_t,
                                 const double tau) {
   assert(Qc.rows() == Qc.cols());
-  return calcPhi(Qc.rows(), tau) -
-         calcQ(Qc, tau) * (calcPhi(Qc.rows(), delta_t - tau).transpose()) *
-             calcQ_inv(Qc, delta_t) * calcPhi(Qc.rows(), delta_t);
+  return CalcPhi(Qc.rows(), tau) -
+         CalcQ(Qc, tau) * (CalcPhi(Qc.rows(), delta_t - tau).transpose()) *
+             CalcQ_inv(Qc, delta_t) * CalcPhi(Qc.rows(), delta_t);
 }
 
 /// calculate Psi
-inline gtsam::Matrix calcPsi(const gtsam::Matrix& Qc, double delta_t,
+inline gtsam::Matrix CalcPsi(const gtsam::Matrix& Qc, double delta_t,
                              double tau) {
   assert(Qc.rows() == Qc.cols());
-  return calcQ(Qc, tau) * (calcPhi(Qc.rows(), delta_t - tau).transpose()) *
-         calcQ_inv(Qc, delta_t);
+  return CalcQ(Qc, tau) * (CalcPhi(Qc.rows(), delta_t - tau).transpose()) *
+         CalcQ_inv(Qc, delta_t);
 }
 
 /// interpolate pose with Jacobians

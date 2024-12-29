@@ -29,7 +29,7 @@ public:
             double delta_t,
             const gtsam::SharedNoiseModel Qc_model)
         : Base(gtsam::noiseModel::Gaussian::Covariance(
-                    calcQ(getQc(Qc_model), delta_t)),
+                    CalcQ(getQc(Qc_model), delta_t)),
                 poseKey1, velKey1, poseKey2, velKey2),
             dof_(Qc_model->dim()),
             delta_t_(delta_t) {}

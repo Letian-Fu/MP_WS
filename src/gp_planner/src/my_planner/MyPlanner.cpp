@@ -96,6 +96,7 @@ gazebo_client_("/cr5_robot/joint_controller/follow_joint_trajectory", true)
     nh.getParam("settings/control_inter", control_inter_);
     nh.getParam("settings/ref_inter_num", ref_inter_num_);
     nh.getParam("settings/goal_tolerance", goal_tolerance_);
+    nh.getParam("settings/goal_sigma", goal_sigma_);
 
     gtsam::Vector joints_pos_limits_up(dof_), joints_pos_limits_down(dof_), vel_limits(dof_);
     gtsam::Vector pos_limit_sigmas(dof_), vel_limit_sigmas(dof_);
@@ -239,6 +240,8 @@ gazebo_client_("/cr5_robot/joint_controller/follow_joint_trajectory", true)
 
     nh.getParam("settings/use_random_perturbation", use_random_perturbation_);
     nh.getParam("settings/use_obstacle_gradient", use_obstacle_gradient_);
+    nh.getParam("settings/perturbation_scale", perturbation_scale_);
+    nh.getParam("settings/gradient_step_size", gradient_step_size_);
 }
 
 gtsam::Values MyPlanner::InitWithRef(const std::vector<Eigen::VectorXd>& ref_path, int total_step){
@@ -470,7 +473,7 @@ gtsam::Values MyPlanner::addRandomPerturbation(const gtsam::Values& init_values,
                 perturbed_values.update(vel_key, vel);
             }
         } catch (const std::exception& e) {
-            ROS_ERROR("Error perturbing key [%c%d]: %s", 'x', i, e.what());
+            ROS_ERROR("Error perturbing key [%c %ld]: %s", 'x', i, e.what());
         }
     }
     return perturbed_values;
@@ -616,8 +619,10 @@ void MyPlanner::LocalPlanningCallback(const ros::TimerEvent&){
     is_local_success_ = false;
     local_results_.clear();
     auto start = std::chrono::high_resolution_clock::now();
-    count_++;
-    vector<VectorXd> local_ref_path;
+    // 停止计时
+    auto stop = std::chrono::high_resolution_clock::now();
+    // 计算持续时间
+    auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(stop - start);
     if(count_ > 60){
         planning_scene_monitor::PlanningSceneMonitorPtr monitor_ptr_udef = std::make_shared<planning_scene_monitor::PlanningSceneMonitor>("robot_description");
         monitor_ptr_udef->requestPlanningSceneState("get_planning_scene");
@@ -629,63 +634,85 @@ void MyPlanner::LocalPlanningCallback(const ros::TimerEvent&){
         if(is_global_success_)  publishGlobalPath();
         count_ = 0;
     }
-    if(is_global_success_) local_ref_path= getLocalRefPath();
     if(is_global_success_ && calculateDistance(arm_pos_, end_conf_)> goal_tolerance_){
-        plan_times_ ++;
+        vector<VectorXd> local_ref_path = getLocalRefPath();
         if(planner_type_ == "gp"){
-            gtsam::Vector start_conf = ConvertToGtsamVector(arm_pos_);
-            gtsam::Vector end_conf = ConvertToGtsamVector(local_ref_path[local_ref_path.size()-1]);
-            // end_conf = ConvertToGtsamVector(end_conf_);
-            gtsam::Values init_values;
-            if(calculateDistance(arm_pos_,local_ref_path[0])>0.5 || !ref_flag_){
-                init_values = gp_planner::initArmTrajStraightLine(ConvertToGtsamVector(arm_pos_), end_conf, opt_setting_.total_step);
+            for(int i = 0;i<20;i++){
+                plan_times_ ++;
+                if(i==0){
+                    gtsam::Vector start_conf = ConvertToGtsamVector(arm_pos_);
+                    gtsam::Vector end_conf = ConvertToGtsamVector(local_ref_path[local_ref_path.size()-1]);
+                    // end_conf = ConvertToGtsamVector(end_conf_);
+                    gtsam::Values init_values;
+                    if(calculateDistance(arm_pos_,local_ref_path[0])>0.5 || !ref_flag_){
+                        init_values = gp_planner::initArmTrajStraightLine(ConvertToGtsamVector(arm_pos_), end_conf, opt_setting_.total_step);
+                    }
+                    else{
+                        init_values = InitWithRef(local_ref_path, opt_setting_.total_step);
+                    }
+                    init_values_ = init_values;
+                    double total_time =  traj_total_time_*calculateDistance(start_conf,end_conf) / max_vel_ ;
+                    total_time = opt_setting_.total_time;
+                    start_vel_ = (end_conf - start_conf) / total_time;
+                    end_vel_ = (end_conf - start_conf) / total_time;
+                    start_vel_ = limitJointVelocities(start_vel_,max_vel_);
+                    end_vel_ = limitJointVelocities(end_vel_,max_vel_);
+                    opt_setting_.set_total_time(total_time);
+                    gtsam::Values opt_values = gp_planner::Optimizer(robot_,sdf_,start_conf,end_conf,
+                                                                    ConvertToGtsamVector(start_vel_),ConvertToGtsamVector(end_vel_),
+                                                                    init_values,opt_setting_,
+                                                                    ConvertToGtsamVector(end_conf_),goal_sigma_);
+                    exec_step_ = opt_setting_.total_step + control_inter_ * (opt_setting_.total_step - 1);
+                    exec_values_ = gp_planner::interpolateTraj(opt_values, opt_setting_.Qc_model, delta_t_, control_inter_);
+                    // double init_coll_cost = gp_planner::CollisionCost(robot_, sdf_, init_values, opt_setting_);
+                    // double opt_coll_cost = gp_planner::CollisionCost(robot_, sdf_, opt_values, opt_setting_)/(opt_setting_.total_step*opt_setting_.obs_check_inter-opt_setting_.total_step);
+                    double opt_coll_cost = gp_planner::CollisionCost(robot_, sdf_, exec_values_, opt_setting_)/(exec_step_);
+                    if(opt_coll_cost<= obs_thresh_) {
+                        is_local_success_ = true;
+                        break;
+                    }
+                }
+                else{
+                    ROS_WARN("Optimization failed, attempting to adjust initial values...");
+                    gtsam::Values adapt_values;
+                    // 随机扰动或基于障碍物梯度调整初值
+                    if (use_random_perturbation_) {
+                        adapt_values = addRandomPerturbation(init_values_, perturbation_scale_);
+                        ROS_INFO("Adjusted initial values using random perturbation.");
+                    } else if (use_obstacle_gradient_) {
+                        adapt_values = adjustByObstacleGradient(init_values_, sdf_, gradient_step_size_);
+                        init_values_ = adapt_values;
+                        ROS_INFO("Adjusted initial values using obstacle gradient.");
+                    }
+                    if(use_random_perturbation_ || use_obstacle_gradient_){
+                        gtsam::Vector start_conf = ConvertToGtsamVector(arm_pos_);
+                        gtsam::Vector end_conf = ConvertToGtsamVector(local_ref_path[local_ref_path.size()-1]);
+                        // 再次进行优化
+                        gtsam::Values opt_values = gp_planner::Optimizer(robot_, sdf_, start_conf, end_conf,
+                                                        ConvertToGtsamVector(start_vel_), ConvertToGtsamVector(end_vel_),
+                                                        adapt_values, opt_setting_,
+                                                        ConvertToGtsamVector(end_conf_),goal_sigma_);
+
+                        exec_values_ = gp_planner::interpolateTraj(opt_values, opt_setting_.Qc_model, delta_t_, control_inter_);
+                        // 检查优化结果
+                        double opt_coll_cost = gp_planner::CollisionCost(robot_, sdf_, exec_values_, opt_setting_) / exec_step_;
+                        if (opt_coll_cost <= obs_thresh_) {
+                            is_local_success_ = true;
+                            ROS_INFO("Optimization succeeded after adjusting initial values.");
+                            break;
+                        } else {
+                            ROS_WARN("Optimization still failed after adjustment.");
+                        }
+                    }
+                }
             }
-            else{
-                init_values = InitWithRef(local_ref_path, opt_setting_.total_step);
-            }
-            init_values_ = init_values;
-            double total_time =  traj_total_time_*calculateDistance(start_conf,end_conf) / max_vel_ ;
-            total_time = opt_setting_.total_time;
-            start_vel_ = (end_conf - start_conf) / total_time;
-            end_vel_ = (end_conf - start_conf) / total_time;
-            start_vel_ = limitJointVelocities(start_vel_,max_vel_);
-            end_vel_ = limitJointVelocities(end_vel_,max_vel_);
-            // start_vel_ = gtsam::Vector::Zero(6)
-            // end_vel_.setZero();
-            opt_setting_.set_total_time(total_time);
-            gtsam::Values opt_values = gp_planner::Optimizer(robot_,sdf_,start_conf,end_conf,
-                                                            ConvertToGtsamVector(start_vel_),ConvertToGtsamVector(end_vel_),
-                                                            init_values,opt_setting_,
-                                                            ConvertToGtsamVector(end_conf_));
-            // 停止计时
-            auto stop = std::chrono::high_resolution_clock::now();
-            // 计算持续时间
-            auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(stop - start);
-            plan_time_cost_ += static_cast<double>(duration.count());
-            // 输出花费的时间
-            // std::cout << "Local planning took " << duration.count() << " ms" << std::endl;
-            ROS_INFO("Local planning took %.2f ms", static_cast<double>(duration.count()));
-            exec_step_ = opt_setting_.total_step + control_inter_ * (opt_setting_.total_step - 1);
-            exec_values_ = gp_planner::interpolateTraj(opt_values, opt_setting_.Qc_model, delta_t_, control_inter_);
-            // double init_coll_cost = gp_planner::CollisionCost(robot_, sdf_, init_values, opt_setting_);
-            // double opt_coll_cost = gp_planner::CollisionCost(robot_, sdf_, opt_values, opt_setting_)/(opt_setting_.total_step*opt_setting_.obs_check_inter-opt_setting_.total_step);
-            double opt_coll_cost = gp_planner::CollisionCost(robot_, sdf_, exec_values_, opt_setting_)/(exec_step_);
-            if(opt_coll_cost< obs_thresh_)    {
-                is_local_success_ = true;
-                // ref_flag_ = true;
-            }
-            else {
+            if(!is_local_success_) {
                 // cout<<"plan error: "<<opt_coll_cost<<endl;
                 // ROS_INFO("Plan error: %f", opt_coll_cost);
                 auto start_2 = std::chrono::high_resolution_clock::now();
                 local_results_ = generateTraj(arm_pos_);
                 local_results_.clear();
                 is_local_success_ = false;
-                // 停止计时
-                auto stop_2 = std::chrono::high_resolution_clock::now();
-                // 计算持续时间
-                auto duration_2 = std::chrono::duration_cast<std::chrono::milliseconds>(stop - start);
-                plan_time_cost_ += static_cast<double>(duration_2.count());
                 if(local_results_.size()==5){
                     nav_msgs::Path path;
                     path.header.stamp = ros::Time::now();
@@ -734,8 +761,12 @@ void MyPlanner::LocalPlanningCallback(const ros::TimerEvent&){
                         boost::bind(&MyPlanner::activeCb, this),            // 目标激活时的回调
                         boost::bind(&MyPlanner::feedbackCb, this, _1));     // 接收到反馈的回调
                 }
-                // ref_flag_ = false;
             }
+            stop = std::chrono::high_resolution_clock::now();
+            duration = std::chrono::duration_cast<std::chrono::milliseconds>(stop - start);
+            plan_time_cost_ += static_cast<double>(duration.count());
+            // 输出花费的时间
+            ROS_INFO("Local planning took %.2f ms", static_cast<double>(duration.count()));
         }
         else if(planner_type_ == "mpc"){
             auto start = std::chrono::high_resolution_clock::now();
@@ -797,39 +828,6 @@ void MyPlanner::LocalPlanningCallback(const ros::TimerEvent&){
         // is_global_success_ = false;
         ROS_INFO("Plan Finished...");
     }
-    if (is_global_success_ && !is_local_success_ && planner_type_ == "gp") {
-        ROS_WARN("Optimization failed, attempting to adjust initial values...");
-        gtsam::Values adapt_values;
-        // 随机扰动或基于障碍物梯度调整初值
-        if (use_random_perturbation_) {
-            double perturbation_scale = 0.05; // 设置扰动强度
-            adapt_values = addRandomPerturbation(init_values_, perturbation_scale);
-            ROS_INFO("Adjusted initial values using random perturbation.");
-        } else if (use_obstacle_gradient_) {
-            double step_size = 0.1; // 设置沿梯度方向的调整步长
-            adapt_values = adjustByObstacleGradient(init_values_, sdf_, step_size);
-            ROS_INFO("Adjusted initial values using obstacle gradient.");
-        }
-        if(use_random_perturbation_ || use_obstacle_gradient_){
-            gtsam::Vector start_conf = ConvertToGtsamVector(arm_pos_);
-            gtsam::Vector end_conf = ConvertToGtsamVector(local_ref_path[local_ref_path.size()-1]);
-            // 再次进行优化
-            gtsam::Values opt_values = gp_planner::Optimizer(robot_, sdf_, start_conf, end_conf,
-                                            ConvertToGtsamVector(start_vel_), ConvertToGtsamVector(end_vel_),
-                                            adapt_values, opt_setting_,
-                                            ConvertToGtsamVector(end_conf_));
-
-            exec_values_ = gp_planner::interpolateTraj(opt_values, opt_setting_.Qc_model, delta_t_, control_inter_);
-            // 检查优化结果
-            double opt_coll_cost = gp_planner::CollisionCost(robot_, sdf_, exec_values_, opt_setting_) / exec_step_;
-            if (opt_coll_cost < obs_thresh_) {
-                is_local_success_ = true;
-                ROS_INFO("Optimization succeeded after adjusting initial values.");
-            } else {
-                ROS_WARN("Optimization still failed after adjustment.");
-            }
-        }
-    }
     is_plan_success_ = is_global_success_ && is_local_success_;
     if(is_plan_success_){
         if(calculateDistance(arm_pos_, end_conf_)<= goal_tolerance_){
@@ -858,6 +856,7 @@ void MyPlanner::LocalPlanningCallback(const ros::TimerEvent&){
             publishTrajectory(static_cast<int>(exec_step_),true);
         }
     }
+    else    count_++;
 
 }
 

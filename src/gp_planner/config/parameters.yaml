@@ -36,32 +36,35 @@ global_planner:
 
 settings:
   planner_type: gp
-  frequency: 8
+  frequency: 5
   ref_inter_num: 3
-  total_time: 1.0
-  total_step: 10
-  epsilon: 0.12
-  control_inter: 5
-  obs_check_inter: 5
-  cost_sigma: 0.3
-  obs_thresh: 0.05
-  traj_cut: 0.5
-  fix_pose_sigma: 0.0003
-  fix_vel_sigma: 0.0001
-  Qc: 2.0
-  opt_type: LM
-  flag_pos_limit: true
+  total_time: 1.5    # 1.0
+  total_step: 10     # 10
+  epsilon: 0.1      # 0.12
+  control_inter: 5   # 5 
+  obs_check_inter: 5 # 5
+  cost_sigma: 0.02    # 0.3
+  obs_thresh: 0.01   # 0.05
+  traj_cut: 0.5      # 0.5
+  fix_pose_sigma: 0.02 # 0.0003
+  fix_vel_sigma: 0.02  # 0.0001
+  goal_sigma: 0.005
+  Qc: 0.5    # 2.0
+  opt_type: LM # LM
+  flag_pos_limit: true 
   flag_vel_limit: true
   joint_pos_limits_up: 3.14
   joint_pos_limits_down: -3.14
-  max_vel: 0.5
-  pos_limit_sigma: 0.0001
-  vel_limit_sigma: 0.0001
+  max_vel: 1.0 # 1.0
+  pos_limit_sigma: 0.0001 # 0.0001
+  vel_limit_sigma: 0.0001 # 0.0001
   goal_tolerance: 0.1
   decay_factor: 0.5
   map_update_frenquency: 15
-  use_obstacle_gradient: false
-  use_random_perturbation: true
+  use_obstacle_gradient: true
+  use_random_perturbation: false
+  perturbation_scale: 0.05
+  gradient_step_size: 0.1
   # mpc setting
   # planner_type: mpc
   # frequency: 30

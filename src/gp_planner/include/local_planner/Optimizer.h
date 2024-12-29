@@ -30,7 +30,7 @@ gtsam::Values Optimizer(const ArmModel& arm, const SDF& sdf,
                         const gtsam::Vector& start_conf, const gtsam::Vector& end_conf,
                         const gtsam::Vector& start_vel, const gtsam::Vector& end_vel,
                         const gtsam::Values& init_values,
-                        const OptimizerSetting& setting, const gtsam::Vector& goal){
+                        const OptimizerSetting& setting, const gtsam::Vector& goal, const double goal_sigma){
     const double delta_t = setting.total_time / static_cast<double>(setting.total_step);
     const double inter_dt = delta_t / static_cast<double>(setting.obs_check_inter + 1);
     //build graph
@@ -45,8 +45,8 @@ gtsam::Values Optimizer(const ArmModel& arm, const SDF& sdf,
         } else if(i == setting.total_step){
             graph.add(PriorFactorConf(pose_key,end_conf,setting.conf_prior_model));
             graph.add(PriorFactorVel(vel_key,end_vel,setting.vel_prior_model));
-            
-            graph.add(PriorFactorConf(pose_key,goal,setting.conf_prior_model));
+            gtsam::SharedNoiseModel goal_prior_model = gtsam::noiseModel::Isotropic::Sigma(setting.dof, goal_sigma);
+            graph.add(PriorFactorConf(pose_key,goal,goal_prior_model));
             graph.add(PriorFactorVel(vel_key,gtsam::Vector::Zero(6),setting.vel_prior_model));
         }
         // Limits for joints and velocity
@@ -124,8 +124,8 @@ gtsam::Values interpolateTraj(const gtsam::Values& opt_values,
                     } else {
                         // inter pose
                         double tau = static_cast<double>(inter_idx) * inter_dt;
-                        Lambda = calcLambda(Qc,delta_t,tau);
-                        Psi = calcPsi(Qc, delta_t, tau);
+                        Lambda = CalcLambda(Qc,delta_t,tau);
+                        Psi = CalcPsi(Qc, delta_t, tau);
                         gtsam::Vector conf1 = opt_values.at<gtsam::Vector>(gtsam::Symbol('x', last_pos_idx));
                         gtsam::Vector vel1 = opt_values.at<gtsam::Vector>(gtsam::Symbol('v', last_pos_idx));
                         gtsam::Vector conf2 = opt_values.at<gtsam::Vector>(gtsam::Symbol('x', pos_idx));
