@@ -76,7 +76,7 @@ def move_obstacle():
     # 应用碰撞对象到规划场景
     planning_scene_interface.add_object(floor)
 
-    # # 更新MoveIt中的规划场景(地板)
+    # # 更新MoveIt中的规划场景
     # shebei = CollisionObject()
     # shebei.header.frame_id = "base_link"
     # shebei.header.stamp = rospy.Time.now()
@@ -186,8 +186,8 @@ def move_obstacle():
     if mode == 'vertical':
         # 上下往复运动参数
         start = np.array([-0.6, 0.0, 0.2])  # 垂直方向起点
-        end = np.array([-0.6, 0.0, 0.8])    # 垂直方向终点
-        linear_speed = 0.35  # 匀速运动的速度 (m/s)
+        end = np.array([-0.6, 0.0, 1.0])    # 垂直方向终点
+        linear_speed = 0.6  # 匀速运动的速度 (m/s)
     elif mode == 'horizontal':
         # 水平往复运动参数
         start = np.array([-0.8, 0, 0.6])  # 水平方向起点

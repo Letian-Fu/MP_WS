@@ -14,6 +14,8 @@
 #include <pcl/point_cloud.h>
 #include <pcl/point_types.h>
 #include <pcl_ros/point_cloud.h>
+#include <pcl/filters/passthrough.h>
+#include <pcl/filters/voxel_grid.h>
 #include <pcl/filters/statistical_outlier_removal.h>
 #include <pcl/common/common.h>
 #include <opencv2/opencv.hpp>
@@ -279,29 +281,40 @@ void callback(const gp_planner::BoundingBoxArray::ConstPtr &bounding_boxes_msg, 
     pass.filter(*filtered_cloud);
 
     pass.setFilterFieldName("z");
-    pass.setFilterLimits(-1.0, 20); // 根据实际情况设置 Z 轴范围
+    pass.setFilterLimits(-1.0, 3); // 根据实际情况设置 Z 轴范围
     pass.filter(*filtered_cloud);
-
-    std::cout << "Filtered cloud size: " << filtered_cloud->size() << std::endl;
-
-
     if (filtered_cloud->size() == 0) {
-        std::cerr << "No points found in ROI!" << std::endl;
+        ROS_WARN("No points found in ROI!");
         return;
     }
+    // ROS_INFO("Filtered cloud size: %lu", filtered_cloud->size());
+
+    // **添加体素下采样**
+    pcl::PointCloud<pcl::PointXYZ>::Ptr downsampled_cloud(new pcl::PointCloud<pcl::PointXYZ>());
+    pcl::VoxelGrid<pcl::PointXYZ> voxel;
+    voxel.setInputCloud(filtered_cloud);
+    voxel.setLeafSize(0.01f, 0.01f, 0.01f); // 根据场景调整叶片大小
+    voxel.filter(*downsampled_cloud);
+
+    if (downsampled_cloud->size() == 0) {
+        ROS_WARN("No points found after downsampling!");
+        return;
+    }
+    // ROS_INFO("Downsampled cloud size: %lu", downsampled_cloud->size());
 
     // 增加噪声滤除
     pcl::PointCloud<pcl::PointXYZ>::Ptr denoised_cloud(new pcl::PointCloud<pcl::PointXYZ>());
     pcl::StatisticalOutlierRemoval<pcl::PointXYZ> sor;
-    sor.setInputCloud(filtered_cloud);
+    sor.setInputCloud(downsampled_cloud);
     sor.setMeanK(50); // 平均邻居点数
     sor.setStddevMulThresh(1.0); // 标准差倍数
     sor.filter(*denoised_cloud);
 
     if (denoised_cloud->size() == 0) {
-        std::cerr << "No points found in ROI after noise removal!" << std::endl;
+        ROS_WARN("No points found in ROI after noise removal!");
         return;
     }
+    // ROS_INFO("Denoised cloud size: %lu", denoised_cloud->size());
 
     // 3. 对 ROI 内的点云进行聚类
     std::vector<pcl::PointIndices> cluster_indices;
@@ -309,9 +322,9 @@ void callback(const gp_planner::BoundingBoxArray::ConstPtr &bounding_boxes_msg, 
     tree->setInputCloud(denoised_cloud);
 
     pcl::EuclideanClusterExtraction<pcl::PointXYZ> ec;
-    ec.setClusterTolerance(0.05); // 点之间的最大距离
-    ec.setMinClusterSize(10);
-    ec.setMaxClusterSize(10000);
+    ec.setClusterTolerance(0.02); // 点之间的最大距离
+    ec.setMinClusterSize(30);
+    ec.setMaxClusterSize(5000);
     ec.setSearchMethod(tree);
     ec.setInputCloud(denoised_cloud);
     ec.extract(cluster_indices);
@@ -331,12 +344,12 @@ void callback(const gp_planner::BoundingBoxArray::ConstPtr &bounding_boxes_msg, 
         }
     }
 
-    std::cout << "Largest cluster size: " << largest_cluster->size() << std::endl;
-
+    // ROS_INFO("Number of clusters found: %lu", cluster_indices.size());
     if (largest_cluster->size() == 0) {
-        std::cerr << "No significant cluster found!" << std::endl;
+        ROS_WARN("No significant cluster found!");
         return;
     }
+    // ROS_INFO("Largest cluster size: %lu", largest_cluster->size());
 
     // 4. 使用 RANSAC 拟合球体
     pcl::ModelCoefficients::Ptr coefficients_sphere(new pcl::ModelCoefficients());
@@ -345,14 +358,14 @@ void callback(const gp_planner::BoundingBoxArray::ConstPtr &bounding_boxes_msg, 
     sac_seg.setOptimizeCoefficients(true);
     sac_seg.setModelType(pcl::SACMODEL_SPHERE);
     sac_seg.setMethodType(pcl::SAC_RANSAC);
-    sac_seg.setDistanceThreshold(0.02); // 距离阈值
-    sac_seg.setMaxIterations(1000);    // 增加迭代次数
-    sac_seg.setRadiusLimits(0.05, 0.5); // 限制球体半径范围
+    sac_seg.setDistanceThreshold(0.01); // 距离阈值
+    sac_seg.setMaxIterations(2000);    // 增加迭代次数
+    sac_seg.setRadiusLimits(0.03, 0.1); // 限制球体半径范围
     sac_seg.setInputCloud(largest_cluster);
     sac_seg.segment(*inliers, *coefficients_sphere);
 
     if (inliers->indices.empty()) {
-        std::cerr << "No sphere found in the cluster!" << std::endl;
+        ROS_WARN("No sphere found in the cluster!");
         std_msgs::Float64MultiArray obstacle_info;
         obstacle_info.data.push_back(previous_positions[0]);
         obstacle_info.data.push_back(previous_positions[1]);
@@ -365,13 +378,18 @@ void callback(const gp_planner::BoundingBoxArray::ConstPtr &bounding_boxes_msg, 
         pub_obstacle_info.publish(obstacle_info);
         return;
     }
-
+    
     // 5. 提取球体参数
     float center_x = coefficients_sphere->values[0];
     float center_y = coefficients_sphere->values[1];
     float center_z = coefficients_sphere->values[2];
     float radius = coefficients_sphere->values[3];
     float obs_size = radius * 2; // 球体的直径作为大小
+    // ROS_INFO("Sphere found. Center: (%f, %f, %f), Radius: %f",
+    //      coefficients_sphere->values[0],
+    //      coefficients_sphere->values[1],
+    //      coefficients_sphere->values[2],
+    //      coefficients_sphere->values[3]);
 
     // 6. 转换为世界坐标系
     geometry_msgs::PointStamped sphere_center_cam;
@@ -391,13 +409,13 @@ void callback(const gp_planner::BoundingBoxArray::ConstPtr &bounding_boxes_msg, 
             "base_link", sphere_center_cam.header.frame_id, cloud_msg->header.stamp, ros::Duration(0.1));
         tf2::doTransform(sphere_center_cam, sphere_center_world, transform_stamped);
 
-        std::cout<<"Sphere center in world frame: ( "<< 
-                sphere_center_world.point.x<<","<<
-                sphere_center_world.point.y<<","<<
-                sphere_center_world.point.z<<")"<<std::endl;
+        // ROS_INFO("Sphere center in world frame: (%f, %f, %f)",
+        //     sphere_center_world.point.x,
+        //     sphere_center_world.point.y,
+        //     sphere_center_world.point.z);
 
     } catch (tf2::TransformException &ex) {
-        std::cerr <<"TF2 Transform Exception: "<< ex.what()<<std::endl;
+        ROS_ERROR("TF2 Transform Exception: %s", ex.what());
         return;
     }
 
@@ -443,8 +461,20 @@ void callback(const gp_planner::BoundingBoxArray::ConstPtr &bounding_boxes_msg, 
         pub_obstacle_info.publish(obstacle_info);
 
         // 输出结果
-        std::cout << "World center: " << world_center_x << ", " << world_center_y << ", " << world_center_z << std::endl;
-        std::cout << "Size: " << obs_size << ", Velocity: " << estimated_velocity.norm() << ", Direction: " << direction.transpose() << std::endl;
+        ROS_INFO("World center: [%f, %f, %f]", world_center_x, world_center_y, world_center_z);
+        ROS_INFO("Size: %f, Velocity: %f, Direction: [%f, %f, %f]", 
+                obs_size, 
+                estimated_velocity.norm(), 
+                direction[0], 
+                direction[1], 
+                direction[2]);
+        
+        Eigen::Vector3d current_positions(world_center_x, world_center_y, world_center_z);
+        previous_positions = current_positions;
+        previous_size = obs_size;
+        previous_directions = direction;
+        previous_velocity = velocity;
+        previous_time = ros::Time::now();
     }
     else{
         // 获取当前时间
@@ -477,8 +507,13 @@ void callback(const gp_planner::BoundingBoxArray::ConstPtr &bounding_boxes_msg, 
         pub_obstacle_info.publish(obstacle_info);
 
         // 输出结果
-        std::cout << "World center: " << world_center_x << ", " << world_center_y << ", " << world_center_z << std::endl;
-        std::cout << "Size: " << obs_size << ", Velocity: " << velocity << ", Direction: " << direction.transpose() << std::endl;
+        ROS_INFO("World center: [%f, %f, %f]", world_center_x, world_center_y, world_center_z);
+        ROS_INFO("Size: %f, Velocity: %f, Direction: [%f, %f, %f]", 
+                obs_size, 
+                velocity, 
+                direction[0], 
+                direction[1], 
+                direction[2]);
 
         previous_positions = current_positions;
         previous_size = obs_size;

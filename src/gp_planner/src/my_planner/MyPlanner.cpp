@@ -69,29 +69,22 @@ gazebo_client_("/cr5_robot/joint_controller/follow_joint_trajectory", true)
     /// joint position and velocity limit settings
     bool flag_pos_limit;  // whether enable joint position limits
     bool flag_vel_limit;  // whether enable velocity limits
-    double joint_pos_limits_up, joint_pos_limits_down;  // joint position limits
-    /// obstacle cost settings
-    double epsilon;          // eps of hinge loss function (see the paper)
-    double cost_sigma;       // sigma of obstacle cost (see the paper)
-    int obs_check_inter;  // number of point interpolated for obstacle cost,
-    double fix_pose_sigma, fix_vel_sigma, pos_limit_sigma, vel_limit_sigma;
-    double Qc;
     string opt_type;
     nh.getParam("settings/total_time", traj_total_time_);
     nh.getParam("settings/total_step", total_step);
     nh.getParam("settings/flag_pos_limit", flag_pos_limit);
     nh.getParam("settings/flag_pos_limit", flag_vel_limit);
-    nh.getParam("settings/joint_pos_limits_up", joint_pos_limits_up);
-    nh.getParam("settings/joint_pos_limits_down", joint_pos_limits_down);
+    nh.getParam("settings/joint_pos_limits_up", joint_pos_limits_up_);
+    nh.getParam("settings/joint_pos_limits_down", joint_pos_limits_down_);
     nh.getParam("settings/max_vel", max_vel_);
-    nh.getParam("settings/epsilon", epsilon);
-    nh.getParam("settings/cost_sigma", cost_sigma);
-    nh.getParam("settings/fix_pose_sigma", fix_pose_sigma);
-    nh.getParam("settings/fix_vel_sigma", fix_vel_sigma);
-    nh.getParam("settings/pos_limit_sigma", pos_limit_sigma);
-    nh.getParam("settings/vel_limit_sigma", vel_limit_sigma);
-    nh.getParam("settings/obs_check_inter", obs_check_inter);
-    nh.getParam("settings/Qc", Qc);
+    nh.getParam("settings/epsilon", epsilon_);
+    nh.getParam("settings/cost_sigma", cost_sigma_);
+    nh.getParam("settings/fix_pose_sigma", fix_pose_sigma_);
+    nh.getParam("settings/fix_vel_sigma", fix_vel_sigma_);
+    nh.getParam("settings/pos_limit_sigma", pos_limit_sigma_);
+    nh.getParam("settings/vel_limit_sigma", vel_limit_sigma_);
+    nh.getParam("settings/obs_check_inter", obs_check_inter_);
+    nh.getParam("settings/Qc", Qc_);
     nh.getParam("settings/opt_type", opt_type);
     nh.getParam("settings/control_inter", control_inter_);
     nh.getParam("settings/ref_inter_num", ref_inter_num_);
@@ -101,22 +94,20 @@ gazebo_client_("/cr5_robot/joint_controller/follow_joint_trajectory", true)
     gtsam::Vector joints_pos_limits_up(dof_), joints_pos_limits_down(dof_), vel_limits(dof_);
     gtsam::Vector pos_limit_sigmas(dof_), vel_limit_sigmas(dof_);
     for(size_t i = 0;i<dof_;i++){
-        joints_pos_limits_up[i]=joint_pos_limits_up;
-        joints_pos_limits_down[i]=joint_pos_limits_down;
+        joints_pos_limits_up[i]=joint_pos_limits_up_;
+        joints_pos_limits_down[i]=joint_pos_limits_down_;
         vel_limits[i]=max_vel_;
-        pos_limit_sigmas[i]=pos_limit_sigma;
-        vel_limit_sigmas[i]=vel_limit_sigma;
+        pos_limit_sigmas[i]=pos_limit_sigma_;
+        vel_limit_sigmas[i]=vel_limit_sigma_;
     }
     opt_setting_.set_total_time(traj_total_time_);
-    // opt_setting_.set_total_time(6);
     opt_setting_.set_total_step(static_cast<size_t>(total_step));
-    opt_setting_.set_conf_prior_model(fix_pose_sigma);
-    opt_setting_.set_vel_prior_model(fix_vel_sigma);
-    opt_setting_.set_epsilon(epsilon);
-    opt_setting_.set_cost_sigma(cost_sigma);
-    opt_setting_.set_cost_sigma(0.1);
-    opt_setting_.set_obs_check_inter(static_cast<size_t>(obs_check_inter));
-    opt_setting_.set_Qc_model(gtsam::Matrix::Identity(dof_,dof_)*Qc);
+    opt_setting_.set_conf_prior_model(fix_pose_sigma_);
+    opt_setting_.set_vel_prior_model(fix_vel_sigma_);
+    opt_setting_.set_epsilon(epsilon_);
+    opt_setting_.set_cost_sigma(cost_sigma_);
+    opt_setting_.set_obs_check_inter(static_cast<size_t>(obs_check_inter_));
+    opt_setting_.set_Qc_model(gtsam::Matrix::Identity(dof_,dof_)*Qc_);
 
     opt_setting_.set_flag_pos_limit(flag_pos_limit);
     opt_setting_.set_flag_vel_limit(flag_vel_limit);
@@ -220,7 +211,9 @@ gazebo_client_("/cr5_robot/joint_controller/follow_joint_trajectory", true)
 
     path_length_ = 0;
     plan_time_cost_ = 0;
+    success_time_cost_ = 0;
     plan_times_ = 0;
+    success_times_ = 0;
     end_path_length_ = 0;
     planner_type_ = "gp";
     max_acc_ = 0;
@@ -242,6 +235,8 @@ gazebo_client_("/cr5_robot/joint_controller/follow_joint_trajectory", true)
     nh.getParam("settings/use_obstacle_gradient", use_obstacle_gradient_);
     nh.getParam("settings/perturbation_scale", perturbation_scale_);
     nh.getParam("settings/gradient_step_size", gradient_step_size_);
+    max_iterations_ = 10;
+    nh.getParam("settings/max_iterations", max_iterations_);
 }
 
 gtsam::Values MyPlanner::InitWithRef(const std::vector<Eigen::VectorXd>& ref_path, int total_step){
@@ -453,6 +448,10 @@ gtsam::Values MyPlanner::addRandomPerturbation(const gtsam::Values& init_values,
         gtsam::Key vel_key = gtsam::Symbol('v', i);
 
         try {
+            if (i == 0) {
+                ROS_INFO("Skipping perturbation for the first step (i = 0).");
+                continue;
+            }
             // 对位姿添加扰动
             if (init_values.exists(pose_key)) {
                 gtsam::Vector pose = init_values.at<gtsam::Vector>(pose_key);
@@ -485,6 +484,10 @@ gtsam::Values MyPlanner::adjustByObstacleGradient(const gtsam::Values& init_valu
     ROS_INFO("Gradient adaption");
     double max_gradient = 1.0;
     for (size_t i = 0; i < opt_setting_.total_step; ++i) {
+        if (i == 0) {
+            ROS_INFO("Skipping perturbation for the first step (i = 0).");
+            continue;
+        }
         gtsam::Key pose_key = gtsam::Symbol('x', i); // 获取当前轨迹点的关节角状态
         gtsam::Key vel_key = gtsam::Symbol('v', i); // 获取当前轨迹点的关节速度状态
 
@@ -637,7 +640,42 @@ void MyPlanner::LocalPlanningCallback(const ros::TimerEvent&){
     if(is_global_success_ && calculateDistance(arm_pos_, end_conf_)> goal_tolerance_){
         vector<VectorXd> local_ref_path = getLocalRefPath();
         if(planner_type_ == "gp"){
-            for(int i = 0;i<20;i++){
+            double goal_sigma = goal_sigma_;
+            double joint_pos_limits_up = joint_pos_limits_up_;
+            double joint_pos_limits_down = joint_pos_limits_down_;
+            double Qc = Qc_;
+            /// obstacle cost settings
+            double epsilon = epsilon_;          // eps of hinge loss function (see the paper)
+            double cost_sigma = cost_sigma_;       // sigma of obstacle cost (see the paper)
+            int obs_check_inter = obs_check_inter_;  // number of point interpolated for obstacle cost,
+            double fix_pose_sigma = fix_pose_sigma_;
+            double fix_vel_sigma = fix_vel_sigma_;
+            double pos_limit_sigma = pos_limit_sigma_;
+            double vel_limit_sigma = vel_limit_sigma_;
+            gtsam::Vector pos_limit_sigmas(dof_), vel_limit_sigmas(dof_);
+            gtsam::Vector joints_pos_limits_up(dof_), joints_pos_limits_down(dof_), vel_limits(dof_);
+            for(size_t i = 0;i<dof_;i++){
+                joints_pos_limits_up[i]=joint_pos_limits_up;
+                joints_pos_limits_down[i]=joint_pos_limits_down;
+                vel_limits[i]=max_vel_;
+                pos_limit_sigmas[i]=pos_limit_sigma;
+                vel_limit_sigmas[i]=vel_limit_sigma;
+            }
+            opt_setting_.set_conf_prior_model(fix_pose_sigma);
+            opt_setting_.set_vel_prior_model(fix_vel_sigma);
+            opt_setting_.set_epsilon(epsilon);
+            opt_setting_.set_cost_sigma(cost_sigma);
+            opt_setting_.set_obs_check_inter(static_cast<size_t>(obs_check_inter));
+            opt_setting_.set_Qc_model(gtsam::Matrix::Identity(dof_,dof_)*Qc);
+            opt_setting_.set_joint_pos_limits_up(joints_pos_limits_up);
+            opt_setting_.set_joint_pos_limits_down(joints_pos_limits_down);
+            opt_setting_.set_vel_limits(vel_limits);
+            opt_setting_.set_pos_limit_model(pos_limit_sigmas);
+            opt_setting_.set_vel_limit_model(vel_limit_sigmas);
+            double gradient_step_size = gradient_step_size_;
+            double perturbation_scale = perturbation_scale_;
+            start = std::chrono::high_resolution_clock::now();
+            for(int i = 0;i<max_iterations_;i++){
                 plan_times_ ++;
                 if(i==0){
                     gtsam::Vector start_conf = ConvertToGtsamVector(arm_pos_);
@@ -677,14 +715,29 @@ void MyPlanner::LocalPlanningCallback(const ros::TimerEvent&){
                     gtsam::Values adapt_values;
                     // 随机扰动或基于障碍物梯度调整初值
                     if (use_random_perturbation_) {
+                        perturbation_scale += 0.01;
+                        if(perturbation_scale >= 0.1)   perturbation_scale = 0.1;
                         adapt_values = addRandomPerturbation(init_values_, perturbation_scale_);
                         ROS_INFO("Adjusted initial values using random perturbation.");
                     } else if (use_obstacle_gradient_) {
+                        gradient_step_size += 0.01;
+                        if(gradient_step_size >= 0.1)   gradient_step_size = 0.1;
                         adapt_values = adjustByObstacleGradient(init_values_, sdf_, gradient_step_size_);
-                        init_values_ = adapt_values;
                         ROS_INFO("Adjusted initial values using obstacle gradient.");
                     }
                     if(use_random_perturbation_ || use_obstacle_gradient_){
+                        cost_sigma *= 0.5;
+                        if(cost_sigma <= 0.001)  cost_sigma = 0.001;
+                        fix_pose_sigma *= 1.1;
+                        if(fix_pose_sigma >= 0.2)   fix_pose_sigma = 0.2;
+                        fix_vel_sigma *= 1.1;
+                        if(fix_vel_sigma >= 0.2)    fix_vel_sigma = 0.2;    
+                        Qc_ *= 1.1;
+                        if(Qc_ >= 1.0)  Qc_=1.0;
+                        opt_setting_.set_cost_sigma(cost_sigma);
+                        opt_setting_.set_conf_prior_model(fix_pose_sigma);
+                        opt_setting_.set_vel_prior_model(fix_vel_sigma);
+                        opt_setting_.set_Qc_model(gtsam::Matrix::Identity(dof_,dof_)*Qc);
                         gtsam::Vector start_conf = ConvertToGtsamVector(arm_pos_);
                         gtsam::Vector end_conf = ConvertToGtsamVector(local_ref_path[local_ref_path.size()-1]);
                         // 再次进行优化
@@ -707,9 +760,7 @@ void MyPlanner::LocalPlanningCallback(const ros::TimerEvent&){
                 }
             }
             if(!is_local_success_) {
-                // cout<<"plan error: "<<opt_coll_cost<<endl;
                 // ROS_INFO("Plan error: %f", opt_coll_cost);
-                auto start_2 = std::chrono::high_resolution_clock::now();
                 local_results_ = generateTraj(arm_pos_);
                 local_results_.clear();
                 is_local_success_ = false;
@@ -762,6 +813,12 @@ void MyPlanner::LocalPlanningCallback(const ros::TimerEvent&){
                         boost::bind(&MyPlanner::feedbackCb, this, _1));     // 接收到反馈的回调
                 }
             }
+            if(is_local_success_){
+                stop = std::chrono::high_resolution_clock::now();
+                duration = std::chrono::duration_cast<std::chrono::milliseconds>(stop - start);
+                success_times_++;
+                success_time_cost_ += static_cast<double>(duration.count());
+            }
             stop = std::chrono::high_resolution_clock::now();
             duration = std::chrono::duration_cast<std::chrono::milliseconds>(stop - start);
             plan_time_cost_ += static_cast<double>(duration.count());
@@ -769,7 +826,7 @@ void MyPlanner::LocalPlanningCallback(const ros::TimerEvent&){
             ROS_INFO("Local planning took %.2f ms", static_cast<double>(duration.count()));
         }
         else if(planner_type_ == "mpc"){
-            auto start = std::chrono::high_resolution_clock::now();
+            start = std::chrono::high_resolution_clock::now();
             vector<VectorXd> temp;
             delta_t_ = opt_setting_.total_time / opt_setting_.total_step;
             temp = mpcSolve(local_ref_path,arm_pos_,obs_pos_,obs_vel_,obs_direction_);
@@ -814,13 +871,15 @@ void MyPlanner::LocalPlanningCallback(const ros::TimerEvent&){
                 // 最后一个点直接插入
                 // local_results_[index] = temp.back();
             }
-            // 停止计时
-            auto stop = std::chrono::high_resolution_clock::now();
-            // 计算持续时间
-            auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(stop - start);
+            stop = std::chrono::high_resolution_clock::now();
+            duration = std::chrono::duration_cast<std::chrono::milliseconds>(stop - start);
+            if(is_local_success_){
+                success_times_++;
+                success_time_cost_ += static_cast<double>(duration.count());
+            }
             plan_time_cost_ += static_cast<double>(duration.count());
             // 输出花费的时间
-            // ROS_INFO("Local planning took %.2f ms", static_cast<double>(duration.count()));
+            ROS_INFO("Local planning took %.2f ms", static_cast<double>(duration.count()));
         }
     }
     else if(is_global_success_ && calculateDistance(arm_pos_, end_conf_)<= goal_tolerance_){
@@ -847,7 +906,6 @@ void MyPlanner::LocalPlanningCallback(const ros::TimerEvent&){
                 }
             }
             ROS_ASSERT(arm_pos_.size() == dof_);
-            ROS_ASSERT(local_results_[i].size() >= 2 * dof_);
             publishTrajectory(static_cast<int>(traj_cut_ * exec_step_),true);
         }
         else if(planner_type_ =="mpc"){

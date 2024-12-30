@@ -68,7 +68,7 @@ int main(int argc, char **argv)
     n.getParam("iterations", max_iterations);
     int iteration = 0;
     bool is_reached = true;
-    std::vector<VectorXd> results(max_iterations, VectorXd::Zero(6));
+    std::vector<VectorXd> results(max_iterations, VectorXd::Zero(7));
 
     ros::Subscriber sub = n.subscribe("/bumper_states", 1000, bumperCallback);
     // 开始多线程处理回调
@@ -116,7 +116,6 @@ int main(int argc, char **argv)
             VectorXd current_joints_deg = current_joints * 180.0 / M_PI;
 
             // 将关节角度写入文件
-            // joint_angle_file << iteration + 1 << "," << time_since_last_record.count(); // 写入当前迭代号和时间
             joint_angle_file <<std::fixed << std::setprecision(2) << current_joints_deg[0];
             for (int i = 1; i < current_joints_deg.size(); ++i) {
                 joint_angle_file << "," << std::fixed << std::setprecision(2) << current_joints_deg[i];
@@ -130,12 +129,10 @@ int main(int argc, char **argv)
             //     joint_msg.layout.dim[0].size = current_joints_deg.size();
             //     joint_msg.layout.dim[0].stride = current_joints_deg.size();
             //     joint_msg.layout.data_offset = 0;
-
             //     // 填充数据
             //     for (int i = 0; i < current_joints_deg.size(); ++i) {
             //         joint_msg.data.push_back(current_joints_deg(i));
             //     }
-
             //     // 发布消息
             //     joint_pub.publish(joint_msg);
             // }
@@ -199,40 +196,41 @@ int main(int argc, char **argv)
             results[iteration](0) = true;
             results[iteration](2) = static_cast<double>(duration.count());
             results[iteration](3) = my_planner.plan_time_cost_/static_cast<double>(my_planner.plan_times_);
-            // results[iteration](4) = my_planner.path_length_;
-            // results[iteration](5) = my_planner.end_path_length_;
-            results[iteration](4) = joints_change;
-            results[iteration](5) = path_length;
+            results[iteration](4) = my_planner.success_time_cost_/static_cast<double>(my_planner.success_times_);
+            results[iteration](5) = joints_change;
+            results[iteration](6) = path_length;
             my_planner.plan_time_cost_ = 0;
             my_planner.plan_times_=0;
+            my_planner.success_time_cost_ = 0;
+            my_planner.success_times_=0;
             my_planner.path_length_=0;
             my_planner.end_path_length_ = 0;
             joints_change = 0;
             path_length=0;
             // 增加迭代次数
-            // 增加迭代次数
             my_planner.is_global_success_ = false;
             my_planner.is_local_success_ = false;
             my_planner.is_plan_success_ = false;
             is_reached = true;
-            std::cout << std::setw(12) << "Iteration"
-              << std::setw(12) << "Success"
-              << std::setw(12) << "Collision"
-              << std::setw(12) << "Total Time"
-              << std::setw(12) << "Opt Time"
-              << std::setw(12) << "Joints Change(rad)"
-              << std::setw(12) << "Path Length(m)" << std::endl;
+            std::cout << std::setw(14) << "Iteration"
+              << std::setw(14) << "Success"
+              << std::setw(14) << "Collision"
+              << std::setw(14) << "Total Time"
+              << std::setw(14) << "Time to Success"
+              << std::setw(14) << "Opt Time"
+              << std::setw(14) << "Joints Change(rad)"
+              << std::setw(14) << "Path Length(m)" << std::endl;
 
-            std::cout << std::string(12 * 7, '-') << std::endl;
-            std::cout << std::setw(12) << iteration +1;
+            std::cout << std::string(14 * 8, '-') << std::endl;
+            std::cout << std::setw(14) << iteration +1;
             for (int j = 0; j < results[iteration].size(); j++) {
-                std::cout << std::setw(12) << results[iteration][j];
+                std::cout << std::setw(14) << results[iteration][j];
             }
             std::cout << std::endl;
             iteration++;
 
             // 延时 300 毫秒
-            std::this_thread::sleep_for(std::chrono::milliseconds(500));
+            std::this_thread::sleep_for(std::chrono::milliseconds(300));
         }
         if(is_collision){
             results[iteration](1) = 1;
@@ -242,20 +240,21 @@ int main(int argc, char **argv)
         // ros::spinOnce();
     }
     // 打印结果
-    std::cout << std::setw(12) << "Iteration"
-              << std::setw(12) << "Success"
-              << std::setw(12) << "Collision"
-              << std::setw(12) << "Total Time"
-              << std::setw(12) << "Opt Time"
-              << std::setw(12) << "Joints Change(rad)"
-              << std::setw(12) << "Path Length(m)" << std::endl;
+    std::cout << std::setw(14) << "Iteration"
+              << std::setw(14) << "Success"
+              << std::setw(14) << "Collision"
+              << std::setw(14) << "Total Time"
+              << std::setw(14) << "Time to Success"
+              << std::setw(14) << "Opt Time"
+              << std::setw(14) << "Joints Change(rad)"
+              << std::setw(14) << "Path Length(m)" << std::endl;
 
-    std::cout << std::string(12 * 7, '-') << std::endl;
+    std::cout << std::string(14 * 8, '-') << std::endl;
 
     for (int i = 0; i < results.size(); i++) {
-        std::cout << std::setw(12) << i + 1;
+        std::cout << std::setw(14) << i + 1;
         for (int j = 0; j < results[i].size(); j++) {
-            std::cout << std::setw(12) << results[i][j];
+            std::cout << std::setw(14) << results[i][j];
         }
         std::cout << std::endl;
     }
@@ -270,10 +269,10 @@ int main(int argc, char **argv)
     }
 
     // 输出平均值
-    std::cout << std::string(12 * 7, '-') << std::endl;
-    std::cout << std::setw(12) << "Average";
+    std::cout << std::string(14 * 8, '-') << std::endl;
+    std::cout << std::setw(14) << "Average";
     for (double avg : averages) {
-        std::cout << std::setw(12) << avg;
+        std::cout << std::setw(14) << avg;
     }
     std::cout << std::endl;
     // 关闭文件

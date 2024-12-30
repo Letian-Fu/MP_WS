@@ -161,6 +161,14 @@ public:
     // 优化器参数
     gp_planner::OptimizerSetting opt_setting_;
     double goal_sigma_;
+    double joint_pos_limits_up_,joint_pos_limits_down_;
+    double Qc_;
+    int max_iterations_;
+    /// obstacle cost settings
+    double epsilon_;          // eps of hinge loss function (see the paper)
+    double cost_sigma_;       // sigma of obstacle cost (see the paper)
+    int obs_check_inter_;  // number of point interpolated for obstacle cost,
+    double fix_pose_sigma_, fix_vel_sigma_, pos_limit_sigma_, vel_limit_sigma_;
     // 规划结果
     std::vector<Eigen::VectorXd> global_results_;
     std::vector<Eigen::VectorXd> local_results_;
@@ -196,8 +204,8 @@ public:
     
     // 测试相关
     double path_length_,end_path_length_;
-    long double plan_time_cost_;
-    long plan_times_;
+    long double plan_time_cost_, success_time_cost_;
+    long plan_times_,success_times_;
     std::string planner_type_;
     ros::Time last_update_time_;
 

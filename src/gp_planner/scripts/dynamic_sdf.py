@@ -24,7 +24,7 @@ class DynamicSDF:
         self.sdf = np.zeros((self.rows, self.cols, self.z))
         self.prob_map = np.ones((self.rows, self.cols, self.z))
         self.epsilon = 0
-        self.total_time = 1.2
+        self.total_time = 1.0
         self.total_steps = 10
         self.opt_setting_ = type('opt_setting', (object,), {'epsilon': self.epsilon})()
         self.update_flag = False

@@ -728,7 +728,6 @@ set(CMAKE_MAKEFILE_DEPENDS
   "/usr/share/cmake-3.16/Modules/CheckCXXCompilerFlag.cmake"
   "/usr/share/cmake-3.16/Modules/CheckCXXSourceCompiles.cmake"
   "/usr/share/cmake-3.16/Modules/CheckFortranFunctionExists.cmake"
-  "/usr/share/cmake-3.16/Modules/CheckFunctionExists.c"
   "/usr/share/cmake-3.16/Modules/CheckFunctionExists.cmake"
   "/usr/share/cmake-3.16/Modules/CheckIncludeFile.cmake"
   "/usr/share/cmake-3.16/Modules/CheckLibraryExists.cmake"
