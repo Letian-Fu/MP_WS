@@ -102,81 +102,81 @@ def move_obstacle():
     # # 应用碰撞对象到规划场景
     # planning_scene_interface.add_object(shebei)
 
-    # # 更新MoveIt中的规划场景(地板)
-    # shebei2 = CollisionObject()
-    # shebei2.header.frame_id = "base_link"
-    # shebei2.header.stamp = rospy.Time.now()
-    # shebei2.id = "shebei2"
+    # 更新MoveIt中的规划场景(地板)
+    shebei2 = CollisionObject()
+    shebei2.header.frame_id = "base_link"
+    shebei2.header.stamp = rospy.Time.now()
+    shebei2.id = "shebei2"
 
-    # # 假设障碍物是一个长方体
-    # shebei2_primitive = SolidPrimitive()
-    # shebei2_primitive.type = shebei2_primitive.BOX
-    # shebei2_primitive.dimensions=[0.35, 0.35, 0.4]
+    # 假设障碍物是一个长方体
+    shebei2_primitive = SolidPrimitive()
+    shebei2_primitive.type = shebei2_primitive.BOX
+    shebei2_primitive.dimensions=[0.3, 0.3, 0.2]
 
-    # # 设置长方体的位置
-    # shebei2_pose = Pose()
-    # shebei2_pose.position.x = -0.75
-    # shebei2_pose.position.y = 0
-    # shebei2_pose.position.z = 0.05 
-    # shebei2_pose.orientation.w = 1.0
+    # 设置长方体的位置
+    shebei2_pose = Pose()
+    shebei2_pose.position.x = -0.90
+    shebei2_pose.position.y = -0.10
+    shebei2_pose.position.z = 0.1 
+    shebei2_pose.orientation.w = 1.0
 
 
-    # shebei2.primitives.append(shebei2_primitive)
-    # shebei2.primitive_poses.append(shebei2_pose)
-    # shebei2.operation = CollisionObject.ADD
+    shebei2.primitives.append(shebei2_primitive)
+    shebei2.primitive_poses.append(shebei2_pose)
+    shebei2.operation = CollisionObject.ADD
 
-    # # 应用碰撞对象到规划场景
-    # planning_scene_interface.add_object(shebei2)
+    # 应用碰撞对象到规划场景
+    planning_scene_interface.add_object(shebei2)
 
-    # # 更新MoveIt中的规划场景(地板)
-    # pingmu = CollisionObject()
-    # pingmu.header.frame_id = "base_link"
-    # pingmu.header.stamp = rospy.Time.now()
-    # pingmu.id = "pingmu"
+    # 更新MoveIt中的规划场景(地板)
+    pingmu = CollisionObject()
+    pingmu.header.frame_id = "base_link"
+    pingmu.header.stamp = rospy.Time.now()
+    pingmu.id = "pingmu"
 
-    # # 假设障碍物是一个长方体
-    # pingmu_primitive = SolidPrimitive()
-    # pingmu_primitive.type = pingmu_primitive.BOX
-    # pingmu_primitive.dimensions=[0.3, 0.1, 0.3]
+    # 假设障碍物是一个长方体
+    pingmu_primitive = SolidPrimitive()
+    pingmu_primitive.type = pingmu_primitive.BOX
+    pingmu_primitive.dimensions=[0.3, 0.1, 0.3]
 
-    # # 设置长方体的位置
-    # pingmu_pose = Pose()
-    # pingmu_pose.position.x = -0.42
-    # pingmu_pose.position.y = -0.7
-    # pingmu_pose.position.z = 0.15 
-    # pingmu_pose.orientation.w = 1.0
+    # 设置长方体的位置
+    pingmu_pose = Pose()
+    pingmu_pose.position.x = -0.4
+    pingmu_pose.position.y = -0.7
+    pingmu_pose.position.z = 0.15 
+    pingmu_pose.orientation.w = 1.0
 
-    # pingmu.primitives.append(pingmu_primitive)
-    # pingmu.primitive_poses.append(pingmu_pose)
-    # pingmu.operation = CollisionObject.ADD
+    pingmu.primitives.append(pingmu_primitive)
+    pingmu.primitive_poses.append(pingmu_pose)
+    pingmu.operation = CollisionObject.ADD
 
-    # # 应用碰撞对象到规划场景
-    # planning_scene_interface.add_object(pingmu)
+    # 应用碰撞对象到规划场景
+    planning_scene_interface.add_object(pingmu)
 
-    # # 更新MoveIt中的规划场景(地板)
-    # zawu = CollisionObject()
-    # zawu.header.frame_id = "base_link"
-    # zawu.header.stamp = rospy.Time.now()
-    # zawu.id = "zawu"
+    # 更新MoveIt中的规划场景(地板)
+    zawu = CollisionObject()
+    zawu.header.frame_id = "base_link"
+    zawu.header.stamp = rospy.Time.now()
+    zawu.id = "zawu"
 
-    # # 假设障碍物是一个长方体
-    # zawu_primitive = SolidPrimitive()
-    # zawu_primitive.type = zawu_primitive.BOX
-    # zawu_primitive.dimensions=[0.4, 0.1, 0.3]
+    # 假设障碍物是一个长方体
+    zawu_primitive = SolidPrimitive()
+    zawu_primitive.type = zawu_primitive.BOX
+    zawu_primitive.dimensions=[0.4, 0.1, 0.3]
 
-    # # 设置长方体的位置
-    # zawu_pose = Pose()
-    # zawu_pose.position.x = -0.25
-    # zawu_pose.position.y = 0.7
-    # zawu_pose.position.z = 0.15  # 长方体中心在-0.15，高度0.1，所以底部在-0.2
-    # zawu_pose.orientation.w = 1.0
+    # 设置长方体的位置
+    zawu_pose = Pose()
+    zawu_pose.position.x = -0.25
+    zawu_pose.position.y = 0.7
+    zawu_pose.position.z = 0.15  # 长方体中心在-0.15，高度0.1，所以底部在-0.2
+    zawu_pose.orientation.w = 1.0
 
-    # zawu.primitives.append(zawu_primitive)
-    # zawu.primitive_poses.append(zawu_pose)
-    # zawu.operation = CollisionObject.ADD
+    zawu.primitives.append(zawu_primitive)
+    zawu.primitive_poses.append(zawu_pose)
+    zawu.operation = CollisionObject.ADD
 
-    # # 应用碰撞对象到规划场景
-    # planning_scene_interface.add_object(zawu)
+    # 应用碰撞对象到规划场景
+    planning_scene_interface.add_object(zawu)
 
 
     obs_size = 0.10
@@ -187,7 +187,7 @@ def move_obstacle():
         # 上下往复运动参数
         start = np.array([-0.6, 0.0, 0.2])  # 垂直方向起点
         end = np.array([-0.6, 0.0, 1.0])    # 垂直方向终点
-        linear_speed = 0.6  # 匀速运动的速度 (m/s)
+        linear_speed = 0.1  # 匀速运动的速度 (m/s)
     elif mode == 'horizontal':
         # 水平往复运动参数
         start = np.array([-0.8, 0, 0.6])  # 水平方向起点

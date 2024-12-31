@@ -5,6 +5,7 @@ robot_acc_ratio: 90
 robot_cp_ratio: 99
 control_frequency: 80
 group_name: cr5_arm
+print_flag: false
 # group_name: arm
 robot:
   DOF: 6
@@ -44,8 +45,8 @@ settings:
   control_inter: 5   # 5 
   obs_check_inter: 10 # 5
   cost_sigma: 0.02    # 0.3
-  obs_thresh: 0.01   # 0.05
-  traj_cut: 0.7      # 0.5
+  obs_thresh: 0.05   # 0.05
+  traj_cut: 0.5      # 0.5
   fix_pose_sigma: 0.02 # 0.0003
   fix_vel_sigma: 0.02  # 0.0001
   goal_sigma: 0.005
@@ -56,16 +57,17 @@ settings:
   joint_pos_limits_up: 3.14
   joint_pos_limits_down: -3.14
   max_iterations: 10
-  max_vel: 1.5 # 1.0
+  max_vel: 1.0 # 1.0
   pos_limit_sigma: 0.0001 # 0.0001
   vel_limit_sigma: 0.0001 # 0.0001
-  goal_tolerance: 0.1
+  goal_tolerance: 0.15
   decay_factor: 0.5
   map_update_frenquency: 15
   use_obstacle_gradient: true
-  gradient_step_size: 0.01
+  gradient_step_size: 0.02
+  max_gradient: 0.5
   use_random_perturbation: false
-  perturbation_scale: 0.02
+  perturbation_scale: 0.01
   
   # mpc setting
   # planner_type: mpc

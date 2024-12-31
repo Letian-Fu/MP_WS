@@ -194,10 +194,10 @@
         </link>
       </model>
       <model name='shebei'>
-        <pose>-0.91 -0.105 0.05 0 -0 0</pose>
+        <pose>-0.0 -0.10 0.1 0 -0 0</pose>
         <scale>1 1 1</scale>
         <link name='link'>
-          <pose>-0.91 -0.105 0.05 0 -0 0</pose>
+          <pose>-0.90 -0.10 0.1 0 -0 0</pose>
           <velocity>0 0 0 0 -0 0</velocity>
           <acceleration>0 0 0 0 -0 0</acceleration>
           <wrench>0 0 0 0 -0 0</wrench>
@@ -239,7 +239,7 @@
         <visual name='visual'>
           <geometry>
             <box>
-              <size>0.25 0.25 0.1</size>
+              <size>0.3 0.3 0.2</size>
             </box>
           </geometry>
           <material>
@@ -265,7 +265,7 @@
           <pose>0 0 0 0 -0 0</pose>
           <geometry>
             <box>
-              <size>0.25 0.25 0.1</size>
+              <size>0.3 0.3 0.2</size>
             </box>
           </geometry>
           <surface>
@@ -315,7 +315,7 @@
           </surface>
         </collision>
       </link>
-      <static>0</static>
+      <static>1</static>
       <allow_auto_disable>1</allow_auto_disable>
       <pose>1.21358 -0.223069 0.5 0 -0 0</pose>
     </model>
@@ -417,7 +417,7 @@
           </surface>
         </collision>
       </link>
-      <static>0</static>
+      <static>1</static>
       <allow_auto_disable>1</allow_auto_disable>
       <pose>-0.193406 -1.4056 0.5 0 -0 0</pose>
     </model>
@@ -519,7 +519,7 @@
           </surface>
         </collision>
       </link>
-      <static>0</static>
+      <static>1</static>
       <allow_auto_disable>1</allow_auto_disable>
       <pose>-1.48043 -2.02751 0.5 0 -0 0</pose>
     </model>

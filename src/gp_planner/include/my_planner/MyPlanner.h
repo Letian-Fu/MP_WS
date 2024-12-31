@@ -174,7 +174,8 @@ public:
     std::vector<Eigen::VectorXd> local_results_;
     gtsam::Values init_values_,exec_values_;
     bool use_random_perturbation_,use_obstacle_gradient_;
-    double perturbation_scale_,gradient_step_size_;
+    double perturbation_scale_,gradient_step_size_,max_gradient_;
+    bool print_flag_;
 
     // ros相关
     ros::NodeHandle nh_;

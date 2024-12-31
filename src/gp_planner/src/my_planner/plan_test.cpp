@@ -19,6 +19,7 @@
 
 
 bool is_collision = false;
+bool is_write = false;
 
 void bumperCallback(const gazebo_msgs::ContactsState::ConstPtr& msg) {
     if (!msg->states.empty()) {
@@ -114,13 +115,14 @@ int main(int argc, char **argv)
         if (time_since_last_record.count() >= 1000.0/control_frequency_) {
             // 转换关节角度：弧度 -> 角度
             VectorXd current_joints_deg = current_joints * 180.0 / M_PI;
-
-            // 将关节角度写入文件
-            joint_angle_file <<std::fixed << std::setprecision(2) << current_joints_deg[0];
-            for (int i = 1; i < current_joints_deg.size(); ++i) {
-                joint_angle_file << "," << std::fixed << std::setprecision(2) << current_joints_deg[i];
+            if(is_write){
+                // 将关节角度写入文件
+                joint_angle_file <<std::fixed << std::setprecision(2) << current_joints_deg[0];
+                for (int i = 1; i < current_joints_deg.size(); ++i) {
+                    joint_angle_file << "," << std::fixed << std::setprecision(2) << current_joints_deg[i];
+                }
+                joint_angle_file << std::endl;
             }
-            joint_angle_file << std::endl;
             // if(plan_real_robot){
             //     // 构造 std_msgs::Float64MultiArray 消息
             //     std_msgs::Float64MultiArray joint_msg;
@@ -277,6 +279,6 @@ int main(int argc, char **argv)
     std::cout << std::endl;
     // 关闭文件
     joint_angle_file.close();
-    ROS_INFO("Joint angle data has been saved to joint_angles.txt");
+    if(is_write)    ROS_INFO("Joint angle data has been saved to joint_angles.txt");
     return 0;
 }

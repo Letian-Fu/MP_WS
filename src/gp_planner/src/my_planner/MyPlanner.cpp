@@ -53,12 +53,13 @@ gazebo_client_("/cr5_robot/joint_controller/follow_joint_trajectory", true)
     dh_theta_<<0.0,-M_PI_2,0.0,-M_PI_2,0.0,0.0;
     
     vector<gp_planner::BodySphere> body_spheres;
-    VectorXd xs(16),zs(16),ys(16),rs(16);
-    vector<size_t> js={0,0,1,1,1,1,1,1,2,2,2,3,4,5,5,5};
-    xs<<0,0,0,0.105,0.210,0.315,0.420,0,0.11,0.22,0,0,0,0,0,0;
-    ys<<-0.1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0;
-    zs<<0,0,0.1,0.1,0.1,0.1,0.1,0,0,0,0,0,0,0,0.1,0.2;
-    rs<<0.08,0.08,0.10,0.10,0.10,0.10,0.10,0.10,0.10,0.10,0.10,0.10,0.10,0.10,0.07,0.07;
+    VectorXd xs(14),zs(14),ys(14),rs(14);
+    vector<size_t> js={0,0,1,1,1,1,1,1,2,2,2,3,4,5};
+    xs<<0,0,0,0.105,0.210,0.315,0.420,0,0.11,0.22,0,0,0,0;
+    ys<<-0.1,0,0,0,0,0,0,0,0,0,0,0,0,0;
+    zs<<0,0,0.1,0.1,0.1,0.1,0.1,0,0,0,0,0,0,0;
+    // rs<<0.08,0.08,0.10,0.10,0.10,0.10,0.10,0.10,0.10,0.10,0.10,0.10,0.10,0.10;
+    rs<<0.08,0.08,0.06,0.06,0.06,0.06,0.06,0.08,0.06,0.06,0.08,0.07,0.06,0.06;
     for(int i=0;i<xs.size();i++){
         body_spheres.push_back(gp_planner::BodySphere(js[i],rs[i],gtsam::Point3(xs[i],ys[i],zs[i])));
     }
@@ -235,8 +236,11 @@ gazebo_client_("/cr5_robot/joint_controller/follow_joint_trajectory", true)
     nh.getParam("settings/use_obstacle_gradient", use_obstacle_gradient_);
     nh.getParam("settings/perturbation_scale", perturbation_scale_);
     nh.getParam("settings/gradient_step_size", gradient_step_size_);
+    nh.getParam("settings/max_gradient", max_gradient_);
     max_iterations_ = 10;
     nh.getParam("settings/max_iterations", max_iterations_);
+    print_flag_ = false;
+    nh.getParam("print_flag", print_flag_);
 }
 
 gtsam::Values MyPlanner::InitWithRef(const std::vector<Eigen::VectorXd>& ref_path, int total_step){
@@ -442,14 +446,14 @@ gtsam::Values MyPlanner::addRandomPerturbation(const gtsam::Values& init_values,
     std::random_device rd;
     std::default_random_engine generator(rd());
     std::normal_distribution<double> distribution(0.0, perturbation_scale);
-    ROS_INFO("Starting to add random perturbations with scale %.2f", perturbation_scale);
+    if(print_flag_) ROS_INFO("Starting to add random perturbations with scale %.2f", perturbation_scale);
     for (size_t i = 0; i < opt_setting_.total_step; ++i) {
         gtsam::Key pose_key = gtsam::Symbol('x', i);
         gtsam::Key vel_key = gtsam::Symbol('v', i);
 
         try {
             if (i == 0) {
-                ROS_INFO("Skipping perturbation for the first step (i = 0).");
+                if(print_flag_) ROS_INFO("Skipping perturbation for the first step (i = 0).");
                 continue;
             }
             // 对位姿添加扰动
@@ -458,19 +462,25 @@ gtsam::Values MyPlanner::addRandomPerturbation(const gtsam::Values& init_values,
                 size_t pose_size = pose.size();
                 for (size_t j = 0; j < pose_size; ++j) {
                     pose(j) += distribution(generator);
+                    // 限幅处理
+                    if (pose(j) > joint_pos_limits_up_) {
+                        pose(j) = joint_pos_limits_up_;
+                    } else if (pose(j) < joint_pos_limits_down_) {
+                        pose(j) = joint_pos_limits_down_;
+                    }
                 }
                 perturbed_values.update(pose_key, pose);
             }
 
-            // 对速度添加扰动
-            if (init_values.exists(vel_key)) {
-                gtsam::Vector vel = init_values.at<gtsam::Vector>(vel_key);
-                size_t vel_size = vel.size();
-                for (size_t j = 0; j < vel_size; ++j) {
-                    vel(j) += distribution(generator);
-                }
-                perturbed_values.update(vel_key, vel);
-            }
+            // // 对速度添加扰动
+            // if (init_values.exists(vel_key)) {
+            //     gtsam::Vector vel = init_values.at<gtsam::Vector>(vel_key);
+            //     size_t vel_size = vel.size();
+            //     for (size_t j = 0; j < vel_size; ++j) {
+            //         vel(j) += distribution(generator);
+            //     }
+            //     perturbed_values.update(vel_key, vel);
+            // }
         } catch (const std::exception& e) {
             ROS_ERROR("Error perturbing key [%c %ld]: %s", 'x', i, e.what());
         }
@@ -481,11 +491,10 @@ gtsam::Values MyPlanner::addRandomPerturbation(const gtsam::Values& init_values,
 gtsam::Values MyPlanner::adjustByObstacleGradient(const gtsam::Values& init_values, 
                                        const gp_planner::SDF& sdf, double step_size) {
     gtsam::Values adjusted_values = init_values;
-    ROS_INFO("Gradient adaption");
-    double max_gradient = 1.0;
+    if(print_flag_) ROS_INFO("Gradient adaption");
     for (size_t i = 0; i < opt_setting_.total_step; ++i) {
         if (i == 0) {
-            ROS_INFO("Skipping perturbation for the first step (i = 0).");
+            if(print_flag_) ROS_INFO("Skipping perturbation for the first step (i = 0).");
             continue;
         }
         gtsam::Key pose_key = gtsam::Symbol('x', i); // 获取当前轨迹点的关节角状态
@@ -516,8 +525,8 @@ gtsam::Values MyPlanner::adjustByObstacleGradient(const gtsam::Values& init_valu
                     sdf.getSignedDistance(center, gradient);
 
                     // 限制梯度大小，防止梯度过大导致调整幅度过大
-                    if (gradient.norm() > max_gradient) {
-                        gradient = gradient.normalized() * max_gradient;
+                    if (gradient.norm() > max_gradient_) {
+                        gradient = gradient.normalized() * max_gradient_;
                     }
 
                     // 将笛卡尔空间的梯度映射到关节空间
@@ -527,9 +536,25 @@ gtsam::Values MyPlanner::adjustByObstacleGradient(const gtsam::Values& init_valu
                     ROS_WARN("Sphere center is out of SDF range, skipping adjustment for sphere %zu.", j);
                 }
             }
-
-            // 按步长调整关节角
+            // 对 delta_q 的每一维进行限幅，确保每个关节的调整量限制在 [-max_gradient_, max_gradient_] 范围内
+            for (size_t k = 0; k < delta_q.size(); ++k) {
+                if (delta_q(k) > max_gradient_) {
+                    delta_q(k) = max_gradient_;
+                } else if (delta_q(k) < -max_gradient_) {
+                    delta_q(k) = -max_gradient_;
+                }
+            }
+                        // 按步长调整关节角
             joint_angles -= step_size * delta_q;
+
+            // 对调整后的关节角进行限幅
+            for (size_t j = 0; j < joint_angles.size(); ++j) {
+                if (joint_angles(j) > joint_pos_limits_up_) {
+                    joint_angles(j) = joint_pos_limits_up_;
+                } else if (joint_angles(j) < joint_pos_limits_down_) {
+                    joint_angles(j) = joint_pos_limits_down_;
+                }
+            }
 
             // 更新调整后的关节角部分
             pose.head(6) = joint_angles;
@@ -718,20 +743,20 @@ void MyPlanner::LocalPlanningCallback(const ros::TimerEvent&){
                         perturbation_scale += 0.01;
                         if(perturbation_scale >= 0.1)   perturbation_scale = 0.1;
                         adapt_values = addRandomPerturbation(init_values_, perturbation_scale_);
-                        ROS_INFO("Adjusted initial values using random perturbation.");
+                        if(print_flag_) ROS_INFO("Adjusted initial values using random perturbation.");
                     } else if (use_obstacle_gradient_) {
                         gradient_step_size += 0.01;
                         if(gradient_step_size >= 0.1)   gradient_step_size = 0.1;
                         adapt_values = adjustByObstacleGradient(init_values_, sdf_, gradient_step_size_);
-                        ROS_INFO("Adjusted initial values using obstacle gradient.");
+                        if(print_flag_) ROS_INFO("Adjusted initial values using obstacle gradient.");
                     }
                     if(use_random_perturbation_ || use_obstacle_gradient_){
                         cost_sigma *= 0.5;
                         if(cost_sigma <= 0.001)  cost_sigma = 0.001;
                         fix_pose_sigma *= 1.1;
-                        if(fix_pose_sigma >= 0.2)   fix_pose_sigma = 0.2;
+                        if(fix_pose_sigma >= 0.1)   fix_pose_sigma = 0.1;
                         fix_vel_sigma *= 1.1;
-                        if(fix_vel_sigma >= 0.2)    fix_vel_sigma = 0.2;    
+                        if(fix_vel_sigma >= 0.1)    fix_vel_sigma = 0.1;    
                         Qc_ *= 1.1;
                         if(Qc_ >= 1.0)  Qc_=1.0;
                         opt_setting_.set_cost_sigma(cost_sigma);
@@ -751,7 +776,7 @@ void MyPlanner::LocalPlanningCallback(const ros::TimerEvent&){
                         double opt_coll_cost = gp_planner::CollisionCost(robot_, sdf_, exec_values_, opt_setting_) / exec_step_;
                         if (opt_coll_cost <= obs_thresh_) {
                             is_local_success_ = true;
-                            ROS_INFO("Optimization succeeded after adjusting initial values.");
+                            if(print_flag_) ROS_INFO("Optimization succeeded after adjusting initial values.");
                             break;
                         } else {
                             ROS_WARN("Optimization still failed after adjustment.");
@@ -823,7 +848,7 @@ void MyPlanner::LocalPlanningCallback(const ros::TimerEvent&){
             duration = std::chrono::duration_cast<std::chrono::milliseconds>(stop - start);
             plan_time_cost_ += static_cast<double>(duration.count());
             // 输出花费的时间
-            ROS_INFO("Local planning took %.2f ms", static_cast<double>(duration.count()));
+            if(print_flag_) ROS_INFO("Local planning took %.2f ms", static_cast<double>(duration.count()));
         }
         else if(planner_type_ == "mpc"){
             start = std::chrono::high_resolution_clock::now();
@@ -879,18 +904,18 @@ void MyPlanner::LocalPlanningCallback(const ros::TimerEvent&){
             }
             plan_time_cost_ += static_cast<double>(duration.count());
             // 输出花费的时间
-            ROS_INFO("Local planning took %.2f ms", static_cast<double>(duration.count()));
+            if(print_flag_) ROS_INFO("Local planning took %.2f ms", static_cast<double>(duration.count()));
         }
     }
     else if(is_global_success_ && calculateDistance(arm_pos_, end_conf_)<= goal_tolerance_){
         is_local_success_ = true;
         // is_global_success_ = false;
-        ROS_INFO("Plan Finished...");
+        if(print_flag_) ROS_INFO("Plan Finished...");
     }
     is_plan_success_ = is_global_success_ && is_local_success_;
     if(is_plan_success_){
         if(calculateDistance(arm_pos_, end_conf_)<= goal_tolerance_){
-            ROS_INFO("Plan Finished...");
+            if(print_flag_) ROS_INFO("Plan Finished...");
         }
         publishLocalPath();
         if(planner_type_=="gp"){
