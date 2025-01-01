@@ -182,22 +182,21 @@ def move_obstacle():
     obs_size = 0.10
 
     # 运动参数
+    linear_speed = 0.4
     mode = 'vertical'  # 'helical', 'linear', 'vertical', 'horizontal', or 'combined'
     if mode == 'vertical':
         # 上下往复运动参数
         start = np.array([-0.6, 0.0, 0.2])  # 垂直方向起点
-        end = np.array([-0.6, 0.0, 1.0])    # 垂直方向终点
-        linear_speed = 0.1  # 匀速运动的速度 (m/s)
+        end = np.array([-0.6, 0.0, 0.9])    # 垂直方向终点
+          # 匀速运动的速度 (m/s)
     elif mode == 'horizontal':
         # 水平往复运动参数
-        start = np.array([-0.8, 0, 0.6])  # 水平方向起点
-        end = np.array([-0.2, 0.0, 0.6])    # 水平方向终点
-        linear_speed = 0.3  # 匀速运动的速度 (m/s)
+        start = np.array([-0.9, 0, 0.6])  # 水平方向起点
+        end = np.array([-0.4, 0.0, 0.6])    # 水平方向终点
     elif mode == 'diagonal':
         # **斜向往复运动参数**
-        start = np.array([-0.5, -0.3, 0.3])  # 斜向起点
-        end = np.array([-0.5, 0.3, 0.8])      # 斜向终点
-        linear_speed = 0.3  # 匀速运动的速度 (m/s)
+        start = np.array([-0.55, -0.2, 0.4])  # 斜向起点
+        end = np.array([-0.55, 0.2, 0.8])      # 斜向终点
         # 计算运动方向和周期
     direction = (end - start) / np.linalg.norm(end - start)  # 单位方向向量
     position = start.copy()  # 障碍物的初始位置
@@ -268,8 +267,8 @@ def move_obstacle():
         # 发布障碍物的位置和大小信息
         obstacle_info = Float64MultiArray()
         obstacle_info.data = [x, y, z, obs_size, linear_speed, direction[0], direction[1],direction[2]]
-        print(f"Linear Speed: {linear_speed:.2f}, Direction: {direction}")
-        print(f"x: {x:.2f}, y: {y:.2f}, z: {z:.2f}, obs_size: {obs_size:.2f}")
+        # print(f"Linear Speed: {linear_speed:.2f}, Direction: {direction}")
+        # print(f"x: {x:.2f}, y: {y:.2f}, z: {z:.2f}, obs_size: {obs_size:.2f}")
         pub.publish(obstacle_info)
         pub_mpc.publish(obstacle_info)
         rospy.logdebug(f"Obstacle position: x={position[0]:.2f}, y={position[1]:.2f}, z={position[2]:.2f}")

@@ -167,6 +167,7 @@ public:
     /// obstacle cost settings
     double epsilon_;          // eps of hinge loss function (see the paper)
     double cost_sigma_;       // sigma of obstacle cost (see the paper)
+    double min_cost_sigam_,max_fix_pose_sigma_,max_fix_vel_sigma_,max_Qc_;
     int obs_check_inter_;  // number of point interpolated for obstacle cost,
     double fix_pose_sigma_, fix_vel_sigma_, pos_limit_sigma_, vel_limit_sigma_;
     // 规划结果

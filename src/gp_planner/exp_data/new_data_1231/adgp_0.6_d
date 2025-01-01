@@ -1,0 +1,50 @@
+settings:
+  planner_type: gp
+  frequency: 5
+  ref_inter_num: 2
+  total_time: 1.5    # 1.0
+  total_step: 10     # 10
+  epsilon: 0.1      # 0.12
+  control_inter: 8   # 5 
+  obs_check_inter: 10 # 5
+  cost_sigma: 0.03    # 0.3
+  min_cost_sigma: 0.003
+  obs_thresh: 0.02   # 0.05
+  traj_cut: 0.6      # 0.5
+  fix_pose_sigma: 0.02 # 0.0003
+  fix_vel_sigma: 0.02  # 0.0001
+  goal_sigma: 0.01
+  Qc: 0.3    # 2.0
+  max_fix_pose_sigma: 0.06
+  max_fix_vel_sigma: 0.06
+  max_Qc: 1.0
+  opt_type: LM # LM
+  flag_pos_limit: true 
+  flag_vel_limit: true
+  joint_pos_limits_up: 3.14
+  joint_pos_limits_down: -3.14
+  max_iterations: 10
+  max_vel: 2.0 # 1.0
+  pos_limit_sigma: 0.0001 # 0.0001
+  vel_limit_sigma: 0.0001 # 0.0001
+  goal_tolerance: 0.15
+  decay_factor: 0.5
+  map_update_frenquency: 15
+  use_obstacle_gradient: false
+  gradient_step_size: 0.01
+  max_gradient: 0.2
+  use_random_perturbation: true
+  perturbation_scale: 0.01
+
+
+
+       Iteration       Success     Collision    Total TimeTime to Success      Opt TimeJoints Change(rad)Path Length(m)
+----------------------------------------------------------------------------------------------------------------
+             1             1             0         13203       11.1791       11.1791       3.49453        1.2166
+             2             1             0         14717       13.7397       13.7397       4.23821       2.14897
+             3             1             0         13591       11.1791       11.1791       3.99234       1.53515
+             4             1             1         19159       15.2737       15.2737       6.35858       3.08361
+             5             1             0         13452       11.1642       11.1642       3.58031       1.34109
+             6             1             0         15691       12.5641       12.5641       3.92953       1.59782
+             7             1             0         13739       11.5294       11.5294       3.58701       1.54763
+             8             1             0         13850       13.5507       13.5507       4.04137       1.91002

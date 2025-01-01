@@ -24,7 +24,7 @@ class DynamicSDF:
         self.sdf = np.zeros((self.rows, self.cols, self.z))
         self.prob_map = np.ones((self.rows, self.cols, self.z))
         self.epsilon = 0
-        self.total_time = 1.2
+        self.total_time = 0.8
         self.total_steps = 10
         self.opt_setting_ = type('opt_setting', (object,), {'epsilon': self.epsilon})()
         self.update_flag = False
@@ -42,7 +42,7 @@ class DynamicSDF:
         if self.update_flag == True:
             output_file = "/home/roboert/MP_WS/src/gp_planner/sdf_data/sdf_data_dynamic_py.txt"
             self.saveSDFToSingleFile(self.sdf, output_file)
-            print(f"save sdf at {datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+            # print(f"save sdf at {datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
             msg = Float64MultiArray()
             msg.data = [3]
             self.pub.publish(msg)
@@ -138,7 +138,7 @@ class DynamicSDF:
             if (current_position[0] < 0 or current_position[0] >= map.shape[0] or
                 current_position[1] < 0 or current_position[1] >= map.shape[1] or
                 current_position[2] < 0 or current_position[2] >= map.shape[2]):
-                print(f"Skipping out-of-bounds position: {current_position}")
+                # print(f"Skipping out-of-bounds position: {current_position}")
                 continue
             # 计算障碍物的移动距离
             # distance_moved = velocity * time_step
@@ -217,12 +217,12 @@ class DynamicSDF:
             self.prob_map = np.ones((self.rows, self.cols, self.z))
             # floor
             self.add_obstacle([20, 20, 5], [30, 30, 3], self.map)
-            # pingmu
-            self.add_obstacle([6, 12, 10], [2, 6, 6], self.map)
-            # zawu
-            self.add_obstacle([34, 15, 10], [2, 8, 6], self.map)
-            # shebei
-            self.add_obstacle([18, 1, 9], [6, 6, 4], self.map)
+            # # pingmu
+            # self.add_obstacle([6, 12, 10], [2, 6, 6], self.map)
+            # # zawu
+            # self.add_obstacle([34, 15, 10], [2, 8, 6], self.map)
+            # # shebei
+            # self.add_obstacle([18, 1, 9], [6, 6, 4], self.map)
 
             if velocity != 0:
                 # 调用add_dynamic_obstacle函数

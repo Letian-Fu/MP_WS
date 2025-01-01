@@ -58,8 +58,8 @@ gazebo_client_("/cr5_robot/joint_controller/follow_joint_trajectory", true)
     xs<<0,0,0,0.105,0.210,0.315,0.420,0,0.11,0.22,0,0,0,0;
     ys<<-0.1,0,0,0,0,0,0,0,0,0,0,0,0,0;
     zs<<0,0,0.1,0.1,0.1,0.1,0.1,0,0,0,0,0,0,0;
-    // rs<<0.08,0.08,0.10,0.10,0.10,0.10,0.10,0.10,0.10,0.10,0.10,0.10,0.10,0.10;
-    rs<<0.08,0.08,0.06,0.06,0.06,0.06,0.06,0.08,0.06,0.06,0.08,0.07,0.06,0.06;
+    rs<<0.08,0.08,0.10,0.10,0.10,0.10,0.10,0.10,0.10,0.10,0.10,0.10,0.10,0.10;
+    // rs<<0.08,0.08,0.06,0.06,0.06,0.06,0.06,0.08,0.06,0.06,0.08,0.07,0.06,0.06;
     for(int i=0;i<xs.size();i++){
         body_spheres.push_back(gp_planner::BodySphere(js[i],rs[i],gtsam::Point3(xs[i],ys[i],zs[i])));
     }
@@ -241,6 +241,15 @@ gazebo_client_("/cr5_robot/joint_controller/follow_joint_trajectory", true)
     nh.getParam("settings/max_iterations", max_iterations_);
     print_flag_ = false;
     nh.getParam("print_flag", print_flag_);
+    min_cost_sigam_ = 0.003;
+    nh.getParam("settings/min_cost_sigam", min_cost_sigam_);
+    max_fix_pose_sigma_ = 0.1;
+    nh.getParam("settings/max_fix_pose_sigma", max_fix_pose_sigma_);
+    max_fix_vel_sigma_ = 0.1;
+    nh.getParam("settings/max_fix_vel_sigma", max_fix_vel_sigma_);
+    max_Qc_ = 1.0;
+    nh.getParam("settings/max_Qc", max_Qc_);
+
 }
 
 gtsam::Values MyPlanner::InitWithRef(const std::vector<Eigen::VectorXd>& ref_path, int total_step){
@@ -651,7 +660,7 @@ void MyPlanner::LocalPlanningCallback(const ros::TimerEvent&){
     auto stop = std::chrono::high_resolution_clock::now();
     // 计算持续时间
     auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(stop - start);
-    if(count_ > 60){
+    if(count_ > 100){
         planning_scene_monitor::PlanningSceneMonitorPtr monitor_ptr_udef = std::make_shared<planning_scene_monitor::PlanningSceneMonitor>("robot_description");
         monitor_ptr_udef->requestPlanningSceneState("get_planning_scene");
         planning_scene_monitor::LockedPlanningSceneRW ps(monitor_ptr_udef);
@@ -662,7 +671,9 @@ void MyPlanner::LocalPlanningCallback(const ros::TimerEvent&){
         if(is_global_success_)  publishGlobalPath();
         count_ = 0;
     }
+    count_++;
     if(is_global_success_ && calculateDistance(arm_pos_, end_conf_)> goal_tolerance_){
+        
         vector<VectorXd> local_ref_path = getLocalRefPath();
         if(planner_type_ == "gp"){
             double goal_sigma = goal_sigma_;
@@ -736,29 +747,29 @@ void MyPlanner::LocalPlanningCallback(const ros::TimerEvent&){
                     }
                 }
                 else{
-                    ROS_WARN("Optimization failed, attempting to adjust initial values...");
                     gtsam::Values adapt_values;
+                    if(use_random_perturbation_ || use_obstacle_gradient_)  ROS_WARN("Optimization failed, attempting to adjust initial values...");
                     // 随机扰动或基于障碍物梯度调整初值
                     if (use_random_perturbation_) {
-                        perturbation_scale += 0.01;
+                        perturbation_scale += 0.005;
                         if(perturbation_scale >= 0.1)   perturbation_scale = 0.1;
                         adapt_values = addRandomPerturbation(init_values_, perturbation_scale_);
                         if(print_flag_) ROS_INFO("Adjusted initial values using random perturbation.");
                     } else if (use_obstacle_gradient_) {
-                        gradient_step_size += 0.01;
+                        gradient_step_size += 0.005;
                         if(gradient_step_size >= 0.1)   gradient_step_size = 0.1;
                         adapt_values = adjustByObstacleGradient(init_values_, sdf_, gradient_step_size_);
                         if(print_flag_) ROS_INFO("Adjusted initial values using obstacle gradient.");
                     }
                     if(use_random_perturbation_ || use_obstacle_gradient_){
                         cost_sigma *= 0.5;
-                        if(cost_sigma <= 0.001)  cost_sigma = 0.001;
+                        if(cost_sigma <= min_cost_sigam_)  cost_sigma = min_cost_sigam_;
                         fix_pose_sigma *= 1.1;
-                        if(fix_pose_sigma >= 0.1)   fix_pose_sigma = 0.1;
+                        if(fix_pose_sigma >= max_fix_pose_sigma_)   fix_pose_sigma = max_fix_pose_sigma_;
                         fix_vel_sigma *= 1.1;
-                        if(fix_vel_sigma >= 0.1)    fix_vel_sigma = 0.1;    
+                        if(fix_vel_sigma >= max_fix_vel_sigma_)    fix_vel_sigma = max_fix_vel_sigma_;    
                         Qc_ *= 1.1;
-                        if(Qc_ >= 1.0)  Qc_=1.0;
+                        if(Qc_ >= max_Qc_)  Qc_=max_Qc_;
                         opt_setting_.set_cost_sigma(cost_sigma);
                         opt_setting_.set_conf_prior_model(fix_pose_sigma);
                         opt_setting_.set_vel_prior_model(fix_vel_sigma);
@@ -785,7 +796,6 @@ void MyPlanner::LocalPlanningCallback(const ros::TimerEvent&){
                 }
             }
             if(!is_local_success_) {
-                // ROS_INFO("Plan error: %f", opt_coll_cost);
                 local_results_ = generateTraj(arm_pos_);
                 local_results_.clear();
                 is_local_success_ = false;
@@ -838,15 +848,13 @@ void MyPlanner::LocalPlanningCallback(const ros::TimerEvent&){
                         boost::bind(&MyPlanner::feedbackCb, this, _1));     // 接收到反馈的回调
                 }
             }
-            if(is_local_success_){
-                stop = std::chrono::high_resolution_clock::now();
-                duration = std::chrono::duration_cast<std::chrono::milliseconds>(stop - start);
-                success_times_++;
-                success_time_cost_ += static_cast<double>(duration.count());
-            }
             stop = std::chrono::high_resolution_clock::now();
             duration = std::chrono::duration_cast<std::chrono::milliseconds>(stop - start);
             plan_time_cost_ += static_cast<double>(duration.count());
+            if(is_local_success_){
+                success_times_++;
+                success_time_cost_ += static_cast<double>(duration.count());
+            }
             // 输出花费的时间
             if(print_flag_) ROS_INFO("Local planning took %.2f ms", static_cast<double>(duration.count()));
         }
@@ -939,7 +947,6 @@ void MyPlanner::LocalPlanningCallback(const ros::TimerEvent&){
             publishTrajectory(static_cast<int>(exec_step_),true);
         }
     }
-    else    count_++;
 
 }
 
@@ -1063,12 +1070,12 @@ std::vector<VectorXd> MyPlanner::mpcSolve(const vector<VectorXd>& ref_path, cons
                 dh_theta<<0.0,-M_PI_2,0.0,-M_PI_2,0.0,0.0;
                 
                 vector<ADBodySphere> body_spheres;
-                VectorXd xs(16),zs(16),ys(16),rs(16);
-                vector<size_t> js={0,0,1,1,1,1,1,1,2,2,2,3,4,5,5,5};
-                xs<<0,0,0,0.105,0.210,0.315,0.420,0,0.11,0.22,0,0,0,0,0,0;
-                ys<<-0.1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0;
-                zs<<0,0,0.1,0.1,0.1,0.1,0.1,0,0,0,0,0,0,0,0.1,0.2;
-                rs<<0.08,0.08,0.10,0.10,0.10,0.10,0.10,0.10,0.10,0.10,0.10,0.10,0.10,0.10,0.07,0.07;
+                VectorXd xs(14),zs(14),ys(14),rs(14);
+                vector<size_t> js={0,0,1,1,1,1,1,1,2,2,2,3,4,5};
+                xs<<0,0,0,0.105,0.210,0.315,0.420,0,0.11,0.22,0,0,0,0;
+                ys<<-0.1,0,0,0,0,0,0,0,0,0,0,0,0,0;
+                zs<<0,0,0.1,0.1,0.1,0.1,0.1,0,0,0,0,0,0,0;
+                rs<<0.08,0.08,0.10,0.10,0.10,0.10,0.10,0.10,0.10,0.10,0.10,0.10,0.10,0.10;
                 for(int i=0;i<xs.size();i++){
                     body_spheres.emplace_back(ADBodySphere(js[i],rs[i],Eigen::Vector3d(xs[i],ys[i],zs[i])));
                 }
